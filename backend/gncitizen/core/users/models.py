@@ -124,14 +124,19 @@ class UserModel(TimestampMixinModel, db.Model):
 
         return {"users": list(map(lambda x: to_json(x), UserModel.query.all()))}
 
-    # @classmethod
-    # def delete_all(cls):
-    #     try:
-    #         num_rows_deleted = db.session.query(cls).delete()
-    #         db.session.commit()
-    #         return {'message': '{} row(s) deleted'.format(num_rows_deleted)}
-    #     except:
-    #         return {'message': 'Something went wrong'}
+    @classmethod
+    def return_relays(cls):
+        def to_json(x):
+            return {
+                "id": x.id_user,
+                "name": x.organism,
+            }
+
+        relays_list = (UserModel.query
+                        .filter(UserModel.is_relay==True)
+                        .filter(UserModel.active==True)
+                        .all())
+        return list(map(lambda x: to_json(x), relays_list))
 
 
 class GroupsModel(db.Model):

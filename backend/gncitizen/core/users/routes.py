@@ -68,6 +68,26 @@ def registration():
             username:
               type: string
               example: user1
+            organism:
+              type: string
+            function:
+              type: string
+            country:
+              type: string
+            postal_code:
+              type: string
+            want_newsletter:
+              type: boolean
+            is_relay:
+              type: boolean
+            linked_relay_id:
+              type: int
+            made_known_relay_id:
+              type: int
+            category:
+              type: string
+            want_observation_contact:
+              type: boolean
             email:
               type: string
             password:
@@ -313,9 +333,23 @@ def get_allusers():
       200:
         description: list all users
     """
-    # allusers = UserModel.return_all()
-    allusers = UserModel.return_all()
-    return allusers, 200
+    return UserModel.return_all(), 200
+
+@routes.route("/relays", methods=["GET"])
+@json_resp
+def get_relays():
+    """list all relays
+    ---
+    tags:
+      - Relays
+    summary: List all relays
+    produces:
+      - application/json
+    responses:
+      200:
+        description: list all relays
+    """
+    return UserModel.return_relays(), 200
 
 
 @routes.route("/user/info", methods=["GET", "PATCH"])
