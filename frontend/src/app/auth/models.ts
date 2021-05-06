@@ -6,8 +6,28 @@ export class RegisterUser {
     surname?: string;
     avatar?: string | ArrayBuffer;
     extention?: string;
+    category: string;
+    organism?: string;
+    function?: string;
+    country: string;
+    postal_code: string;
+    want_newsletter: boolean;
+    is_relay: boolean;
+    linked_relay_id?: number;
+    made_known_relay_id?: number;
+    want_observation_contact: boolean;
 
-    constructor() {}
+    constructor() {
+        this.category = 'individual';
+        this.country = 'FR';
+        this.want_newsletter = false;
+        this.is_relay = false;
+    }
+}
+
+export interface Relay {
+    id: number;
+    name: string;
 }
 
 export interface LoginUser {
