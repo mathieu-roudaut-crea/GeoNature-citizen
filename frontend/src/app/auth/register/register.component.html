@@ -179,7 +179,7 @@
                             [(ngModel)]="user.organism"
                             #organism="ngModel"
                             autocomplete="organism"
-                            required
+                            [required]="user.category !== 'individual'"
                         />
                     </div>
                 </div>
@@ -198,7 +198,7 @@
                             [(ngModel)]="user.function"
                             #function="ngModel"
                             autocomplete="function"
-                            required
+                            [required]="user.category !== 'individual'"
                         />
                     </div>
                 </div>
@@ -240,6 +240,7 @@
                             #postal_code="ngModel"
                             autocomplete="postal_code"
                             required
+                            pattern="^[\d-]{3,10}$"
                         />
                     </div>
                 </div>
@@ -353,7 +354,6 @@
                         #password="ngModel"
                         autocomplete="new-password"
                         required
-                        #password="ngModel"
                     />
                 </div>
             </div>
