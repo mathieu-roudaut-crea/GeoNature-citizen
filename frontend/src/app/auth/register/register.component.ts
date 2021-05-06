@@ -5,9 +5,10 @@ import { debounceTime, catchError, map } from 'rxjs/operators';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { RegisterUser } from '../models';
+import { RegisterUser, Relay } from '../models';
 import { AuthService } from './../auth.service';
 import { AppConfig } from '../../../conf/app.config';
+import { UserService } from '../user-dashboard/user.service.service';
 
 @Component({
     selector: 'register',
@@ -22,14 +23,35 @@ export class RegisterComponent {
     staticAlertClosed = false;
     errorMessage: string;
     successMessage: string;
+    relaysList: Array<Relay>;
     userAvatar: string | ArrayBuffer;
 
     constructor(
         @Inject(LOCALE_ID) readonly localeId: string,
         private auth: AuthService,
+        private userService: UserService,
         private router: Router,
         public activeModal: NgbActiveModal
     ) {}
+
+    ngOnInit(): void {
+        this.userService
+            .getRelays()
+            .subscribe((relayList) => (this.relaysList = relayList));
+    }
+
+    onChangeCategory(): void {
+        if (this.user.category === 'individual') {
+            this.user.organism = null;
+            this.user.function = null;
+        }
+        if (
+            this.user.category !== 'professional' &&
+            this.user.category !== 'education'
+        ) {
+            this.user.is_relay = false;
+        }
+    }
 
     onRegister(): void {
         this.auth
@@ -37,7 +59,7 @@ export class RegisterComponent {
             .pipe(
                 map((user) => {
                     if (user) {
-                        let message = user.message;
+                        const message = user.message;
                         this._success.subscribe(
                             (message) => (this.successMessage = message)
                         );
@@ -96,8 +118,8 @@ export class RegisterComponent {
     onUploadAvatar($event) {
         if ($event) {
             if ($event.target.files && $event.target.files[0]) {
-                let reader = new FileReader();
-                let file = $event.target.files[0];
+                const reader = new FileReader();
+                const file = $event.target.files[0];
                 reader.readAsDataURL(file);
                 reader.onload = () => {
                     this.userAvatar = reader.result;
