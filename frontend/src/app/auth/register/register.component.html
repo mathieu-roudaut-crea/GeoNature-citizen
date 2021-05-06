@@ -38,6 +38,7 @@
                     *ngIf="userAvatar"
                     class="profile-pic"
                     src="{{ userAvatar }}"
+                    alt="user avatar"
                 />
                 <div class="upload-button" (click)="fileToUpload.click()">
                     <i class="fa fa-arrow-circle-up" aria-hidden="true"></i>
@@ -107,7 +108,7 @@
         <div class="form-row">
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label for="name" i18n="your first name@@yourFirstNameLabel">Votre prénom</label>
+                    <label for="fname" i18n="your first name@@yourFirstNameLabel">Votre prénom</label>
                     <input
                         type="text"
                         class="form-control rounded-0"
@@ -140,6 +141,191 @@
                 </div>
             </div>
         </div>
+        <div class="form-row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="category" i18n="Your category@@yourCategoryLabel">Votre catégorie</label>
+                    <div class="input-group">
+                        <select
+                            id="category"
+                            name="category"
+                            class="form-control rounded-0"
+                            (change)="onChangeCategory()"
+                            [(ngModel)]="user.category"
+                            #category="ngModel"
+                        >
+                            <option value="individual">Particulier</option>
+                            <option value="school">Etablissement scolaire</option>
+                            <option value="professional">Professionnel de la nature</option>
+                            <option value="education">Organisme d’éducation à l’environnement</option>
+                            <option value="other">Autre</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row" *ngIf="user.category !== 'individual'">
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="organism" i18n="Your organism@@yourOrganismLabel">Votre organisme</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="organism"
+                            name="organism"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Enter your organism"
+                            placeholder="Entrez votre organisme"
+                            [(ngModel)]="user.organism"
+                            #organism="ngModel"
+                            autocomplete="organism"
+                            required
+                        />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="function" i18n="Your function@@yourFunctionLabel">Votre Fonction</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="function"
+                            name="function"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Enter your function"
+                            placeholder="Entrez votre fonction"
+                            [(ngModel)]="user.function"
+                            #function="ngModel"
+                            autocomplete="function"
+                            required
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="country" i18n="Your country@@yourCountryLabel">Votre pays</label>
+                    <div class="input-group">
+                        <select
+                            id="country"
+                            name="country"
+                            class="form-control rounded-0"
+                            [(ngModel)]="user.country"
+                            #country="ngModel"
+                        >
+                            <option value="FR">France</option>
+                            <option value="CH">Suisse</option>
+                            <option value="IT">Italie</option>
+                            <option value="ES">Espagne</option>
+                            <option value="AD">Andorre</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="postal_code" i18n="Your postal code@@yourPostalCodeLabel">Votre code postal</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="postal_code"
+                            name="postal_code"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Enter your postal code"
+                            placeholder="Entrez votre code postal"
+                            [(ngModel)]="user.postal_code"
+                            #postal_code="ngModel"
+                            autocomplete="postal_code"
+                            required
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-12" *ngIf="user.category === 'professional' || user.category === 'education'">
+                <div class="form-group">
+                    <input
+                        type="checkbox"
+                        id="is_relay"
+                        name="is_relay"
+                        #is_relay="ngModel"
+                        [(ngModel)]="user.is_relay"
+                        i18n="I Accept@@iAcceptIntro"
+                    />
+                    <label for="is_relay" i18n="Your postal code@@yourPostalCodeLabel">Je suis un relais</label>
+                </div>
+            </div>
+            <div *ngIf="!user.is_relay" class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="linked_relay" i18n="Your postal code@@yourPostalCodeLabel">Relais auquel je suis lié</label>
+                    <div class="input-group">
+                        <select
+                            id="linked_relay"
+                            name="linked_relay"
+                            class="form-control rounded-0"
+                            [(ngModel)]="user.linked_relay_id"
+                            #linked_relay="ngModel"
+                        >
+                            <option *ngFor="let relay of relaysList" [ngValue]="relay.id">{{relay.name}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="!user.is_relay" class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="made_known_relay" i18n="Your postal code@@yourPostalCodeLabel">
+                        Relais qui m'a fait connaitre ce site
+                    </label>
+                    <div class="input-group">
+                        <select
+                            id="made_known_relay"
+                            name="made_known_relay"
+                            class="form-control rounded-0"
+                            [(ngModel)]="user.made_known_relay_id"
+                            #made_known_relay="ngModel"
+                        >
+                            <option *ngFor="let relay of relaysList" [ngValue]="relay.id">{{relay.name}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <input
+                        type="checkbox"
+                        id="want_newsletter"
+                        name="want_newsletter"
+                        #want_newsletter="ngModel"
+                        [(ngModel)]="user.want_newsletter"
+                        i18n="I Accept@@iAcceptIntro"
+                    />
+                    <label for="want_newsletter" i18n="Your country@@yourCountryLabel">J'accepte de recevoir les newsletters</label>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <input
+                        type="checkbox"
+                        id="want_observation_contact"
+                        name="want_observation_contact"
+                        #want_observation_contact="ngModel"
+                        [(ngModel)]="user.want_observation_contact"
+                        i18n="I Accept@@iAcceptIntro"
+                    />
+                    <label for="want_observation_contact" i18n="Your postal code@@yourPostalCodeLabel">
+                        J'accepte d'etre contacté pour valider mes observations
+                    </label>
+                </div>
+            </div>
+        </div>
+
         <ngb-alert
             [dismissible]="false"
             type="danger"
