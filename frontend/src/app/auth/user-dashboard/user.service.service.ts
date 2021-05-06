@@ -4,6 +4,7 @@ import { AppConfig } from '../../../conf/app.config';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { saveAs } from 'file-saver';
+import { Relay } from '../models';
 
 @Injectable({
     providedIn: 'root',
@@ -17,7 +18,7 @@ export class UserService {
     constructor(private http: HttpClient) {}
 
     getPersonalInfo() {
-        let url = `${AppConfig.API_ENDPOINT}/user/info`;
+        const url = `${AppConfig.API_ENDPOINT}/user/info`;
         return this.http.get(url, { headers: this.headers });
     }
 
@@ -39,6 +40,10 @@ export class UserService {
                     return throwError(error);
                 })
             );
+    }
+
+    getRelays() {
+        return this.http.get<Array<Relay>>(`${AppConfig.API_ENDPOINT}/relays`);
     }
 
     getObservationsByUserId(userId: number) {
@@ -66,19 +71,19 @@ export class UserService {
     }
 
     ConvertToCSV(objArray, headerList) {
-        let array =
+        const array =
             typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
         let str = '';
         let row = '';
-        for (let index in headerList) {
+        for (const index in headerList) {
             row += headerList[index] + ';';
         }
         row = row.slice(0, -1);
         str += row + '\r\n';
         for (let i = 0; i < array.length; i++) {
             let line = '';
-            for (let index in headerList) {
-                let head = headerList[index];
+            for (const index in headerList) {
+                const head = headerList[index];
                 line += ';' + (array[i][head] || '');
             }
             line = line.slice(1);
@@ -97,8 +102,8 @@ export class UserService {
         this.http
             .get(baseUrl + route, { headers, responseType: 'blob' as 'json' })
             .subscribe((response: any) => {
-                let dataType = response.type;
-                let binaryData = [];
+                const dataType = response.type;
+                const binaryData = [];
                 binaryData.push(response);
                 saveAs(new Blob(binaryData, { type: dataType }), filename);
             });
