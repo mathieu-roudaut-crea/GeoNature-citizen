@@ -50,6 +50,17 @@ class UserModel(TimestampMixinModel, db.Model):
     active = db.Column(db.Boolean, default=False)
     admin = db.Column(db.Boolean, default=False)
 
+    # CREA custom fields
+    category = db.Column(db.String(100))
+    function = db.Column(db.String(100))
+    country = db.Column(db.String(2))
+    postal_code = db.Column(db.String(10))
+    want_newsletter = db.Column(db.Boolean, default=False)
+    is_relay = db.Column(db.Boolean, default=False)
+    linked_relay_id = db.Column(db.Integer, db.ForeignKey('gnc_core.t_users.id_user', ondelete="SET NULL"))
+    made_known_relay_id = db.Column(db.Integer, db.ForeignKey('gnc_core.t_users.id_user', ondelete="SET NULL"))
+    want_observation_contact = db.Column(db.Boolean, default=False)
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
@@ -76,6 +87,16 @@ class UserModel(TimestampMixinModel, db.Model):
             "timestamp_update": self.timestamp_update.isoformat()
             if self.timestamp_update
             else None,
+
+            "function": self.function,
+            "country": self.country,
+            "postal_code": self.postal_code,
+            "want_newsletter": self.want_newsletter,
+            "is_relay": self.is_relay,
+            "linked_relay_id": self.linked_relay_id,
+            "made_known_relay_id": self.made_known_relay_id,
+            "category": self.category,
+            "want_observation_contact": self.want_observation_contact,
         }
 
     @staticmethod
