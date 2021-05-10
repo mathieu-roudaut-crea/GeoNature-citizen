@@ -154,11 +154,7 @@
                             [(ngModel)]="user.category"
                             #category="ngModel"
                         >
-                            <option value="individual">Particulier</option>
-                            <option value="school">Etablissement scolaire</option>
-                            <option value="professional">Professionnel de la nature</option>
-                            <option value="education">Organisme d’éducation à l’environnement</option>
-                            <option value="other">Autre</option>
+                            <option *ngFor="let category of categoriesEnum | keyvalue" [value]="category.key">{{category.value}}</option>
                         </select>
                     </div>
                 </div>
