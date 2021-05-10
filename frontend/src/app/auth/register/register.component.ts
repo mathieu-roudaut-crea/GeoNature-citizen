@@ -25,6 +25,13 @@ export class RegisterComponent {
     successMessage: string;
     relaysList: Array<Relay>;
     userAvatar: string | ArrayBuffer;
+    categoriesEnum = Object.freeze({
+        individual: 'Particulier',
+        school: 'Etablissement scolaire',
+        professional: 'Professionnel de la nature',
+        education: 'Organisme d’éducation à l’environnement',
+        other: 'Autre',
+    });
 
     constructor(
         @Inject(LOCALE_ID) readonly localeId: string,
