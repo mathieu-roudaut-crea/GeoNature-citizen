@@ -107,6 +107,9 @@ def registration():
         # Hashed password
         datas_to_save["password"] = UserModel.generate_hash(request_datas["password"])
 
+        # Email verification to active user was deleted for CREA prestation
+        datas_to_save["active"] = True
+
         # Protection against admin creation from API
         datas_to_save["admin"] = False
         if "extention" in request_datas and "avatar" in request_datas:
@@ -167,15 +170,10 @@ def registration():
             handler = open(os.path.join(str(MEDIA_DIR), filename), "wb+")
             handler.write(imgdata)
             handler.close()
-        # send confirm mail
-        try:
-            confirm_user_email(newuser)
-        except Exception as e:
-            return {"message mail faild": str(e)}, 500
+
         return (
             {
-                "message": """Félicitations, l'utilisateur "{}" a été créé.  \r\n Vous allez recevoir un email
-                pour activer votre compte """.format(
+                "message": """Félicitations, l'utilisateur "{}" a été créé.""".format(
                     newuser.username
                 ),
                 "username": newuser.username,
