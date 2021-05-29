@@ -251,9 +251,15 @@
                         name="is_relay"
                         #is_relay="ngModel"
                         [(ngModel)]="user.is_relay"
-                        i18n="I Accept@@iAcceptIntro"
+                        i18n="I am a relay@@iAmARelay"
                     />
-                    <label for="is_relay" i18n="Your postal code@@yourPostalCodeLabel">Je suis un relais</label>
+                    <label
+                        for="is_relay"
+                        i18n="I am a relay@@iAmARelayLabel"
+                        class="checkbox-label"
+                    >
+                        Je suis un relais
+                    </label>
                 </div>
             </div>
             <div *ngIf="!user.is_relay" class="col-md-6 col-sm-12">
@@ -303,7 +309,13 @@
                         [(ngModel)]="user.want_newsletter"
                         i18n="I Accept@@iAcceptIntro"
                     />
-                    <label for="want_newsletter" i18n="Your country@@yourCountryLabel">J'accepte de recevoir les newsletters</label>
+                    <label
+                        for="want_newsletter"
+                        class="checkbox-label"
+                        i18n="Your country@@yourCountryLabel"
+                    >
+                        J'accepte de recevoir les newsletters
+                    </label>
                 </div>
             </div>
             <div class="col-sm-12">
@@ -316,7 +328,11 @@
                         [(ngModel)]="user.want_observation_contact"
                         i18n="I Accept@@iAcceptIntro"
                     />
-                    <label for="want_observation_contact" i18n="Your postal code@@yourPostalCodeLabel">
+                    <label
+                        for="want_observation_contact"
+                        class="checkbox-label"
+                        i18n="Your postal code@@yourPostalCodeLabel"
+                    >
                         J'accepte d'etre contacté pour valider mes observations
                     </label>
                 </div>
