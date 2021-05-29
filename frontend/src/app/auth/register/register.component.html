@@ -99,7 +99,7 @@
                             autocomplete="email"
                             [ngModelOptions]="{ updateOn: 'blur' }"
                             required
-                            pattern="^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+                            pattern="^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
                         />
                     </div>
                 </div>
@@ -236,7 +236,7 @@
                             #postal_code="ngModel"
                             autocomplete="postal_code"
                             required
-                            pattern="^[\d-]{3,10}$"
+                            pattern="((([0-8]\d)|(9[0-8]))\d{2,3})|(AD[1-7]00)"
                         />
                     </div>
                 </div>
