@@ -107,8 +107,8 @@ def registration():
         # Hashed password
         datas_to_save["password"] = UserModel.generate_hash(request_datas["password"])
 
-        # Email verification to active user was deleted for CREA prestation
-        datas_to_save["active"] = True
+        if current_app.config["CONFIRM_EMAIL"]["USE_CONFIRM_EMAIL"] == False:
+            datas_to_save["active"] = True
 
         # Protection against admin creation from API
         datas_to_save["admin"] = False
@@ -171,18 +171,31 @@ def registration():
             handler.write(imgdata)
             handler.close()
 
+
+
+        if current_app.config["CONFIRM_EMAIL"]["USE_CONFIRM_EMAIL"] == False:
+            message = """Félicitations, l'utilisateur "{}" a été créé.""".format(
+                newuser.username
+            ),
+        else:
+            message = """Félicitations, l'utilisateur "{}" a été créé.  \r\n Vous allez recevoir un email pour activer votre compte """.format(
+                newuser.username
+            ),
+            try:
+                confirm_user_email(newuser)
+            except Exception as e:
+                return {"message mail faild": str(e)}, 500
+
+        # send confirm mail
         return (
             {
-                "message": """Félicitations, l'utilisateur "{}" a été créé.""".format(
-                    newuser.username
-                ),
+                "message": message,
                 "username": newuser.username,
                 "access_token": access_token,
                 "refresh_token": refresh_token,
             },
             200,
         )
-
     except Exception as e:
         current_app.logger.critical("grab all: %s", str(e))
         return {"message": str(e)}, 500
