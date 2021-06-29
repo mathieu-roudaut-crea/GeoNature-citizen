@@ -10,6 +10,13 @@ import { AuthService } from './../auth.service';
 import { AppConfig } from '../../../conf/app.config';
 import { UserService } from '../user-dashboard/user.service.service';
 
+declare global {
+    interface Window {
+        hcaptcha: any;
+    }
+}
+window.hcaptcha = window.hcaptcha || null;
+
 @Component({
     selector: 'register',
     templateUrl: './register.component.html',
@@ -22,6 +29,7 @@ export class RegisterComponent {
     private _success = new Subject<string>();
     staticAlertClosed = false;
     errorMessage: string;
+    locale: string;
     successMessage: string;
     relaysList: Array<Relay>;
     organismsList: Array<Organism>;
@@ -40,7 +48,13 @@ export class RegisterComponent {
         private userService: UserService,
         private router: Router,
         public activeModal: NgbActiveModal
-    ) {}
+    ) {
+        this.locale = localeId;
+    }
+
+    ngAfterViewInit(): void {
+        this.loadCaptchaScript();
+    }
 
     ngOnInit(): void {
         this.userService
@@ -65,9 +79,10 @@ export class RegisterComponent {
                 map((user) => {
                     if (user) {
                         const message = user.message;
-                        this._success.subscribe(
-                            (message) => (this.successMessage = message)
-                        );
+                        this._success.subscribe((message) => {
+                            this.errorMessage = null;
+                            return (this.successMessage = message);
+                        });
                         this._success.pipe(debounceTime(5000)).subscribe(() => {
                             this.successMessage = null;
                             this.activeModal.close();
@@ -80,7 +95,7 @@ export class RegisterComponent {
                         }
                     }
                 }),
-                catchError(this.handleError)
+                catchError(this.handleError.bind(this))
             )
             .subscribe(
                 (_data) => {},
@@ -108,6 +123,7 @@ export class RegisterComponent {
                 console.error('server-side error', error);
                 errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
             }
+            this.resetCaptcha();
         }
         return throwError(errorMessage);
     }
@@ -135,5 +151,47 @@ export class RegisterComponent {
                 };
             }
         }
+    }
+
+    loadCaptchaScript() {
+        if (!AppConfig.HCAPTCHA_SITE_KEY) {
+            return;
+        }
+        const node = document.createElement('script');
+        node.id = 'hcaptcha-script';
+
+        if (window.hcaptcha === null) {
+            node.type = 'text/javascript';
+            node.async = true;
+            node.onload = function () {
+                this.renderCaptcha();
+            }.bind(this);
+            node.src = 'https://hcaptcha.com/1/api.js?hl=' + this.locale;
+            document.getElementsByTagName('head')[0].appendChild(node);
+        } else {
+            this.renderCaptcha();
+        }
+    }
+
+    resetCaptcha() {
+        if (window.hcaptcha === null) {
+            return;
+        }
+        this.user.captchaToken = null;
+        window.hcaptcha.reset();
+    }
+
+    renderCaptcha() {
+        if (window.hcaptcha === null) {
+            return;
+        }
+        window.hcaptcha.render('h-captcha', {
+            sitekey: AppConfig.HCAPTCHA_SITE_KEY,
+            callback: this.captchaCallback.bind(this),
+        });
+    }
+
+    captchaCallback(token) {
+        this.user.captchaToken = token;
     }
 }
