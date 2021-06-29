@@ -329,7 +329,7 @@ def get_allusers():
     """
     return UserModel.return_all(), 200
 
-@routes.route("/relays", methods=["GET"])
+@users_api.route("/relays", methods=["GET"])
 @json_resp
 def get_relays():
     """list all relays
@@ -346,7 +346,7 @@ def get_relays():
     return UserModel.return_relays(), 200
 
 
-@routes.route("/organisms", methods=["GET"])
+@users_api.route("/organisms", methods=["GET"])
 @json_resp
 def get_organisms():
     """list all organisms
@@ -367,7 +367,7 @@ def get_organisms():
     return [{"id_organism": p.id_organism, "name": p.name} for p in organisms], 200
 
 
-@routes.route("/user/info", methods=["GET", "PATCH"])
+@users_api.route("/user/info", methods=["GET", "PATCH"])
 @json_resp
 @jwt_required()
 def logged_user():
