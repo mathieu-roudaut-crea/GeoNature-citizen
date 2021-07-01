@@ -58,7 +58,9 @@ class UserModel(TimestampMixinModel, db.Model):
     want_newsletter = db.Column(db.Boolean, default=False)
     is_relay = db.Column(db.Boolean, default=False)
     linked_relay_id = db.Column(db.Integer, db.ForeignKey('gnc_core.t_users.id_user', ondelete="SET NULL"))
-    made_known_relay_id = db.Column(db.Integer, db.ForeignKey('gnc_core.t_users.id_user', ondelete="SET NULL"))
+    birth_year = db.Column(db.Integer)
+    gender = db.Column(db.String(100))
+    comments = db.Column(db.Text)
     want_observation_contact = db.Column(db.Boolean, default=False)
 
     def save_to_db(self):
@@ -94,7 +96,9 @@ class UserModel(TimestampMixinModel, db.Model):
             "want_newsletter": self.want_newsletter,
             "is_relay": self.is_relay,
             "linked_relay_id": self.linked_relay_id,
-            "made_known_relay_id": self.made_known_relay_id,
+            "birth_year": self.birth_year,
+            "gender": self.gender,
+            "comments": self.comments,
             "category": self.category,
             "want_observation_contact": self.want_observation_contact,
         }

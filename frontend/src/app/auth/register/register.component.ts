@@ -34,6 +34,7 @@ export class RegisterComponent {
     relaysList: Array<Relay>;
     organismsList: Array<Organism>;
     userAvatar: string | ArrayBuffer;
+    genderType = '0';
     categoriesEnum = Object.freeze({
         individual: 'Particulier',
         school: 'Etablissement scolaire',
@@ -72,7 +73,24 @@ export class RegisterComponent {
         }
     }
 
+    onChangeGenreType(): void {
+        if (this.genderType === '0') {
+            this.user.gender = 'm';
+        } else if (this.genderType === '1') {
+            this.user.gender = 'f';
+        } else if (this.genderType === '2') {
+            this.user.gender = '';
+        }
+    }
+
     onRegister(): void {
+        if (this.user.organism === 0) {
+            this.user.organism = null;
+        }
+        if (this.user.linked_relay_id === 0) {
+            this.user.linked_relay_id = null;
+        }
+
         this.auth
             .register(this.user)
             .pipe(

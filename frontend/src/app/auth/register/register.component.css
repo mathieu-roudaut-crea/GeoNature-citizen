@@ -66,6 +66,26 @@ span.input-group-text {
     margin-left: 5px;
 }
 
+.tos-link {
+    color: #0000d2;
+}
+
+.tos-link:hover {
+    color: #00458b;
+}
+
+input[required], input.required  {
+    border-left: 5px solid #a94442;
+}
+
+#gender {
+    min-width: 210px;
+}
+
+#gender_type {
+    min-width: 110px;
+}
+
 @media screen and (max-width: 775px) {
     .modal-header h4 {
         font-size: 18px;

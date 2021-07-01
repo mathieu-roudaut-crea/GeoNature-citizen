@@ -2,21 +2,24 @@ export class RegisterUser {
     username?: string;
     password?: string;
     email?: string;
-    name?: string;
-    surname?: string;
+    name?: string = '';
+    surname?: string = '';
     avatar?: string | ArrayBuffer;
     extention?: string;
     captchaToken?: string;
     category: string;
-    organism?: string;
+    organism?: number = 0;
     function?: string;
     country: string;
     postal_code: string;
     want_newsletter: boolean;
     is_relay: boolean;
-    linked_relay_id?: number;
-    made_known_relay_id?: number;
+    linked_relay_id?: number = 0;
     want_observation_contact: boolean;
+
+    birth_year: number;
+    gender: string;
+    comments: string;
 
     constructor() {
         this.category = 'individual';
