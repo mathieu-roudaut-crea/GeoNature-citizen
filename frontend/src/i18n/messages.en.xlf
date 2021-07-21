@@ -879,7 +879,7 @@
         </context-group>
         <note priority="1" from="description">Carousel previous</note>
       </trans-unit>
-      
+
       <trans-unit id="ngbCarouselNext" datatype="html">
         <source>Prochain</source><target state="new">Next</target>
         <context-group purpose="location">
@@ -1127,6 +1127,160 @@
         </context-group>
         <note priority="1" from="description">Redirect to home</note>
       </trans-unit>
+
+
+        <trans-unit id="yourCategoryLabel" datatype="html">
+            <source>Votre catégorie</source>
+            <target>Votre catégorie</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">111</context>
+            </context-group>
+            <note priority="1" from="description">Your category</note>
+        </trans-unit>
+        <trans-unit id="yourOrganismLabel" datatype="html">
+            <source>Votre organisme</source>
+            <target>Votre organisme</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">130</context>
+            </context-group>
+            <note priority="1" from="description">Your organism</note>
+        </trans-unit>
+        <trans-unit id="yourFunctionLabel" datatype="html">
+            <source>Profession actuelle ou passée (si en retraite)</source>
+            <target>Profession actuelle ou passée (si en retraite)</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">148</context>
+            </context-group>
+            <note priority="1" from="description">Your function</note>
+        </trans-unit>
+        <trans-unit id="826af538891195cd4a4cb2cc1f97be1fac8ad378" datatype="html">
+            <source>Entrez votre profession</source>
+            <target>Entrez votre profession</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">159</context>
+            </context-group>
+            <note priority="1" from="description">Enter your function</note>
+        </trans-unit>
+        <trans-unit id="yourCountryLabel" datatype="html">
+            <source>Votre pays</source>
+            <target>Votre pays</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">172</context>
+            </context-group>
+            <note priority="1" from="description">Your country</note>
+        </trans-unit>
+        <trans-unit id="yourPostalCodeLabel" datatype="html">
+            <source>Votre code postal</source>
+            <target>Votre code postal</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">193</context>
+            </context-group>
+            <note priority="1" from="description">Your postal code</note>
+        </trans-unit>
+        <trans-unit id="362f9cbb3e8bd46e058fce1caa6b43ca0a6cffc7" datatype="html">
+            <source>Entrez votre code postal</source>
+            <target>Entrez votre code postal</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">201</context>
+            </context-group>
+            <note priority="1" from="description">Enter your postal code</note>
+        </trans-unit>
+        <trans-unit id="yourBirthYearLabel" datatype="html">
+            <source>Année de naissance</source>
+            <target>Année de naissance</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">215</context>
+            </context-group>
+            <note priority="1" from="description">Your birth year</note>
+        </trans-unit>
+        <trans-unit id="d35191b6fecfdd20502caa6766f9334818cf31d5" datatype="html">
+            <source>Entrez votre année de naissance</source>
+            <target>Entrez votre année de naissance</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">226</context>
+            </context-group>
+            <note priority="1" from="description">Enter your birth year</note>
+        </trans-unit>
+        <trans-unit id="yourGenderLabel" datatype="html">
+            <source>Votre genre</source>
+            <target>Votre genre</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">238</context>
+            </context-group>
+            <note priority="1" from="description">Your gender</note>
+        </trans-unit>
+        <trans-unit id="d8aff6c603ce9dbdc4813d35f3c0c7be7d6c12a8" datatype="html">
+            <source>Votre genre</source>
+            <target>Votre genre</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">262</context>
+            </context-group>
+            <note priority="1" from="description">Your gender</note>
+        </trans-unit>
+        <trans-unit id="comments" datatype="html">
+            <source>Commentaires libres</source>
+            <target>Commentaires libres</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">274</context>
+            </context-group>
+            <note priority="1" from="description">comments</note>
+        </trans-unit>
+        <trans-unit id="eba66a4d6a12498d436a505bc9a39d3b9923ee2d" datatype="html">
+            <source>Qu&apos;est-ce qui vous amène à vous inscrire ?</source>
+            <target>Qu&apos;est-ce qui vous amène à vous inscrire ?</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">285</context>
+            </context-group>
+            <note priority="1" from="description">comment_placeholder</note>
+        </trans-unit>
+        <trans-unit id="linkedRelayLabel" datatype="html">
+            <source>Grâce à quel organisme avez-vous connu Phénoclim?</source>
+            <target>Grâce à quel organisme avez-vous connu Phénoclim?</target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">295</context>
+            </context-group>
+            <note priority="1" from="description">Linked relay</note>
+        </trans-unit>
+        <trans-unit id="want_newsletter" datatype="html">
+            <source>
+J&apos;accepte de recevoir les newsletters
+            </source>
+            <target>
+J&apos;accepte de recevoir les newsletters
+            </target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">330</context>
+            </context-group>
+            <note priority="1" from="description">Want newsletter?</note>
+        </trans-unit>
+        <trans-unit id="want_observation_contact" datatype="html">
+            <source>
+J&apos;accepte d&apos;être contacté occasionnellement par mail pour valider une observation
+            </source>
+            <target>
+J&apos;accepte d&apos;être contacté occasionnellement par mail pour valider une observation
+            </target>
+            <context-group purpose="location">
+                <context context-type="sourcefile">app/auth/register/register.component.html</context>
+                <context context-type="linenumber">349</context>
+            </context-group>
+            <note priority="1" from="description">Want observation contact?</note>
+        </trans-unit>
     </body>
   </file>
 </xliff>
