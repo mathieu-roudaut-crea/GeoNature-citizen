@@ -1,11 +1,11 @@
-import { Component, Inject, LOCALE_ID } from '@angular/core';
+import { Component, Inject, LOCALE_ID, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, throwError } from 'rxjs';
 import { debounceTime, catchError, map } from 'rxjs/operators';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { RegisterUser, Relay, Organism } from '../models';
+import { RegisterUser, Relay } from '../models';
 import { AuthService } from './../auth.service';
 import { AppConfig } from '../../../conf/app.config';
 import { UserService } from '../user-dashboard/user.service.service';
@@ -30,9 +30,9 @@ export class RegisterComponent {
     staticAlertClosed = false;
     errorMessage: string;
     locale: string;
+    submitted: boolean;
     successMessage: string;
     relaysList: Array<Relay>;
-    organismsList: Array<Organism>;
     userAvatar: string | ArrayBuffer;
     genderType = '0';
     categoriesEnum = Object.freeze({
@@ -42,6 +42,7 @@ export class RegisterComponent {
         education: 'Organisme d’éducation à l’environnement',
         other: 'Autre',
     });
+    @ViewChild('registerForm', { static: false }) registerForm;
 
     constructor(
         @Inject(LOCALE_ID) readonly localeId: string,
@@ -61,15 +62,11 @@ export class RegisterComponent {
         this.userService
             .getRelays()
             .subscribe((relayList) => (this.relaysList = relayList));
-        this.userService
-            .getOrganisms()
-            .subscribe((organismsList) => (this.organismsList = organismsList));
     }
 
     onChangeCategory(): void {
         if (this.user.category === 'individual') {
             this.user.organism = null;
-            this.user.function = null;
         }
     }
 
@@ -84,9 +81,11 @@ export class RegisterComponent {
     }
 
     onRegister(): void {
-        if (this.user.organism === 0) {
-            this.user.organism = null;
+        this.submitted = true;
+        if (!this.registerForm.valid) {
+            return;
         }
+
         if (this.user.linked_relay_id === 0) {
             this.user.linked_relay_id = null;
         }

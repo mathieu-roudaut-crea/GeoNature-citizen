@@ -8,7 +8,7 @@ export class RegisterUser {
     extention?: string;
     captchaToken?: string;
     category: string;
-    organism?: number = 0;
+    organism?: string;
     function?: string;
     country: string;
     postal_code: string;
@@ -31,11 +31,6 @@ export class RegisterUser {
 
 export interface Relay {
     id: number;
-    name: string;
-}
-
-export interface Organism {
-    id_organism: number;
     name: string;
 }
 

@@ -4,7 +4,7 @@ import { AppConfig } from '../../../conf/app.config';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { saveAs } from 'file-saver';
-import { Organism, Relay } from '../models';
+import { Relay } from '../models';
 
 @Injectable({
     providedIn: 'root',
@@ -44,12 +44,6 @@ export class UserService {
 
     getRelays() {
         return this.http.get<Array<Relay>>(`${AppConfig.API_ENDPOINT}/relays`);
-    }
-
-    getOrganisms() {
-        return this.http.get<Array<Organism>>(
-            `${AppConfig.API_ENDPOINT}/organisms`
-        );
     }
 
     getObservationsByUserId(userId: number) {
