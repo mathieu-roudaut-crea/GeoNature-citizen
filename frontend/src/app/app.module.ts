@@ -32,10 +32,17 @@ import {
     SitesMapComponent,
     SiteMarkerPopupComponent,
 } from './programs/sites/map/map.component';
+
+import { AreasListComponent } from './programs/areas/list/list.component';
+import { AreasMapComponent } from './programs/areas/map/map.component';
+
 import { SitesComponent } from './programs/sites/sites.component';
+import { AreasComponent } from './programs/areas/areas.component';
+import { AreaFormComponent } from './programs/areas/areaform/areaform.component';
 import { SiteFormComponent } from './programs/sites/siteform/siteform.component';
 import { SiteVisitFormComponent } from './programs/sites/form/form.component';
 import { SiteDetailComponent } from './programs/sites/detail/detail.component';
+import { AreaDetailComponent } from './programs/areas/detail/detail.component';
 import { ObsDetailComponent } from './programs/observations/detail/detail.component';
 import { UserDashboardComponent } from './auth/user-dashboard/user-dashboard.component';
 import { UserObsComponent } from './auth/user-dashboard/user-observations/user-observations.component';
@@ -58,6 +65,7 @@ import { CongratsComponent } from './programs/observations/modalflow/steps/congr
 import { SiteCongratsComponent } from './programs/sites/modalflow/steps/congrats/congrats.component';
 import { ModalFlowComponent } from './programs/observations/modalflow/modalflow.component';
 import { SiteModalFlowComponent } from './programs/sites/modalflow/modalflow.component';
+import { AreaModalFlowComponent } from './programs/areas/modalflow/modalflow.component';
 import { RewardComponent } from './programs/observations/modalflow/steps/reward/reward.component';
 import { ModalFlowService } from './programs/observations/modalflow/modalflow.service';
 import { SiteModalFlowService } from './programs/sites/modalflow/modalflow.service';
@@ -106,6 +114,11 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         ObsFormComponent,
         ObsListComponent,
         SitesComponent,
+        AreasComponent,
+        AreaFormComponent,
+        AreasListComponent,
+        AreasMapComponent,
+        AreaDetailComponent,
         SiteFormComponent,
         SiteVisitFormComponent,
         SitesListComponent,
@@ -137,6 +150,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         SiteCongratsComponent,
         ModalFlowComponent,
         SiteModalFlowComponent,
+        AreaModalFlowComponent,
         GNCFrameworkComponent,
         RewardComponent,
         AdminComponent,

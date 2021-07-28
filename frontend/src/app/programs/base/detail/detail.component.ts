@@ -19,6 +19,8 @@ export abstract class BaseDetailComponent {
     obs: any;
     site_id: any;
     site: any;
+    area_id: any;
+    area: any;
 
     showPhoto(photo) {
         console.log('opening photo:');

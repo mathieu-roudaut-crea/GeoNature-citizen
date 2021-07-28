@@ -142,13 +142,38 @@ export class GncProgramsService implements OnInit {
             );
     }
 
+
+    getProgramAreas(id: number): Observable<FeatureCollection> {
+        return this.http
+            .get<FeatureCollection>(`${this.URL}/areas/programs/${id}`)
+            .pipe(
+                catchError(
+                    this.handleError<FeatureCollection>(
+                        `getProgramAreas id=${id}`
+                    )
+                )
+            );
+    }
+
     getSiteDetails(id: number): Observable<FeatureCollection> {
         return this.http
             .get<FeatureCollection>(`${this.URL}/sites/${id}`)
             .pipe(
                 catchError(
                     this.handleError<FeatureCollection>(
-                        `getProgramObservations id=${id}`
+                        `getSiteDetails id=${id}`
+                    )
+                )
+            );
+    }
+
+    getAreaDetails(id: number): Observable<FeatureCollection> {
+        return this.http
+            .get<FeatureCollection>(`${this.URL}/areas/${id}`)
+            .pipe(
+                catchError(
+                    this.handleError<FeatureCollection>(
+                        `getAreaDetails id=${id}`
                     )
                 )
             );
