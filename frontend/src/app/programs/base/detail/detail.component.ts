@@ -21,6 +21,8 @@ export abstract class BaseDetailComponent {
     site: any;
     area_id: any;
     area: any;
+    species_site_id: any;
+    speciesSite: any;
 
     showPhoto(photo) {
         console.log('opening photo:');

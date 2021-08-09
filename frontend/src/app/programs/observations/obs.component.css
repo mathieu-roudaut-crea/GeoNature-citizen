@@ -174,6 +174,10 @@
     line-height: 22px;
 }
 
+.app-no-topbar {
+    flex: 1;
+}
+
 app-observations {
     min-width: 100%;
 }
@@ -298,6 +302,7 @@ section .observations {
         min-width: inherit !important;
     }
 }
+
 @media screen and (max-width: 760px) {
     .obs-tabs .tab-pane.active #mapList #list,
     .obs-tabs .tab-pane.active #map {
@@ -305,6 +310,7 @@ section .observations {
         overflow: scroll;
     }
 }
+
 @media screen and (max-width: 576px) {
     .obs-tabs .tab-pane.active #mapList #list,
     .obs-tabs .tab-pane.active #map {
@@ -312,6 +318,7 @@ section .observations {
         overflow: scroll;
     }
 }
+
 @media screen and (max-width: 576px) {
     section#slide {
         margin-top: 66px !important;

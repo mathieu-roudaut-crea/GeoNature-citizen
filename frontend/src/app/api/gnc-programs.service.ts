@@ -179,6 +179,18 @@ export class GncProgramsService implements OnInit {
             );
     }
 
+    getSpeciesSiteDetails(id: number): Observable<FeatureCollection> {
+        return this.http
+            .get<FeatureCollection>(`${this.URL}/areas/species_sites/${id}`)
+            .pipe(
+                catchError(
+                    this.handleError<FeatureCollection>(
+                        `getSpeciesSiteDetails id=${id}`
+                    )
+                )
+            );
+    }
+
     getObsDetails(id: number): Observable<FeatureCollection> {
         return this.http
             .get<FeatureCollection>(`${this.URL}/observations/${id}`)

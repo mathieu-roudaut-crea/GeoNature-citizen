@@ -180,7 +180,15 @@ class ProgramsModel(TimestampMixinModel, db.Model):
     id_form = db.Column(
         db.Integer, db.ForeignKey(CustomFormModel.id_form), nullable=True
     )
-    custom_form = relationship("CustomFormModel")
+    custom_form = relationship("CustomFormModel", uselist=False, foreign_keys=[id_form])
+    area_form_id = db.Column(
+        db.Integer, db.ForeignKey(CustomFormModel.id_form), nullable=True
+    )
+    area_custom_form = relationship("CustomFormModel", uselist=False, foreign_keys=[area_form_id])
+    species_site_form_id = db.Column(
+        db.Integer, db.ForeignKey(CustomFormModel.id_form), nullable=True
+    )
+    species_site_custom_form = relationship("CustomFormModel", uselist=False, foreign_keys=[species_site_form_id])
     geometry = relationship("GeometryModel")
     project = relationship("ProjectModel")
 

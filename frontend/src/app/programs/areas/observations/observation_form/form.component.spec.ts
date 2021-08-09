@@ -12,11 +12,11 @@ import {
     NgbDateStruct,
 } from '@ng-bootstrap/ng-bootstrap';
 
-import { AreaVisitFormComponent } from './form.component';
+import { SpeciesSiteObservationFormComponent } from './form.component';
 
-describe('AreaVisitFormComponent', () => {
-    let component: AreaVisitFormComponent;
-    let fixture: ComponentFixture<AreaVisitFormComponent>;
+describe('speciesSiteObservationFormComponent', () => {
+    let component: SpeciesSiteObservationFormComponent;
+    let fixture: ComponentFixture<SpeciesSiteObservationFormComponent>;
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
@@ -28,12 +28,12 @@ describe('AreaVisitFormComponent', () => {
             ],
             providers: [NgbActiveModal],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [AreaVisitFormComponent],
+            declarations: [SpeciesSiteObservationFormComponent],
         }).compileComponents();
     }));
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(AreaVisitFormComponent);
+        fixture = TestBed.createComponent(SpeciesSiteObservationFormComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

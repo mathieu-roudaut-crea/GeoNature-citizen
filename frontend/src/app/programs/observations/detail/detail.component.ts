@@ -15,7 +15,7 @@ declare let $: any;
     selector: 'app-obs-detail',
     templateUrl: '../../base/detail/detail.component.html',
     styleUrls: [
-        './../../observations/obs.component.css', // for form modal only
+        './../../observations/obs.component.css', // for observation_form modal only
         '../../base/detail/detail.component.css',
     ],
     encapsulation: ViewEncapsulation.None,

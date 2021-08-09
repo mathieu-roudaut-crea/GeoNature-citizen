@@ -1,5 +1,5 @@
 import * as L from 'leaflet';
-import { AppConfig } from '../../../../conf/app.config';
+import { AppConfig } from '../../../../../conf/app.config';
 
 import {
     Component,
@@ -10,8 +10,8 @@ import {
     Inject,
     LOCALE_ID,
 } from '@angular/core';
-import { BaseMapComponent } from '../../base/map/map.component';
-import { MapService } from '../../base/map/map.service';
+import { BaseMapComponent } from '../areaform/map/map.component';
+import { MapService } from '../areaform/map/map.service';
 
 @Component({
     selector: 'app-areas-map',
@@ -20,10 +20,10 @@ import { MapService } from '../../base/map/map.service';
             [id]="'areasMap'"
             class="obsMap"
             #map
-            data-observation-zoom-statement-warning="Veuillez zoomer pour localiser votre area."
+            data-observation-zoom-statement-warning="Veuillez zoomer pour localiser votre zone."
         ></div>
     `,
-    styleUrls: ['../../base/map/map.component.css'],
+    styleUrls: ['../../../base/map/map.component.css'],
     encapsulation: ViewEncapsulation.None,
 })
 export class AreasMapComponent extends BaseMapComponent {

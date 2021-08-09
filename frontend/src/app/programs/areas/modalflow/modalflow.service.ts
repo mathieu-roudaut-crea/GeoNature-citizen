@@ -4,7 +4,8 @@ import { FlowItem } from '../../observations/modalflow/flow/flow-item';
 import { FlowComponent } from '../../observations/modalflow/flow/flow.component';
 import { OnboardComponent } from '../../observations/modalflow/steps/onboard/onboard.component';
 import { AreaStepComponent } from './steps/area/area_step.component';
-import { VisitStepComponent } from './steps/visit/visit_step.component';
+import { SpeciesSiteStepComponent } from './steps/species_site/species_site_step.component';
+import { SpeciesSiteObsStepComponent } from './steps/observation/species_site_obs_step.component';
 import { AreaCongratsComponent } from './steps/congrats/congrats.component';
 import { RewardComponent } from '../../observations/modalflow/steps/reward/reward.component';
 import { ModalFlowService } from '../../observations/modalflow/modalflow.service';
@@ -29,15 +30,23 @@ export class AreaModalFlowService extends ModalFlowService {
                 })
             );
         }
+        if (!init_data.updateData && !init_data.species_site_id) {
+            items.push(new FlowItem(SpeciesSiteStepComponent));
+        } // else user only edits the area and do not attach species_site
         if (!init_data.updateData) {
-            items.push(new FlowItem(VisitStepComponent));
-        } // else user only edits the area and do not attach visit
-        // items.push(new FlowItem(RewardComponent, {service: this}));
+            items.push(new FlowItem(SpeciesSiteObsStepComponent));
+        } // else user only edits the area and do not attach species_site
+        items.push(new FlowItem(RewardComponent, { service: this }));
         return items;
     }
 
-    addAreaVisit(area_id) {
+    addAreaSpeciesSite(area_id) {
         const init_data = { area_id: area_id };
+        this.openFormModal(init_data);
+    }
+
+    addSpeciesSiteObservation(species_site_id) {
+        const init_data = { species_site_id: species_site_id };
         this.openFormModal(init_data);
     }
 

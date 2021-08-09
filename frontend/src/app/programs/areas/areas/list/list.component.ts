@@ -7,10 +7,10 @@ import {
 } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
-import { AreaModalFlowService } from '../modalflow/modalflow.service';
-import { UserService } from '../../../auth/user-dashboard/user.service.service';
-import { AreaService } from '../areas.service';
-import { AppConfig } from '../../../../conf/app.config';
+import { AreaModalFlowService } from '../../modalflow/modalflow.service';
+import { UserService } from '../../../../auth/user-dashboard/user.service.service';
+import { AreaService } from '../../areas.service';
+import { AppConfig } from '../../../../../conf/app.config';
 
 @Component({
     selector: 'app-areas-list',
@@ -47,8 +47,8 @@ export class AreasListComponent implements OnChanges {
                 .filter((v, i, a) => a.indexOf(v) === i);
         }
     }
-    addAreaVisit(area_id) {
-        this.flowService.addAreaVisit(area_id);
+    onAddSpeciesSiteClick(area_id) {
+        this.flowService.addAreaSpeciesSite(area_id);
     }
 
     onAreaClick(e): void {

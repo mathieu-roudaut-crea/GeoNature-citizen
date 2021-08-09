@@ -20,30 +20,7 @@ import { TopbarComponent } from './core/topbar/topbar.component';
 import { HomeComponent } from './home/home.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { ProgramsComponent } from './programs/programs.component';
-import { ObsFormComponent } from './programs/observations/form/form.component';
-import { ObsListComponent } from './programs/observations/list/list.component';
-import {
-    ObsMapComponent,
-    MarkerPopupComponent,
-} from './programs/observations/map/map.component';
-import { ObsComponent } from './programs/observations/obs.component';
-import { SitesListComponent } from './programs/sites/list/list.component';
-import {
-    SitesMapComponent,
-    SiteMarkerPopupComponent,
-} from './programs/sites/map/map.component';
 
-import { AreasListComponent } from './programs/areas/list/list.component';
-import { AreasMapComponent } from './programs/areas/map/map.component';
-
-import { SitesComponent } from './programs/sites/sites.component';
-import { AreasComponent } from './programs/areas/areas.component';
-import { AreaFormComponent } from './programs/areas/areaform/areaform.component';
-import { SiteFormComponent } from './programs/sites/siteform/siteform.component';
-import { SiteVisitFormComponent } from './programs/sites/form/form.component';
-import { SiteDetailComponent } from './programs/sites/detail/detail.component';
-import { AreaDetailComponent } from './programs/areas/detail/detail.component';
-import { ObsDetailComponent } from './programs/observations/detail/detail.component';
 import { UserDashboardComponent } from './auth/user-dashboard/user-dashboard.component';
 import { UserObsComponent } from './auth/user-dashboard/user-observations/user-observations.component';
 import { SpeciesComponent } from './synthesis/species/species.component';
@@ -54,22 +31,60 @@ import { AboutComponent } from './about/about.component';
 import { AboutCustomComponent } from './about/custom/custom.component';
 import { AboutFixedComponent } from './about/fixed/fixed.component';
 import { HomeCustomComponent } from './home/custom/custom.component';
+
+import { ObsDetailComponent } from './programs/observations/detail/detail.component';
+import { ObsFormComponent } from './programs/observations/form/form.component';
+import { ObsListComponent } from './programs/observations/list/list.component';
+import {
+    ObsMapComponent,
+    MarkerPopupComponent,
+} from './programs/observations/map/map.component';
+import { ObsComponent } from './programs/observations/obs.component';
 import { FlowComponent } from './programs/observations/modalflow/flow/flow.component';
 // import { FlowService } from './programs/observations/flow/flow.service'
+import { ModalFlowComponent } from './programs/observations/modalflow/modalflow.component';
+import { ModalFlowService } from './programs/observations/modalflow/modalflow.service';
 import { FlowDirective } from './programs/observations/modalflow/flow/flow.directive';
 import { OnboardComponent } from './programs/observations/modalflow/steps/onboard/onboard.component';
 import { CommittedComponent } from './programs/observations/modalflow/steps/committed/committed.component';
+import { CongratsComponent } from './programs/observations/modalflow/steps/congrats/congrats.component';
+import { RewardComponent } from './programs/observations/modalflow/steps/reward/reward.component';
+
+import { SitesComponent } from './programs/sites/sites.component';
+import { SiteFormComponent } from './programs/sites/siteform/siteform.component';
+import { SiteVisitFormComponent } from './programs/sites/form/form.component';
+import { SiteDetailComponent } from './programs/sites/detail/detail.component';
+import { SitesListComponent } from './programs/sites/list/list.component';
+import {
+    SitesMapComponent,
+    SiteMarkerPopupComponent,
+} from './programs/sites/map/map.component';
 import { VisitStepComponent } from './programs/sites/modalflow/steps/visit/visit_step.component';
 import { SiteStepComponent } from './programs/sites/modalflow/steps/site/site_step.component';
-import { CongratsComponent } from './programs/observations/modalflow/steps/congrats/congrats.component';
 import { SiteCongratsComponent } from './programs/sites/modalflow/steps/congrats/congrats.component';
-import { ModalFlowComponent } from './programs/observations/modalflow/modalflow.component';
 import { SiteModalFlowComponent } from './programs/sites/modalflow/modalflow.component';
-import { AreaModalFlowComponent } from './programs/areas/modalflow/modalflow.component';
-import { RewardComponent } from './programs/observations/modalflow/steps/reward/reward.component';
-import { ModalFlowService } from './programs/observations/modalflow/modalflow.service';
 import { SiteModalFlowService } from './programs/sites/modalflow/modalflow.service';
 import { SiteService } from './programs/sites/sites.service';
+
+import { AreasComponent } from './programs/areas/areas.component';
+import { AreaDetailComponent } from './programs/areas/areas/detail/detail.component';
+import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
+import { SpeciesSiteDetailComponent } from './programs/areas/species_sites/detail/detail.component';
+import { AreaFormComponent } from './programs/areas/areas/areaform/areaform.component';
+import { SpeciesSiteFormComponent } from './programs/areas/species_sites/species_site_form/species_site_form.component';
+import { SpeciesSiteObservationFormComponent } from './programs/areas/observations/observation_form/form.component';
+import { AreasListComponent } from './programs/areas/areas/list/list.component';
+import {
+    AreasMapComponent,
+    AreaMarkerPopupComponent,
+} from './programs/areas/areas/map/map.component';
+import { AreaStepComponent } from './programs/areas/modalflow/steps/area/area_step.component';
+import { SpeciesSiteStepComponent } from './programs/areas/modalflow/steps/species_site/species_site_step.component';
+import { AreaCongratsComponent } from './programs/areas/modalflow/steps/congrats/congrats.component';
+import { AreaModalFlowComponent } from './programs/areas/modalflow/modalflow.component';
+import { AreaModalFlowService } from './programs/areas/modalflow/modalflow.service';
+import { AreaService } from './programs/areas/areas.service';
+
 import { ProgramsResolve } from './programs/programs-resolve.service';
 import { AdminComponent } from './auth/admin/admin.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -115,12 +130,17 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         ObsListComponent,
         SitesComponent,
         AreasComponent,
+        SpeciesSitesComponent,
         AreaFormComponent,
         AreasListComponent,
         AreasMapComponent,
+        AreaMarkerPopupComponent,
         AreaDetailComponent,
         SiteFormComponent,
         SiteVisitFormComponent,
+        SpeciesSiteDetailComponent,
+        SpeciesSiteFormComponent,
+        SpeciesSiteObservationFormComponent,
         SitesListComponent,
         SitesMapComponent,
         SiteDetailComponent,
@@ -146,11 +166,14 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         CommittedComponent,
         VisitStepComponent,
         SiteStepComponent,
+        SpeciesSiteStepComponent,
         CongratsComponent,
         SiteCongratsComponent,
+        AreaCongratsComponent,
         ModalFlowComponent,
         SiteModalFlowComponent,
         AreaModalFlowComponent,
+        AreaStepComponent,
         GNCFrameworkComponent,
         RewardComponent,
         AdminComponent,
@@ -164,8 +187,10 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         ErrorHandler,
         // FlowService,
         ModalFlowService,
+        AreaModalFlowService,
         SiteModalFlowService,
         SiteService,
+        AreaService,
         ProgramsResolve,
         {
             provide: HTTP_INTERCEPTORS,
@@ -184,13 +209,17 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         CommittedComponent,
         VisitStepComponent,
         SiteStepComponent,
+        AreaStepComponent,
+        SpeciesSiteStepComponent,
         CongratsComponent,
         SiteCongratsComponent,
+        AreaCongratsComponent,
         RewardComponent,
         GNCFrameworkComponent,
         FlowComponent,
         MarkerPopupComponent,
         SiteMarkerPopupComponent,
+        AreaMarkerPopupComponent,
     ],
     exports: [AdminComponent],
 })

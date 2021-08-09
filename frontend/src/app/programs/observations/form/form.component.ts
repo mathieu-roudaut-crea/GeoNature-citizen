@@ -176,7 +176,7 @@ export class ObsFormComponent implements AfterViewInit {
                 this.surveySpecies$.subscribe();
 
                 if (this.program.features[0].properties.id_form) {
-                    // Load custom form if one is attached to program
+                    // Load custom observation_form if one is attached to program
                     this.programService
                         .getCustomForm(
                             this.program.features[0].properties.id_form

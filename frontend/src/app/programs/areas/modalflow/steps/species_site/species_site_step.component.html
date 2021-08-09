@@ -1,6 +1,6 @@
 <!-- Ajouter une observation -->
 <div class="modal-header">
-    <h4 class="modal-title">AJOUTER UNE ZONE</h4>
+    <h4 class="modal-title">AJOUTER UN INDIVIDU</h4>
     <button
         type="button"
         class="close"
@@ -12,20 +12,20 @@
 </div>
 
 <div class="modal-body add-obs">
-    <app-area-form
-        [program_id]="data.program_id"
+    <app-species-site-form
+        [area_id]="data.area_id"
         [coords]="data.coords"
         [data]="data"
-    ></app-area-form>
+    ></app-species-site-form>
 </div>
 
 <div class="modal-footer">
     <button
         type="submit"
-        [disabled]="!form.areaForm.valid"
+        [disabled]="!form.speciesSiteForm.valid"
         class="btn btn-default btn-outline-primary rounded-0"
         (click)="committed()"
     >
-        Valider la zone
+        Valider l'individu
     </button>
 </div>

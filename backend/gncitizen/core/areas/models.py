@@ -66,6 +66,7 @@ class SpeciesSiteModel(TimestampMixinModel, ObserverMixinModel, db.Model):
     id_area = db.Column(
         db.Integer, db.ForeignKey(AreaModel.id_area, ondelete="CASCADE")
     )
+    name = db.Column(db.String(250))
     area = relationship("AreaModel")
     geom = db.Column(Geometry("POINT", 4326))
     uuid_sinp = db.Column(UUID(as_uuid=True), nullable=False, unique=True)
@@ -101,30 +102,13 @@ class SpeciesStageModel(db.Model):
     __table_args__ = {"schema": "gnc_areas"}
     id_species_stage = db.Column(db.Integer, primary_key=True, unique=True)
     name = db.Column(db.String(250))
+    active = db.Column(db.Boolean(), default=True)
     cd_nom = db.Column(db.Integer, db.ForeignKey(Taxref.cd_nom), nullable=False)
+    order = db.Column(db.Integer)
     start_month = db.Column(db.Integer)
     start_day = db.Column(db.Integer)
     end_month = db.Column(db.Integer)
     end_day = db.Column(db.Integer)
-
-
-class MediaOnSpeciesStageModel(TimestampMixinModel, db.Model):
-    """Table de correspondance des médias avec les sites d'espèces"""
-
-    __tablename__ = "cor_species_stages_media"
-    __table_args__ = {"schema": "gnc_areas"}
-    id_match = db.Column(db.Integer, primary_key=True, unique=True)
-    type = db.Column(db.String(50))
-    id_data_source = db.Column(
-        db.Integer,
-        db.ForeignKey(SpeciesStageModel.id_species_stage, ondelete="CASCADE"),
-        nullable=False,
-    )
-    id_media = db.Column(
-        db.Integer,
-        db.ForeignKey(MediaModel.id_media, ondelete="CASCADE"),
-        nullable=False,
-    )
 
 
 @serializable
@@ -140,6 +124,25 @@ class StagesStepModel(db.Model):
     )
     species_stage = relationship("SpeciesStageModel")
     order = db.Column(db.Integer)
+
+
+class MediaOnStagesStepsModel(TimestampMixinModel, db.Model):
+    """Table de correspondance des médias avec les étapes de chaque stade"""
+
+    __tablename__ = "cor_stages_steps_media"
+    __table_args__ = {"schema": "gnc_areas"}
+    id_match = db.Column(db.Integer, primary_key=True, unique=True)
+    id_data_source = db.Column(
+        db.Integer,
+        db.ForeignKey(StagesStepModel.id_stages_step, ondelete="CASCADE"),
+        nullable=False,
+    )
+    id_media = db.Column(
+        db.Integer,
+        db.ForeignKey(MediaModel.id_media, ondelete="CASCADE"),
+        nullable=False,
+    )
+
 
 @serializable
 class SpeciesSiteObservationModel(ObserverMixinModel, TimestampMixinModel, db.Model):

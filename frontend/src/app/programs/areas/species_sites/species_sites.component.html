@@ -1,0 +1,39 @@
+<div class="areas-container">
+    <div class="row tabs">
+        <a
+            [ngClass]="router.url.includes('areas') ? 'selected' : ''"
+            [routerLink]="[
+            '/programs',
+            program_id,
+            'areas'
+        ]"
+        >
+            Mes zones d'observation
+        </a>
+        <a
+            [ngClass]="router.url.includes('species_sites') ? 'selected' : ''"
+            [routerLink]="[
+            '/programs',
+            program_id,
+            'species_sites'
+        ]"
+        >
+            Ajouter mes observations
+        </a>
+        <a
+            [routerLink]="[
+            '/programs',
+            program_id,
+            'species_sites'
+        ]"
+        >
+            Visualiser mes observations
+        </a>
+    </div>
+    <div class="row">
+        <!-- LES ZONES -->
+        <section id="program" class="observations row obs-section">
+            INDIVIDUS
+        </section>
+    </div>
+</div>

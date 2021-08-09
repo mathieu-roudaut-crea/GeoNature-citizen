@@ -1,29 +1,30 @@
 import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
-import { GncProgramsService } from '../../../api/gnc-programs.service';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
-import { AreaModalFlowService } from '../modalflow/modalflow.service';
-import { AppConfig } from '../../../../conf/app.config';
+import { AreaModalFlowService } from '../../modalflow/modalflow.service';
+import { AppConfig } from '../../../../../conf/app.config';
 import { HttpClient } from '@angular/common/http';
 import {
     BaseDetailComponent,
     markerIcon,
-} from '../../base/detail/detail.component';
+} from '../../../base/detail/detail.component';
 
 declare let $: any;
 
 @Component({
     selector: 'app-area-detail',
-    templateUrl: '../../base/detail/detail.component.html',
+    templateUrl: '../../../base/detail/detail.component.html',
     styleUrls: [
-        './../../observations/obs.component.css', // for form modal only
-        '../../base/detail/detail.component.css',
+        '../../../observations/obs.component.css', // for observation_form modal only
+        '../../../base/detail/detail.component.css',
     ],
     encapsulation: ViewEncapsulation.None,
 })
 export class AreaDetailComponent
     extends BaseDetailComponent
-    implements AfterViewInit {
+    implements AfterViewInit
+{
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
@@ -33,7 +34,6 @@ export class AreaDetailComponent
         super();
         this.route.params.subscribe((params) => {
             this.area_id = params['area_id'];
-            this.program_id = params['program_id'];
         });
         this.module = 'areas';
     }
@@ -42,9 +42,11 @@ export class AreaDetailComponent
         this.programService.getAreaDetails(this.area_id).subscribe((areas) => {
             this.area = areas['features'][0];
             this.photos = this.area.properties.photos;
-            for (var i = 0; i < this.photos.length; i++) {
-                this.photos[i]['url'] =
-                    AppConfig.API_ENDPOINT + this.photos[i]['url'];
+            if (Array.isArray(this.photos)) {
+                for (let i = 0; i < this.photos.length; i++) {
+                    this.photos[i]['url'] =
+                        AppConfig.API_ENDPOINT + this.photos[i]['url'];
+                }
             }
 
             // setup map
@@ -53,24 +55,26 @@ export class AreaDetailComponent
                 attribution: 'OpenStreetMap',
             }).addTo(map);
 
-            let coord = this.area.geometry.coordinates;
-            let latLng = L.latLng(coord[1], coord[0]);
+            const coord = this.area.geometry.coordinates;
+            const latLng = L.latLng(coord[1], coord[0]);
             map.setView(latLng, 13);
 
-            L.marker(latLng, { icon: markerIcon }).addTo(map);
+            L.circle(latLng, { radius: 500 }).addTo(map);
 
             // prepare data
-            if (this.area.properties.last_visit) {
-                let data = this.area.properties.last_visit.json_data;
-                var that = this;
+            if (this.area.properties) {
+                const data = this.area.properties.json_data;
+                const that = this;
                 this.loadJsonSchema().subscribe((jsonschema: any) => {
-                    let schema = jsonschema.schema.properties;
+                    const schema = jsonschema.schema.properties;
                     for (const k in data) {
-                        let v = data[k];
+                        const v = data[k];
+
                         that.attributes.push({
                             name: schema[k].title,
                             value: v.toString(),
                         });
+                        console.log('added', that.attributes);
                     }
                 });
             }
@@ -81,7 +85,7 @@ export class AreaDetailComponent
         return this.http.get(`${this.URL}/areas/${this.area_id}/jsonschema`);
     }
 
-    addAreaVisit() {
-        this.flowService.addAreaVisit(this.area_id);
+    addAreaSpeciesSite() {
+        this.flowService.addAreaSpeciesSite(this.area_id);
     }
 }

@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild } from '@angular/core';
 
 import { IFlowComponent } from '../../../../observations/modalflow/flow/flow';
-import { AreaFormComponent } from '../../../areaform/areaform.component';
+import { AreaFormComponent } from '../../../areas/areaform/areaform.component';
 import { AreaService } from '../../../areas.service';
 
 @Component({

@@ -111,7 +111,7 @@ div.btn-group a:first-child {
 
 @media screen and (max-width: 992px) {
     /* FIXME: la nav bar ne se referme qu'à 768, pourquoi 912 ? */
-    /*    .navbar-collapse form{
+    /*    .navbar-collapse observation_form{
     justify-content: flex-end;
   } */
 

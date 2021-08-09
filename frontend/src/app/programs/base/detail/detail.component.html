@@ -1,83 +1,165 @@
 <div class="container">
     <div class="row">
-        <a [routerLink]="['/programs', program_id, module]" id="back_link"
-            >< Retour au programme</a
-        >
+        <a [routerLink]="['/programs', program_id, module]" id="back_link">< Retour au programme</a>
     </div>
     <div class="row">
         <h1 class="mt-3 title">
             {{
-                module === 'sites'
-                    ? site?.properties.name
-                    : !!obs?.properties.nom_francais
-                    ? obs?.properties.nom_francais
-                    : obs?.properties.taxref?.nom_vern
+            module === 'areas' ? area?.properties.name :
+                module === 'species_site' ?
+                    speciesSite?.properties.name :
+                    module === 'sites'
+                        ? site?.properties.name
+                        : !!obs?.properties.nom_francais
+                            ? obs?.properties.nom_francais
+                            : obs?.properties.taxref?.nom_vern
             }}
         </h1>
     </div>
     <div class="row mb-4">
-        <div
-            class="col-md-4 pt-4 card box-shadow"
-            *ngIf="module === 'sites'; else obsDisplay"
-        >
-            <div class="card-body">
-                <h5 class="card-title">
-                    {{ site?.properties.site_type.type | titlecase }} #{{
+        <div class="col-md-4 pt-4 card box-shadow">
+            <ng-container [ngSwitch]="true">
+                <div *ngSwitchCase="module === 'areas'" class="card-body">
+                    <h5 class="card-title">
+                        Zone #{{
+                        area_id
+                        }}
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Ajoutée le
+                        {{
+                        area?.properties.timestamp_create.substring(0, 10)
+                            | date: 'longDate'
+                        }}
+                    </h6>
+                    <p class="card-text">
+                        Inventoriée par {{ area?.properties.obs_txt }}
+                    </p>
+
+                    <p
+                        *ngIf="area?.properties.species_sites.count; else noSpeciesSite"
+                        class="card-text"
+                    >
+                        <small class="text-muted">
+                            {{
+                            area.properties.species_sites.count
+                            }}
+                            individu(s)
+                        </small>
+                    </p>
+                    <ng-template #noSpeciesSite>
+                        <p class="card-text">
+                            <small class="text-danger"
+                            >Aucun individu enregistré :(</small
+                            >
+                        </p>
+                    </ng-template>
+                    <a
+                        href="#"
+                        (click)="$event.preventDefault(); addAreaSpeciesSite()"
+                        class="btn btn-primary"
+                    >Ajouter un individu</a
+                    >
+                </div>
+                <div *ngSwitchCase="module === 'species_sites'" class="card-body">
+                    <h5 class="card-title">
+                        Individu #{{
+                        species_site_id
+                        }}
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Ajoutée le
+                        {{
+                        speciesSite?.properties.timestamp_create.substring(0, 10)
+                            | date: 'longDate'
+                        }}
+                    </h6>
+                    <p class="card-text">
+                        Inventoriée par {{ speciesSite?.properties.obs_txt }}
+                    </p>
+
+                    <p
+                        *ngIf="speciesSite?.properties.observations.count; else noObservations"
+                        class="card-text"
+                    >
+                        <small class="text-muted">
+                            {{
+                            speciesSite.properties.observations.count
+                            }}
+                            observations(s)
+                        </small>
+                    </p>
+                    <ng-template #noObservations>
+                        <p class="card-text">
+                            <small class="text-danger"
+                            >Aucune observation enregistrée :(</small
+                            >
+                        </p>
+                    </ng-template>
+                    <a
+                        href="#"
+                        (click)="$event.preventDefault(); addSpeciesSiteObservation()"
+                        class="btn btn-primary"
+                    >
+                        Ajouter une observation
+                    </a>
+                </div>
+                <div *ngSwitchCase="module === 'sites'" class="card-body">
+                    <h5 class="card-title">
+                        {{ site?.properties.site_type.type | titlecase }} #{{
                         site_id
-                    }}
-                </h5>
-                <h6 class="card-subtitle mb-2 text-muted">
-                    Ajoutée le
-                    {{
+                        }}
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Ajoutée le
+                        {{
                         site?.properties.timestamp_create.substring(0, 10)
                             | date: 'longDate'
-                    }}
-                </h6>
-                <p class="card-text">
-                    Inventoriée par {{ site?.properties.obs_txt }}
-                </p>
-
-                <p
-                    *ngIf="site?.properties.last_visit; else noVisit"
-                    class="card-text"
-                >
-                    <small class="text-muted">
-                        Dernière visite:
-                        {{
-                            site?.properties.last_visit.date | date: 'longDate'
                         }}
-                    </small>
-                </p>
-                <ng-template #noVisit>
+                    </h6>
                     <p class="card-text">
-                        <small class="text-danger"
-                            >Aucune visite enregistrée :(</small
-                        >
+                        Inventoriée par {{ site?.properties.obs_txt }}
                     </p>
-                </ng-template>
-                <a
-                    href="#"
-                    (click)="$event.preventDefault(); addSiteVisit()"
-                    class="btn btn-primary"
+
+                    <p
+                        *ngIf="site?.properties.last_visit; else noVisit"
+                        class="card-text"
+                    >
+                        <small class="text-muted">
+                            Dernière visite:
+                            {{
+                            site?.properties.last_visit.date | date: 'longDate'
+                            }}
+                        </small>
+                    </p>
+                    <ng-template #noVisit>
+                        <p class="card-text">
+                            <small class="text-danger"
+                            >Aucune visite enregistrée :(</small
+                            >
+                        </p>
+                    </ng-template>
+                    <a
+                        href="#"
+                        (click)="$event.preventDefault(); addSiteVisit()"
+                        class="btn btn-primary"
                     >Ajouter un rapport de visite</a
-                >
-            </div>
-        </div>
-        <ng-template #obsDisplay>
-            <div class="col-md-4 pt-4 card box-shadow">
-                <div class="card-body">
+                    >
+                </div>
+                <div *ngSwitchDefault>
                     <h5 class="card-title">Observation #{{ obs_id }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">
                         Ajoutée le
                         {{
-                            obs?.properties.timestamp_create.substring(0, 10)
-                                | date: 'longDate'
+                        obs?.properties.timestamp_create.substring(0, 10)
+                            | date: 'longDate'
                         }}
                     </h6>
                     <p class="card-text">par {{ obs?.properties.obs_txt }}</p>
                 </div>
-            </div>
-        </ng-template>
+            </ng-container>
+        </div>
+
         <div class="col-md-8">
             <div id="map" class="col-lg-12"></div>
         </div>
@@ -111,16 +193,45 @@
                 </div>
             </div>
         </div>
-        <div *ngIf="attributes.length > 0" class="row">
+    </div>
+    <div *ngIf="attributes.length > 0">
+        <div class="row">
             <h2 class="mt-4 mb-4">Description</h2>
         </div>
         <div class="row bg-light">
             <table class="table table-striped">
                 <tbody>
-                    <tr *ngFor="let d of attributes" class="d-flex">
-                        <td class="col-4">{{ d.name }}</td>
-                        <td class="col-8">{{ d.value }}</td>
-                    </tr>
+                <tr *ngFor="let d of attributes" class="d-flex">
+                    <td class="col-4">{{ d.name }}</td>
+                    <td class="col-8">{{ d.value }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div *ngIf="module === 'areas' && area?.properties.species_sites && area.properties.species_sites.count > 0">
+        <div class="row">
+            <h2 class="mt-4 mb-4">Individus</h2>
+        </div>
+        <div class="row bg-light">
+            <table class="table table-striped">
+                <tbody>
+                <tr *ngFor="let species_site of area.properties.species_sites.features" class="d-flex">
+                    <td class="col-4">{{ species_site.properties.name }}</td>
+                    <td class="col-4">{{ species_site.properties.cd_nom }}</td>
+                    <td class="col-4">
+                        <a
+                            [routerLink]="[
+                                '/programs',
+                                area.properties.id_program,
+                                'species_site',
+                                species_site.properties.id_species_site
+                            ]"
+                        >
+                            Voir le détail
+                        </a>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -144,7 +255,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <img src="{{ clickedPhoto?.url }}" style="width: 100%" />
+                <img src="{{ clickedPhoto?.url }}" style="width: 100%"/>
                 <p class="card-text">
                     <small class="text-muted">{{ clickedPhoto?.author }}</small>
                 </p>

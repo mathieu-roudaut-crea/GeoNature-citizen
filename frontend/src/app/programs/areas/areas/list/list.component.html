@@ -2,7 +2,7 @@
     <ng-content select="[obs-form]" *ngIf="display_form"></ng-content>
     <span [class.d-none]="display_form">
         <div class="col-lg-12 mx-4 mt-2 mb-4">
-            <strong><span *ngIf="userDashboard">Mes </span>Areas </strong>
+            <strong><span *ngIf="userDashboard">Mes </span>Zones </strong>
             <span class="badge badge-pill badge-info">{{ areas?.length }}</span>
             <ng-content select="[add-obs]"></ng-content>
         </div>
@@ -60,9 +60,7 @@
                         </span>
                     </h5>
                     <p>
-                        {{ o.properties.area_type.type | titlecase }} ajouté(e)
-                        par
-                        <span>{{ o.properties.obs_txt }}</span>
+                        ajoutée par <span>{{ o.properties.obs_txt }}</span>
                     </p>
                     <p>
                         le
@@ -71,6 +69,11 @@
                                 | date: 'longDate'
                         }}</span>
                     </p>
+                </div>
+                <div class="add-species-site">
+                    <div ngbTooltip="Ajouter un individu" (click)="onAddSpeciesSiteClick(o.properties.id_area)">
+                        +
+                    </div>
                 </div>
                 <div
                     class="hide"
@@ -81,9 +84,9 @@
                         o.properties.id_area
                     ]"
                     style="cursor: pointer"
-                    title="Voir les détails sur ce area"
+                    title="Voir les détails sur cette zone"
                 >
-                    <img src="assets/binoculars.png" />
+                    <img src="../../../../../assets/binoculars.png" />
                 </div>
             </div>
         </div>

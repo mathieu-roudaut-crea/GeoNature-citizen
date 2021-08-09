@@ -3,30 +3,23 @@
     <div class="form-row">
         <div class="form-group col-lg-6 col-md-12 half">
             <h5>Informations</h5>
-            <label for="counting">*Type de area&nbsp;</label>
-            <select
-                type="text"
-                formControlName="id_type"
-                class="form-control"
-                *ngIf="program"
-                [value]="area_types.length == 1 ? area_types[0].value : none"
-            >
-                <option
-                    *ngFor="let t of program.features[0].area_types"
-                    [value]="t.value"
-                >
-                    {{ t.text }}
-                </option>
-            </select>
-            <label for="counting">*Nom du area&nbsp;</label>
+            <label for="counting">*Nom de la zone</label>
             <input type="text" formControlName="name" class="form-control" />
+
+            <json-schema-form
+                [form]="formInputObject"
+                [options]="formOptions"
+                (onChanges)="yourOnChangesFn($event)"
+                [framework]="GNCBootstrap4Framework"
+            >
+            </json-schema-form>
         </div>
         <div class="form-group col-lg-6 col-md-12 half">
             <h5>Où est-il situé ?</h5>
             <div class="position-relative">
                 <div class="zoom-alert" *ngIf="hasZoomAlert">
                     <div class="mb-2 text-center" i18n="Zooming instruction@@zoomingInstruction">
-                        Veuillez zoomer pour localiser votre observation.<br />
+                        Veuillez zoomer pour localiser votre zone.<br />
                         <span
                             >(zoom min:
                             {{ MAP_CONFIG.ZOOM_LEVEL_RELEVE }})</span

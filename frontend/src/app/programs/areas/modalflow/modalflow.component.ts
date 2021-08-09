@@ -18,7 +18,7 @@ import { FlowComponent } from '../../observations/modalflow/flow/flow.component'
 })
 export class AreaModalFlowComponent {
     @Input('coords') coords;
-    @Input('modalversion') modalversion: boolean = true;
+    @Input('modalversion') modalversion = true;
     @ViewChild('content', { static: true }) content: ElementRef;
     @Input('updateData') updateData;
     @Input('program_id') program_id;
@@ -38,7 +38,7 @@ export class AreaModalFlowComponent {
             updateData: this.updateData,
         });
         if (this.modalversion) {
-            var modalRef = this.flowService.open(this.content);
+            const modalRef = this.flowService.open(this.content);
         } else {
             this.flowService.toggleDisplay();
         }

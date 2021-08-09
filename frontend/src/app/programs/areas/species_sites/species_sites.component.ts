@@ -10,26 +10,29 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { FeatureCollection } from 'geojson';
 
-import { GncProgramsService } from '../../api/gnc-programs.service';
-import { Program } from '../programs.models';
-import { AreaModalFlowService } from './modalflow/modalflow.service';
-import { AreaService } from './areas.service';
-import { AreasMapComponent } from './areas/map/map.component';
-import { AreasListComponent } from './areas/list/list.component';
-import { AreaModalFlowComponent } from './modalflow/modalflow.component';
-import { ProgramBaseComponent } from '../base/program-base.component';
+import { GncProgramsService } from '../../../api/gnc-programs.service';
+import { Program } from '../../programs.models';
+import { AreaModalFlowService } from '../modalflow/modalflow.service';
+import { AreaService } from '../areas.service';
+import { AreasMapComponent } from '../areas/map/map.component';
+import { AreasListComponent } from '../areas/list/list.component';
+import { AreaModalFlowComponent } from '../modalflow/modalflow.component';
+import { ProgramBaseComponent } from '../../base/program-base.component';
 
 @Component({
-    selector: 'app-areas',
-    templateUrl: './areas.component.html',
+    selector: 'app-species-sites',
+    templateUrl: './species_sites.component.html',
     styleUrls: [
-        '../observations/obs.component.css',
-        '../../home/home.component.css',
-        './areas.component.css',
+        '../../observations/obs.component.css',
+        '../../../home/home.component.css',
+        './species_sites.component.css',
     ],
     encapsulation: ViewEncapsulation.None,
 })
-export class AreasComponent extends ProgramBaseComponent implements OnInit {
+export class SpeciesSitesComponent
+    extends ProgramBaseComponent
+    implements OnInit
+{
     title = 'Areas';
     areas: FeatureCollection;
     userDashboard = false;

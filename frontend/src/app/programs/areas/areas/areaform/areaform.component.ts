@@ -18,13 +18,14 @@ import { LeafletMouseEvent } from 'leaflet';
 import 'leaflet-fullscreen/dist/Leaflet.fullscreen';
 import 'leaflet-gesture-handling';
 
-import { AppConfig } from '../../../../conf/app.config';
-import { MAP_CONFIG } from '../../../../conf/map.config';
-import { MapService } from '../../base/map/map.service';
+import { AppConfig } from '../../../../../conf/app.config';
+import { MAP_CONFIG } from '../../../../../conf/map.config';
+import { MapService } from './map/map.service';
+import { GNCFrameworkComponent } from '../../../base/jsonform/framework/framework.component';
 
 // declare let $: any;
 
-const PROGRAM_AREA_STYLE = {
+const AREA_STYLE = {
     fillColor: 'transparent',
     weight: 2,
     opacity: 0.8,
@@ -54,19 +55,33 @@ export class AreaFormComponent implements AfterViewInit {
     @Input('program_id') program_id: number;
     @ViewChild('photo', { static: true }) photo: ElementRef;
     program: any;
-    area_types: any;
     formMap: L.Map;
     areaForm = new FormGroup({
         name: new FormControl('', Validators.required),
         geometry: new FormControl('', Validators.required),
         id_program: new FormControl(),
-        id_type: new FormControl('', Validators.required),
         id_area: new FormControl(),
     });
     MAP_CONFIG = MAP_CONFIG;
     hasZoomAlert: boolean;
     zoomAlertTimeout: any;
     mapVars: any = {};
+
+    jsonData: object = {};
+    formOptions: any = {
+        loadExternalAssets: false,
+        debug: false,
+        returnEmptyFields: false,
+        addSubmit: false,
+    };
+    jsonSchema: any = {};
+    GNCBootstrap4Framework: any = {
+        framework: GNCFrameworkComponent,
+    };
+    formInputObject: object = {};
+    readyToDisplay = false;
+    partialLayout: any[] = [];
+    advancedMode = false;
 
     constructor(
         private http: HttpClient,
@@ -94,6 +109,38 @@ export class AreaFormComponent implements AfterViewInit {
                 }
             ).addTo(this.formMap);
         });
+
+        this.loadJsonSchema().subscribe((data: any) => {
+            this.initForm(data);
+        });
+    }
+
+    initForm(json_schema) {
+        this.jsonSchema = json_schema;
+        this.updatePartialLayout();
+        this.updateFormInput();
+        this.readyToDisplay = true;
+    }
+    loadJsonSchema() {
+        return this.http.get(
+            `${this.URL}/areas/program/${this.program_id}/jsonschema`
+        );
+    }
+    updateFormInput() {
+        this.updatePartialLayout();
+        this.formInputObject = {
+            schema: this.jsonSchema.schema,
+            data: this.jsonData,
+            layout: this.partialLayout,
+        };
+    }
+    updatePartialLayout() {
+        this.partialLayout = this.jsonSchema.layout;
+        this.partialLayout[this.partialLayout.length - 1].expanded =
+            this.advancedMode;
+    }
+    yourOnChangesFn(e) {
+        this.jsonData = e;
     }
 
     ngAfterViewInit(): void {
@@ -101,15 +148,7 @@ export class AreaFormComponent implements AfterViewInit {
             .get(`${AppConfig.API_ENDPOINT}/programs/${this.program_id}`)
             .subscribe((result) => {
                 this.program = result;
-                this.area_types = this.program.features[0].area_types;
-                console.debug('area_types',this.area_types);
-                console.debug('prev', this.areaForm);
-                if (this.area_types.length == 1) {
-                    this.areaForm.patchValue({
-                        id_type: this.area_types[0].value,
-                    });
-                }
-                console.debug('post', this.areaForm);
+                console.debug('areaForm', this.areaForm);
 
                 // build map control
                 const formMap = L.map('formMap', {
@@ -152,9 +191,12 @@ export class AreaFormComponent implements AfterViewInit {
 
                 const programArea = L.geoJSON(this.program, {
                     style: function (_feature) {
-                        return PROGRAM_AREA_STYLE;
+                        return AREA_STYLE;
                     },
                 }).addTo(formMap);
+
+                console.log('programArea', programArea);
+                console.log('getBounds', programArea.getBounds());
 
                 const maxBounds: L.LatLngBounds = programArea.getBounds();
                 formMap.fitBounds(maxBounds);
@@ -176,7 +218,7 @@ export class AreaFormComponent implements AfterViewInit {
 
                 // Update marker on click event
                 formMap.on('click', (e: LeafletMouseEvent) => {
-                    let z = formMap.getZoom();
+                    const z = formMap.getZoom();
 
                     if (z < MAP_CONFIG.ZOOM_LEVEL_RELEVE) {
                         // this.hasZoomAlert = true;
@@ -205,9 +247,14 @@ export class AreaFormComponent implements AfterViewInit {
                             // Implement draggable marker
                             formMap.removeLayer(myMarker);
                         }
-                        myMarker = L.marker(e.latlng, {
-                            icon: areaFormMarkerIcon,
+
+                        myMarker = L.circle(e.latlng, {
+                            radius: 500,
                         }).addTo(formMap);
+
+                        // myMarker = L.marker(e.latlng, {
+                        //     icon: areaFormMarkerIcon,
+                        // }).addTo(formMap);
                         this.coords = L.point(e.latlng.lng, e.latlng.lat);
                         // this.areaForm.patchValue({ geometry: this.coords });
                         const coords = <Point>{
@@ -227,7 +274,6 @@ export class AreaFormComponent implements AfterViewInit {
         this.areaForm.patchValue({
             name: updateData.name,
             geometry: this.data.coords ? this.coords : '',
-            id_type: updateData.id_type,
             id_program: updateData.program_id,
             id_area: updateData.id_area,
         });
@@ -235,7 +281,12 @@ export class AreaFormComponent implements AfterViewInit {
 
     onFormSubmit(): Promise<object> {
         console.debug('formValues:', this.areaForm.value);
-        return this.postArea()
+
+        const formData = this.areaForm.value;
+        if (this.jsonData) {
+            formData.json_data = JSON.stringify(this.jsonData);
+        }
+        return this.postArea(formData)
             .toPromise()
             .then(
                 (data) => {
@@ -245,7 +296,7 @@ export class AreaFormComponent implements AfterViewInit {
             );
     }
 
-    postArea(): Observable<any> {
+    postArea(postData): Observable<any> {
         const httpOptions = {
             headers: new HttpHeaders({
                 Accept: 'application/json',
@@ -254,16 +305,14 @@ export class AreaFormComponent implements AfterViewInit {
         if (this.data.updateData) {
             return this.http.patch<any>(
                 `${this.URL}/areas/`,
-                this.areaForm.value,
+                postData,
                 httpOptions
             );
         } else {
-            this.areaForm.patchValue({
-                id_program: this.program_id,
-            });
+            postData.id_program = this.program_id;
             return this.http.post<any>(
                 `${this.URL}/areas/`,
-                this.areaForm.value,
+                postData,
                 httpOptions
             );
         }

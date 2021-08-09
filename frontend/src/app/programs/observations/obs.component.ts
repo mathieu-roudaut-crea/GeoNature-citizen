@@ -59,7 +59,7 @@ export class ObsComponent extends ProgramBaseComponent implements OnInit {
         super();
         this.route.params.subscribe((params) => {
             this.program_id = params['id'];
-            this.flowService.closeModal(); // Avoid keeping another program's form open
+            this.flowService.closeModal(); // Avoid keeping another program's observation_form open
         });
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;

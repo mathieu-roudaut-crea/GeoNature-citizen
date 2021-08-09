@@ -1,6 +1,6 @@
 <!-- Ajouter une observation -->
 <div class="modal-header">
-    <h4 class="modal-title">AJOUTER UN RAPPORT DE VISITE</h4>
+    <h4 class="modal-title">AJOUTER UNE OBSERVATION</h4>
     <button
         type="button"
         class="close"
@@ -12,7 +12,7 @@
 </div>
 
 <div class="modal-body add-obs">
-    <app-area-visit-form [area_id]="data.area_id"></app-area-visit-form>
+    <app-species-site-obs-form [species_site_id]="data.species_site_id"></app-species-site-obs-form>
 </div>
 
 <div class="modal-footer" *ngIf="form.readyToDisplay">
@@ -38,6 +38,6 @@
         (click)="committed()"
         *ngIf="form.isLastStep()"
     >
-        Valider la viarea
+        Valider la visite
     </button>
 </div>

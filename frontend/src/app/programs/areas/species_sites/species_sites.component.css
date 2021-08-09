@@ -17,6 +17,7 @@
     color: #000000;
 }
 
+
 .app-no-topbar .observations {
     height: calc(100vh - 55px);
     --list-obs-offset: 0px;

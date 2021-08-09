@@ -18,21 +18,21 @@ import { Position, Point } from 'geojson';
 import * as L from 'leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 
-import { AppConfig } from '../../../../conf/app.config';
+import { AppConfig } from '../../../../../conf/app.config';
 
-import { GNCFrameworkComponent } from '../../base/jsonform/framework/framework.component';
-import { ngbDateMaxIsToday } from '../../observations/form/formValidators';
-import { AreaService } from '../areas.service';
+import { GNCFrameworkComponent } from '../../../base/jsonform/framework/framework.component';
+import { ngbDateMaxIsToday } from '../../../observations/form/formValidators';
+import { AreaService } from '../../areas.service';
 
 declare let $: any;
 
 @Component({
-    selector: 'app-area-visit-form',
+    selector: 'app-species-site-obs-form',
     templateUrl: './form.component.html',
     styleUrls: ['./form.component.css'],
     encapsulation: ViewEncapsulation.None,
 })
-export class AreaVisitFormComponent implements OnInit, AfterViewInit {
+export class SpeciesSiteObservationFormComponent implements OnInit, AfterViewInit {
     private readonly URL = AppConfig.API_ENDPOINT;
     @Input() area_id: number;
     today = new Date();
@@ -87,7 +87,7 @@ export class AreaVisitFormComponent implements OnInit, AfterViewInit {
         this.readyToDisplay = true;
     }
     loadJsonSchema() {
-        return this.http.get(`${this.URL}/areas/${this.area_id}/jsonschema`);
+        return this.http.get(`${this.URL}/areas/${this.area_id}/obs/jsonschema`);
     }
     updateFormInput() {
         this.updatePartialLayout();
@@ -156,7 +156,7 @@ export class AreaVisitFormComponent implements OnInit, AfterViewInit {
     }
     onFormSubmit(): void {
         console.debug('formValues:', this.visitForm.value);
-        this.postAreaVisit().subscribe(
+        this.postSpeciesSiteObservation().subscribe(
             (data) => {
                 console.debug(data);
                 const visitId = data['features'][0]['id_visit'];
@@ -177,7 +177,7 @@ export class AreaVisitFormComponent implements OnInit, AfterViewInit {
         );
     }
 
-    postAreaVisit(): Observable<any> {
+    postSpeciesSiteObservation(): Observable<any> {
         const httpOptions = {
             headers: new HttpHeaders({
                 Accept: 'application/json',
