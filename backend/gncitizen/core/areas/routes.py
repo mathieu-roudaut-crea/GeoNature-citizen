@@ -73,6 +73,17 @@ def get_species_site_jsonschema(pk):
         return {"error_message": str(e)}, 400
 
 
+@areas_api.route("/program/<int:pk>/species_site/jsonschema", methods=["GET"])
+@json_resp
+def get_species_site_jsonschema_by_program(pk):
+    try:
+        program = ProgramsModel.query.get(pk)
+        data_dict = program.species_site_custom_form.json_schema
+        return data_dict, 200
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
 @areas_api.route("/programs/<int:id>", methods=["GET"])
 @json_resp
 def get_program_areas(id):

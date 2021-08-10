@@ -34,6 +34,7 @@ export class SpeciesSiteDetailComponent
         super();
         this.route.params.subscribe((params) => {
             this.species_site_id = params['species_site_id'];
+            this.program_id = params['program_id'];
         });
         this.module = 'species_sites';
     }
@@ -61,23 +62,25 @@ export class SpeciesSiteDetailComponent
                 const latLng = L.latLng(coord[1], coord[0]);
                 map.setView(latLng, 13);
 
-                L.circle(latLng, { radius: 500 }).addTo(map);
+                L.marker(latLng, { icon: markerIcon }).addTo(map);
 
                 // prepare data
                 if (this.speciesSite.properties) {
                     const data = this.speciesSite.properties.json_data;
                     const that = this;
-                    this.loadJsonSchema().subscribe((jsonschema: any) => {
-                        const schema = jsonschema.schema.properties;
-                        for (const k in data) {
-                            const v = data[k];
-
-                            that.attributes.push({
-                                name: schema[k].title,
-                                value: v.toString(),
-                            });
-                            console.log('added', that.attributes);
+                    this.loadJsonSchema().subscribe((json_schema: any) => {
+                        const schema = json_schema.schema.properties;
+                        const layout = json_schema.layout;
+                        for (const item of layout) {
+                            const v = data[item.key];
+                            if (v !== undefined) {
+                                that.attributes.push({
+                                    name: schema[item.key].title,
+                                    value: v.toString(),
+                                });
+                            }
                         }
+
                     });
                 }
             });
@@ -85,7 +88,7 @@ export class SpeciesSiteDetailComponent
 
     loadJsonSchema() {
         return this.http.get(
-            `${this.URL}/areas/${this.speciesSite.id_area}/species_site/jsonschema`
+            `${this.URL}/areas/program/${this.program_id}/species_site/jsonschema`
         );
     }
 

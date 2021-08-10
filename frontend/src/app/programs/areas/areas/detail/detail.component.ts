@@ -34,6 +34,7 @@ export class AreaDetailComponent
         super();
         this.route.params.subscribe((params) => {
             this.area_id = params['area_id'];
+            this.program_id = params['program_id'];
         });
         this.module = 'areas';
     }
@@ -65,16 +66,17 @@ export class AreaDetailComponent
             if (this.area.properties) {
                 const data = this.area.properties.json_data;
                 const that = this;
-                this.loadJsonSchema().subscribe((jsonschema: any) => {
-                    const schema = jsonschema.schema.properties;
-                    for (const k in data) {
-                        const v = data[k];
-
-                        that.attributes.push({
-                            name: schema[k].title,
-                            value: v.toString(),
-                        });
-                        console.log('added', that.attributes);
+                this.loadJsonSchema().subscribe((json_schema: any) => {
+                    const schema = json_schema.schema.properties;
+                    const layout = json_schema.layout;
+                    for (const item of layout) {
+                        const v = data[item.key];
+                        if (v !== undefined) {
+                            that.attributes.push({
+                                name: schema[item.key].title,
+                                value: v.toString(),
+                            });
+                        }
                     }
                 });
             }

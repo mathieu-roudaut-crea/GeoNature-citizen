@@ -5,7 +5,7 @@ import {
     HttpTestingController,
 } from '@angular/common/http/testing';
 
-import { AreasMapComponent } from './map.component';
+import { AreasMapComponent } from './areamap.component';
 
 describe('AreasMapComponent', () => {
     let component: AreasMapComponent;

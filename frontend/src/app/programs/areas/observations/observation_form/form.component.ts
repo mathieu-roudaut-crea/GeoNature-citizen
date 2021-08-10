@@ -32,9 +32,11 @@ declare let $: any;
     styleUrls: ['./form.component.css'],
     encapsulation: ViewEncapsulation.None,
 })
-export class SpeciesSiteObservationFormComponent implements OnInit, AfterViewInit {
+export class SpeciesSiteObservationFormComponent
+    implements OnInit, AfterViewInit
+{
     private readonly URL = AppConfig.API_ENDPOINT;
-    @Input() area_id: number;
+    @Input() species_site_id: number;
     today = new Date();
     visitForm = new FormGroup({
         date: new FormControl(
@@ -74,7 +76,7 @@ export class SpeciesSiteObservationFormComponent implements OnInit, AfterViewIni
 
     ngOnInit() {
         console.debug('ngOnInit');
-        console.debug('area_id:', this.area_id);
+        console.debug('species_site_id:', this.species_site_id);
         // const that = this;
         this.loadJsonSchema().subscribe((data: any) => {
             this.initForm(data);
@@ -87,7 +89,9 @@ export class SpeciesSiteObservationFormComponent implements OnInit, AfterViewIni
         this.readyToDisplay = true;
     }
     loadJsonSchema() {
-        return this.http.get(`${this.URL}/areas/${this.area_id}/obs/jsonschema`);
+        return this.http.get(
+            `${this.URL}/areas/${this.species_site_id}/obs/jsonschema`
+        );
     }
     updateFormInput() {
         this.updatePartialLayout();
@@ -108,15 +112,13 @@ export class SpeciesSiteObservationFormComponent implements OnInit, AfterViewIni
     }
     updatePartialLayout() {
         if (this.jsonSchema.steps) {
-            this.partialLayout = this.jsonSchema.steps[
-                this.currentStep - 1
-            ].layout;
+            this.partialLayout =
+                this.jsonSchema.steps[this.currentStep - 1].layout;
         } else {
             this.partialLayout = this.jsonSchema.layout;
         }
-        this.partialLayout[
-            this.partialLayout.length - 1
-        ].expanded = this.advancedMode;
+        this.partialLayout[this.partialLayout.length - 1].expanded =
+            this.advancedMode;
     }
     isFirstStep() {
         return this.currentStep === 1;
@@ -159,17 +161,6 @@ export class SpeciesSiteObservationFormComponent implements OnInit, AfterViewIni
         this.postSpeciesSiteObservation().subscribe(
             (data) => {
                 console.debug(data);
-                const visitId = data['features'][0]['id_visit'];
-                if (this.photos.length > 0) {
-                    this.postVisitPhotos(visitId).subscribe(
-                        (resp) => {
-                            console.debug(resp);
-                            this.areaService.newAreaCreated.emit(true);
-                        },
-                        (err) => console.error(err),
-                        () => console.log('photo upload done')
-                    );
-                }
             },
             (err) => console.error(err),
             () => console.log('done')
@@ -191,20 +182,9 @@ export class SpeciesSiteObservationFormComponent implements OnInit, AfterViewIni
                 .match(/\d{4}-\d{2}-\d{2}/)[0],
         });
         return this.http.post<any>(
-            `${this.URL}/areas/${this.area_id}/visits`,
+            `${this.URL}/areas/${this.species_site_id}/visits`,
             this.visitForm.value,
             httpOptions
-        );
-    }
-
-    postVisitPhotos(visitId: number) {
-        const formData = new FormData();
-        this.photos.forEach((file) => {
-            formData.append('file', file);
-        });
-        return this.http.post<any>(
-            `${this.URL}/areas/${this.area_id}/visits/${visitId}/photos`,
-            formData
         );
     }
 }

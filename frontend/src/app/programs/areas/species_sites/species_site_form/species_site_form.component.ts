@@ -83,7 +83,6 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     zoomAlertTimeout: any;
     mapVars: any = {};
 
-    currentStep = 1;
     jsonData: object = {};
     formOptions: any = {
         loadExternalAssets: false,
@@ -144,14 +143,6 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
         });
     }
 
-    nextStep() {
-        this.currentStep += 1;
-        this.updateFormInput();
-    }
-    previousStep() {
-        this.currentStep -= 1;
-        this.updateFormInput();
-    }
     initForm(json_schema) {
         this.jsonSchema = json_schema;
         this.updatePartialLayout();
@@ -167,22 +158,17 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
         this.updatePartialLayout();
         this.formInputObject = {
             schema: this.jsonSchema.schema,
-            data: this.jsonData[this.currentStep],
+            data: this.jsonData,
             layout: this.partialLayout,
         };
     }
     updatePartialLayout() {
-        if (this.jsonSchema.steps) {
-            this.partialLayout =
-                this.jsonSchema.steps[this.currentStep - 1].layout;
-        } else {
-            this.partialLayout = this.jsonSchema.layout;
-        }
+        this.partialLayout = this.jsonSchema.layout;
         this.partialLayout[this.partialLayout.length - 1].expanded =
             this.advancedMode;
     }
     yourOnChangesFn(e) {
-        this.jsonData[this.currentStep] = e;
+        this.jsonData = e;
     }
 
     ngAfterViewInit(): void {

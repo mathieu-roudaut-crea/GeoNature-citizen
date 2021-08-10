@@ -77,9 +77,10 @@ import { AreasListComponent } from './programs/areas/areas/list/list.component';
 import {
     AreasMapComponent,
     AreaMarkerPopupComponent,
-} from './programs/areas/areas/map/map.component';
+} from './programs/areas/areas/map/areamap.component';
 import { AreaStepComponent } from './programs/areas/modalflow/steps/area/area_step.component';
 import { SpeciesSiteStepComponent } from './programs/areas/modalflow/steps/species_site/species_site_step.component';
+import { SpeciesSiteObsStepComponent } from './programs/areas/modalflow/steps/observation/species_site_obs_step.component';
 import { AreaCongratsComponent } from './programs/areas/modalflow/steps/congrats/congrats.component';
 import { AreaModalFlowComponent } from './programs/areas/modalflow/modalflow.component';
 import { AreaModalFlowService } from './programs/areas/modalflow/modalflow.service';
@@ -167,6 +168,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         VisitStepComponent,
         SiteStepComponent,
         SpeciesSiteStepComponent,
+        SpeciesSiteObsStepComponent,
         CongratsComponent,
         SiteCongratsComponent,
         AreaCongratsComponent,
@@ -211,6 +213,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         SiteStepComponent,
         AreaStepComponent,
         SpeciesSiteStepComponent,
+        SpeciesSiteObsStepComponent,
         CongratsComponent,
         SiteCongratsComponent,
         AreaCongratsComponent,

@@ -14,7 +14,7 @@ import { GncProgramsService } from '../../api/gnc-programs.service';
 import { Program } from '../programs.models';
 import { AreaModalFlowService } from './modalflow/modalflow.service';
 import { AreaService } from './areas.service';
-import { AreasMapComponent } from './areas/map/map.component';
+import { AreasMapComponent } from '../../programs/areas/areas/map/areamap.component';
 import { AreasListComponent } from './areas/list/list.component';
 import { AreaModalFlowComponent } from './modalflow/modalflow.component';
 import { ProgramBaseComponent } from '../base/program-base.component';

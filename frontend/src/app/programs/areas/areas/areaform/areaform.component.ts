@@ -20,7 +20,7 @@ import 'leaflet-gesture-handling';
 
 import { AppConfig } from '../../../../../conf/app.config';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
-import { MapService } from './map/map.service';
+import { MapService } from '../../../base/map/map.service';
 import { GNCFrameworkComponent } from '../../../base/jsonform/framework/framework.component';
 
 // declare let $: any;
@@ -195,9 +195,6 @@ export class AreaFormComponent implements AfterViewInit {
                     },
                 }).addTo(formMap);
 
-                console.log('programArea', programArea);
-                console.log('getBounds', programArea.getBounds());
-
                 const maxBounds: L.LatLngBounds = programArea.getBounds();
                 formMap.fitBounds(maxBounds);
                 formMap.setMaxBounds(maxBounds);
@@ -211,8 +208,8 @@ export class AreaFormComponent implements AfterViewInit {
                     };
                     this.areaForm.patchValue({ geometry: geo_coords });
 
-                    myMarker = L.marker([this.coords.y, this.coords.x], {
-                        icon: areaFormMarkerIcon,
+                    myMarker = L.circle([this.coords.y, this.coords.x], {
+                        radius: 500,
                     }).addTo(formMap);
                 }
 
