@@ -236,6 +236,34 @@
             </table>
         </div>
     </div>
+    <div *ngIf="module === 'species_sites' && speciesSite?.properties.observations && speciesSite.properties.observations.count > 0">
+        <div class="row">
+            <h2 class="mt-4 mb-4">Observations</h2>
+        </div>
+        <div class="row bg-light">
+            <table class="table table-striped">
+                <tbody>
+                <tr *ngFor="let observation of speciesSite.properties.observations.features" class="d-flex">
+                    <td class="col-4">{{ observation.properties.obs_txt }}</td>
+                    <td class="col-4">{{ observation.properties.date }}</td>
+                    <td class="col-4">
+                        <a
+                            [routerLink]="[
+                                '/programs',
+                                speciesSite.properties.area.id_program,
+                                'species-site',
+                                'observations',
+                                observation.properties.id_species_site_observation
+                            ]"
+                        >
+                            Voir le détail
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="photoModal" tabindex="-1" role="dialog">

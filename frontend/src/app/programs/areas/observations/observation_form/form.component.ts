@@ -9,20 +9,23 @@ import {
 } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+    AbstractControl,
+    FormControl,
+    FormGroup,
+    ValidatorFn,
+    Validators,
+} from '@angular/forms';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
 
 import { NgbDate } from '@ng-bootstrap/ng-bootstrap';
-import { Position, Point } from 'geojson';
-import * as L from 'leaflet';
-import { LeafletMouseEvent } from 'leaflet';
 
 import { AppConfig } from '../../../../../conf/app.config';
 
 import { GNCFrameworkComponent } from '../../../base/jsonform/framework/framework.component';
 import { ngbDateMaxIsToday } from '../../../observations/form/formValidators';
 import { AreaService } from '../../areas.service';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 declare let $: any;
 
@@ -38,7 +41,7 @@ export class SpeciesSiteObservationFormComponent
     private readonly URL = AppConfig.API_ENDPOINT;
     @Input() species_site_id: number;
     today = new Date();
-    visitForm = new FormGroup({
+    observationForm = new FormGroup({
         date: new FormControl(
             {
                 year: this.today.getFullYear(),
@@ -48,11 +51,17 @@ export class SpeciesSiteObservationFormComponent
             [Validators.required, ngbDateMaxIsToday()]
         ),
         data: new FormControl(''),
+        species_stage_id: new FormControl(0),
+        stages_step_id: new FormControl(0),
     });
+    selectedStage = 0;
+    selectedStep = 0;
+    steps: any[] = [];
     currentStep = 1;
     partialLayout: any[] = [];
     advancedMode = false;
     jsonData: object = {};
+    speciesSite: any;
     formOptions: any = {
         loadExternalAssets: false,
         debug: false,
@@ -71,6 +80,7 @@ export class SpeciesSiteObservationFormComponent
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
+        private programService: GncProgramsService,
         public areaService: AreaService
     ) {}
 
@@ -82,6 +92,15 @@ export class SpeciesSiteObservationFormComponent
             this.initForm(data);
         });
     }
+
+    ngAfterViewInit() {
+        this.programService
+            .getSpeciesSiteDetails(this.species_site_id)
+            .subscribe((speciesSites) => {
+                this.speciesSite = speciesSites['features'][0];
+            });
+    }
+
     initForm(json_schema) {
         this.jsonSchema = json_schema;
         this.updatePartialLayout();
@@ -90,7 +109,7 @@ export class SpeciesSiteObservationFormComponent
     }
     loadJsonSchema() {
         return this.http.get(
-            `${this.URL}/areas/${this.species_site_id}/obs/jsonschema`
+            `${this.URL}/areas/species_site/${this.species_site_id}/obs/jsonschema`
         );
     }
     updateFormInput() {
@@ -101,7 +120,6 @@ export class SpeciesSiteObservationFormComponent
             layout: this.partialLayout,
         };
     }
-    ngAfterViewInit() {}
     nextStep() {
         this.currentStep += 1;
         this.updateFormInput();
@@ -130,7 +148,9 @@ export class SpeciesSiteObservationFormComponent
         return this.jsonSchema.steps ? this.jsonSchema.steps.length : 1;
     }
     invalidStep() {
-        return this.currentStep === 1 && this.visitForm.get('date').invalid;
+        return (
+            this.currentStep === 1 && this.observationForm.get('date').invalid
+        );
     }
     yourOnChangesFn(e) {
         this.jsonData[this.currentStep] = e;
@@ -156,8 +176,43 @@ export class SpeciesSiteObservationFormComponent
             }
         }
     }
-    onFormSubmit(): void {
-        console.debug('formValues:', this.visitForm.value);
+
+    onSelectedStageChange(): void {
+        const stages = this.speciesSite.properties.stages.features.filter(
+            (stage) => stage.properties.id_species_stage == this.selectedStage
+        );
+
+        const newSteps =
+            stages.length && Array.isArray(stages[0].properties.steps.features)
+                ? stages[0].properties.steps.features
+                : [];
+
+        this.steps = newSteps;
+    }
+
+    stepIsNotSelected() {
+        return (
+            this.speciesSite.properties.stages.count && this.selectedStep === 0
+        );
+    }
+
+    onFormSubmit(): boolean {
+        console.debug('formValues:', this.observationForm.value);
+
+        if (this.stepIsNotSelected()) {
+            const field = this.selectedStage
+                ? 'stages_step_id'
+                : 'species_stage_id';
+            this.observationForm.get(field).setErrors({
+                notSelected: true,
+            });
+            return false;
+        }
+        if (this.selectedStep === 0) {
+            this.observationForm.get('stages_step_id').setValue(null);
+        }
+
+
         this.postSpeciesSiteObservation().subscribe(
             (data) => {
                 console.debug(data);
@@ -166,6 +221,7 @@ export class SpeciesSiteObservationFormComponent
             () => console.log('done')
             // TODO: queue obs in list
         );
+        return true;
     }
 
     postSpeciesSiteObservation(): Observable<any> {
@@ -174,16 +230,18 @@ export class SpeciesSiteObservationFormComponent
                 Accept: 'application/json',
             }),
         };
-        const visitDate = NgbDate.from(this.visitForm.controls.date.value);
-        this.visitForm.patchValue({
+        const visitDate = NgbDate.from(
+            this.observationForm.controls.date.value
+        );
+        this.observationForm.patchValue({
             data: this.getTotalJsonData(),
             date: new Date(visitDate.year, visitDate.month, visitDate.day)
                 .toISOString()
                 .match(/\d{4}-\d{2}-\d{2}/)[0],
         });
         return this.http.post<any>(
-            `${this.URL}/areas/${this.species_site_id}/visits`,
-            this.visitForm.value,
+            `${this.URL}/areas/species_sites/${this.species_site_id}/observations`,
+            this.observationForm.value,
             httpOptions
         );
     }

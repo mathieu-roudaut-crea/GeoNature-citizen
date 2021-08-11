@@ -17,6 +17,7 @@ import { AreaDetailComponent } from './programs/areas/areas/detail/detail.compon
 import { SpeciesSiteDetailComponent } from './programs/areas/species_sites/detail/detail.component';
 import { SiteDetailComponent } from './programs/sites/detail/detail.component';
 import { ObsDetailComponent } from './programs/observations/detail/detail.component';
+import { SpeciesSiteObsDetailComponent } from './programs/areas/observations/detail/detail.component';
 import { AdminComponent } from './auth/admin/admin.component';
 import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
 
@@ -87,6 +88,10 @@ const appRoutes: Routes = [
     {
         path: 'programs/:program_id/observations/:obs_id',
         component: ObsDetailComponent,
+    },
+    {
+        path: 'programs/:program_id/species-site/observations/:obs_id',
+        component: SpeciesSiteObsDetailComponent,
     },
     { path: '**', component: PageNotFoundComponent },
 ];

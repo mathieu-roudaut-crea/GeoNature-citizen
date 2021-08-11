@@ -19,7 +19,7 @@ export class AreaModalFlowService extends ModalFlowService {
         items.push(
             new FlowItem(OnboardComponent, { ...init_data, service: this })
         );
-        if (!init_data.area_id) {
+        if (!init_data.area_id && !init_data.species_site_id) {
             items.push(
                 new FlowItem(AreaStepComponent, { ...init_data, service: this })
             );
@@ -47,6 +47,7 @@ export class AreaModalFlowService extends ModalFlowService {
 
     addSpeciesSiteObservation(species_site_id) {
         const init_data = { species_site_id: species_site_id };
+        console.log('init_data', init_data);
         this.openFormModal(init_data);
     }
 

@@ -203,6 +203,18 @@ export class GncProgramsService implements OnInit {
             );
     }
 
+    getSpeciesSiteObsDetails(id: number): Observable<FeatureCollection> {
+        return this.http
+            .get<FeatureCollection>(`${this.URL}/areas/observations/${id}`)
+            .pipe(
+                catchError(
+                    this.handleError<FeatureCollection>(
+                        `getAreaProgramObservations id=${id}`
+                    )
+                )
+            );
+    }
+
     getProgramTaxonomyList(program_id: number): Observable<TaxonomyList> {
         return this.getAllPrograms().pipe(
             map((programs) => programs.find((p) => p.id_program == program_id)),

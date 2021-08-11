@@ -33,6 +33,7 @@ import { AboutFixedComponent } from './about/fixed/fixed.component';
 import { HomeCustomComponent } from './home/custom/custom.component';
 
 import { ObsDetailComponent } from './programs/observations/detail/detail.component';
+import { SpeciesSiteObsDetailComponent } from './programs/areas/observations/detail/detail.component';
 import { ObsFormComponent } from './programs/observations/form/form.component';
 import { ObsListComponent } from './programs/observations/list/list.component';
 import {
@@ -146,6 +147,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         SitesMapComponent,
         SiteDetailComponent,
         ObsDetailComponent,
+        SpeciesSiteObsDetailComponent,
         HomeComponent,
         HomeCustomComponent,
         ProgramsComponent,

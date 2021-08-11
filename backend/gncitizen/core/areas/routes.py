@@ -8,24 +8,27 @@ from shapely.geometry import asShape, Point
 from geoalchemy2.shape import from_shape
 from flask_jwt_extended import jwt_required
 
-from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel
+from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, MediaOnSpeciesSiteObservationModel
 from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.jwt import get_id_role_if_exists
+from gncitizen.utils.media import save_upload_files
 from gncitizen.utils.sqlalchemy import get_geojson_feature, json_resp
+from gncitizen.utils.taxonomy import get_specie_from_cd_nom, mkTaxonRepository
 from gncitizen.core.users.models import UserModel
-from gncitizen.core.commons.models import ProgramsModel
+from gncitizen.core.commons.models import ProgramsModel, MediaModel
 
 areas_api = Blueprint("areas", __name__)
 
 
 def format_entity(data, with_geom=True):
-    feature = get_geojson_feature(data.geom)
-    print(data, feature)
-    area_dict = data.as_dict(True)
     if with_geom:
-        for k in area_dict:
-            if k not in ("geom",):
-                feature["properties"][k] = area_dict[k]
+        feature = get_geojson_feature(data.geom)
+    else:
+        feature = {"properties": {}}
+    area_dict = data.as_dict(True)
+    for k in area_dict:
+        if k not in ("geom",):
+            feature["properties"][k] = area_dict[k]
     return feature
 
 
@@ -38,6 +41,94 @@ def prepare_list(data, with_geom=True):
     data = FeatureCollection(features)
     data["count"] = count
     return data
+
+
+"""Used attributes in observation features"""
+obs_keys = (
+    "id_species_site_observation",
+    "observer",
+    "id_program",
+    "obs_txt",
+    "count",
+    "date",
+    "timestamp_create",
+    "json_data",
+)
+
+def generate_observation(id_species_site_observation):
+    """generate observation from observation id
+
+      :param id_species_site_observation: Observation unique id
+      :type id_species_site_observation: int
+
+      :return features: Observations as a Feature dict
+      :rtype features: dict
+    """
+
+    # Crée le dictionnaire de l'observation
+    observation = (
+        db.session.query(
+            SpeciesSiteObservationModel, UserModel.username
+        )
+        .join(SpeciesSiteModel, SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site, full=True)
+        .join(UserModel, SpeciesSiteObservationModel.id_role == UserModel.id_user, full=True)
+        .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
+    ).one()
+
+    photos = (
+        db.session.query(MediaModel, SpeciesSiteObservationModel)
+        .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
+        .join(
+            MediaOnSpeciesSiteObservationModel,
+            MediaOnSpeciesSiteObservationModel.id_data_source == SpeciesSiteObservationModel.id_species_site_observation,
+        )
+        .join(MediaModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
+        .all()
+    )
+
+    result_dict = observation.SpeciesSiteObservationModel.as_dict(True)
+    result_dict["observer"] = {"username": observation.username}
+
+    # Populate "geometry"
+    features = []
+    feature = get_geojson_feature(observation.SpeciesSiteObservationModel.species_site.geom)
+    feature["properties"]["cd_nom"] = observation.SpeciesSiteObservationModel.species_site.cd_nom
+
+    # Populate "properties"
+    for k in result_dict:
+        if k in obs_keys:
+            feature["properties"][k] = result_dict[k]
+
+    feature["properties"]["photos"] = [
+        {
+            "url": "/media/{}".format(p.MediaModel.filename),
+            "date": p.SpeciesSiteObservationModel.as_dict()["date"],
+            "author": p.SpeciesSiteObservationModel.obs_txt,
+        }
+        for p in photos
+    ]
+
+    taxhub_list_id = (
+        ProgramsModel.query.filter_by(
+            id_program=observation.SpeciesSiteObservationModel.species_site.area.id_program
+        )
+        .one()
+        .taxonomy_list
+    )
+    taxon_repository = mkTaxonRepository(taxhub_list_id)
+    try:
+        taxon = next(
+            taxon
+            for taxon in taxon_repository
+            if taxon and taxon["cd_nom"] == feature["properties"]["cd_nom"]
+        )
+        feature["properties"]["taxref"] = taxon["taxref"]
+        feature["properties"]["medias"] = taxon["medias"]
+    except StopIteration:
+        pass
+
+    features.append(feature)
+    return features
 
 
 @areas_api.route("/program/<int:pk>/jsonschema", methods=["GET"])
@@ -71,6 +162,18 @@ def get_species_site_jsonschema(pk):
         return data_dict, 200
     except Exception as e:
         return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/species_site/<int:pk>/obs/jsonschema", methods=["GET"])
+@json_resp
+def get_species_site_obs_jsonschema(pk):
+    try:
+        species_site = SpeciesSiteModel.query.get(pk)
+        data_dict = species_site.area.program.custom_form.json_schema
+        return data_dict, 200
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
 
 
 @areas_api.route("/program/<int:pk>/species_site/jsonschema", methods=["GET"])
@@ -181,7 +284,25 @@ def get_species_site(pk):
                 .all(),
             with_geom=False
         )
+        stages = prepare_list(
+            SpeciesStageModel.query.filter_by(cd_nom=species_site.cd_nom)
+                .order_by(SpeciesStageModel.order.asc())
+                .all(),
+            with_geom=False
+        )
         formatted_species_site["properties"]["observations"] = observations
+
+        for stage in stages.features:
+            steps = prepare_list(
+                StagesStepModel.query.filter_by(id_species_stage=stage['properties']['id_species_stage'])
+                    .order_by(StagesStepModel.order.asc())
+                    .all(),
+                with_geom=False
+            )
+            stage["properties"]["steps"] = steps
+
+        formatted_species_site["properties"]["stages"] = stages
+
         return {"features": [formatted_species_site]}, 200
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -366,3 +487,84 @@ def post_species_site():
     except Exception as e:
         current_app.logger.warning("Error: %s", str(e))
         return {"error_message": str(e)}, 400
+
+
+
+
+@areas_api.route("/species_sites/<int:species_site_id>/observations", methods=["POST"])
+@json_resp
+@jwt_required(optional=True)
+def post_observation(species_site_id):
+    try:
+        request_data = request.get_json()
+
+        new_observation = SpeciesSiteObservationModel(
+            id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"], json_data=request_data["data"]
+        )
+
+        id_role = get_id_role_if_exists()
+        if id_role is not None:
+            new_observation.id_role = id_role
+            role = UserModel.query.get(id_role)
+            new_observation.obs_txt = role.username
+            new_observation.email = role.email
+        else:
+            if new_observation.obs_txt is None or len(new_visit.obs_txt) == 0:
+                new_observation.obs_txt = "Anonyme"
+
+        new_observation.uuid_sinp = uuid.uuid4()
+
+        db.session.add(new_observation)
+        db.session.commit()
+
+        # Réponse en retour
+        result = SpeciesSiteObservationModel.query.get(new_observation.id_species_site_observation)
+        return {"message": "New observation created.", "features": [result.as_dict()]}, 200
+    except Exception as e:
+        current_app.logger.warning("Error: %s", str(e))
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/species_sites/<int:site_id>/observations/<int:visit_id>/photos", methods=["POST"])
+@json_resp
+@jwt_required(optional=True)
+def post_observation_photo(species_site_id, observation_id):
+    try:
+        current_app.logger.debug("UPLOAD FILE? " + str(request.files))
+        if request.files:
+            files = save_upload_files(
+                request.files, "species_site_id", species_site_id, observation_id, MediaOnSpeciesSiteObservationModel,
+            )
+            current_app.logger.debug("UPLOAD FILE {}".format(files))
+            return files, 200
+        return [], 200
+    except Exception as e:
+        current_app.logger.error("Error: %s", str(e))
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/observations/<int:pk>", methods=["GET"])
+@json_resp
+def get_observation(pk):
+    """Get on observation by id
+         ---
+         tags:
+          - observations
+         parameters:
+          - name: pk
+            in: path
+            type: integer
+            required: true
+            example: 1
+         definitions:
+           name:
+             type: string
+         responses:
+           200:
+             description: A list of all observations
+         """
+    try:
+        features = generate_observation(pk)
+        return {"features": features}, 200
+    except Exception as e:
+        return {"message": str(e)}, 400

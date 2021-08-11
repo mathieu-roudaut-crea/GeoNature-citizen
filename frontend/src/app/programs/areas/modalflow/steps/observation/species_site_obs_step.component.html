@@ -33,11 +33,11 @@
     </button>
     <button
         type="submit"
-        [disabled]="!form.visitForm.valid"
+        [disabled]="!form.observationForm.valid"
         class="btn btn-default btn-outline-primary rounded-0"
         (click)="committed()"
         *ngIf="form.isLastStep()"
     >
-        Valider la visite
+        Valider l'observation
     </button>
 </div>

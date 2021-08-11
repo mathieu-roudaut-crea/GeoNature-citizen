@@ -14,10 +14,11 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
     form: SpeciesSiteObservationFormComponent;
 
     committed() {
-        this.form.onFormSubmit();
-        console.debug('committed action > data:', this.data);
-        // this.data.next();
-        this.data.service.close(null);
+        if (this.form.onFormSubmit() !== false) {
+            console.debug('committed action > data:', this.data);
+            // this.data.next();
+            this.data.service.close(null);
+        }
     }
 
     closeModal() {

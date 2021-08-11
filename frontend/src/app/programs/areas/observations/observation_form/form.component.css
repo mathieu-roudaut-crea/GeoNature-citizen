@@ -37,3 +37,20 @@
 .hidden {
     display: none !important;
 }
+
+.stage-select-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-radio-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.step-radio-container label {
+    margin: 0 5px;
+}
