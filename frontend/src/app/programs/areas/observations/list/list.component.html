@@ -1,0 +1,84 @@
+<div id="list">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Date obs</th>
+            <th scope="col">Date saisie</th>
+            <th scope="col">Zone</th>
+            <th scope="col">Observateur</th>
+            <th scope="col">Individu</th>
+            <th scope="col">Etape</th>
+            <th scope="col">Observation</th>
+            <th scope="col">Voir</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let observation of observations">
+            <td>
+                <span [ngbTooltip]="observation.properties.date">
+                    {{ observation.properties.date }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observation.properties.timestamp_create">
+                    {{ observation.properties.timestamp_create }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observation.properties.species_site.area.name">
+                    {{ observation.properties.species_site.area.name }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observation.properties.obs_txt">
+                    {{ observation.properties.obs_txt }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observation.properties.species_site.name">
+                    {{ observation.properties.species_site.name }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observation.properties.stages_step?.name">
+                    {{ observation.properties.stages_step?.name }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observation.properties.json_data.remark">
+                    {{ observation.properties.json_data.remark }}
+                </span>
+            </td>
+            <td>
+                <div
+                    [routerLink]="[
+                        '/programs',
+                        program_id,
+                        'areas-observations',
+                        observation.properties.id_species_site_observation
+                    ]"
+                    class="see-more-link"
+                    ngbTooltip="Voir les détails sur cette observation"
+                >
+                    <img src="../../../../../assets/binoculars.png"/>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between p-2">
+        <ngb-pagination
+            [collectionSize]="collectionSize"
+            [(page)]="page"
+            [pageSize]="pageSize"
+            (pageChange)="refreshList()">
+        </ngb-pagination>
+
+        <select class="custom-select" style="width: auto" [(ngModel)]="pageSize" (ngModelChange)="refreshList()">
+            <option [ngValue]="2">2 observations par page</option>
+            <option [ngValue]="4">4 observations par page</option>
+            <option [ngValue]="6">6 observations par page</option>
+        </select>
+    </div>
+</div>

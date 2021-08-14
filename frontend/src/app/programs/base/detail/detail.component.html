@@ -6,7 +6,7 @@
         <h1 class="mt-3 title">
             {{
             module === 'areas' ? area?.properties.name :
-                module === 'species_site' ?
+                module === 'species_sites' ?
                     speciesSite?.properties.name :
                     module === 'sites'
                         ? site?.properties.name
@@ -224,7 +224,7 @@
                             [routerLink]="[
                                 '/programs',
                                 area.properties.id_program,
-                                'species_site',
+                                'species_sites',
                                 species_site.properties.id_species_site
                             ]"
                         >
@@ -251,8 +251,7 @@
                             [routerLink]="[
                                 '/programs',
                                 speciesSite.properties.area.id_program,
-                                'species-site',
-                                'observations',
+                                'areas-observations',
                                 observation.properties.id_species_site_observation
                             ]"
                         >

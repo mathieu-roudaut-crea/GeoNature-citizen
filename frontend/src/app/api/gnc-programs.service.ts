@@ -81,12 +81,14 @@ export class GncProgramsService implements OnInit {
                 ),
                 map((programs: Program[]) =>
                     programs.map((program) => {
-                        program.html_short_desc = this.domSanitizer.bypassSecurityTrustHtml(
-                            program.short_desc
-                        );
-                        program.html_long_desc = this.domSanitizer.bypassSecurityTrustHtml(
-                            program.long_desc
-                        );
+                        program.html_short_desc =
+                            this.domSanitizer.bypassSecurityTrustHtml(
+                                program.short_desc
+                            );
+                        program.html_long_desc =
+                            this.domSanitizer.bypassSecurityTrustHtml(
+                                program.long_desc
+                            );
                         return program;
                     })
                 ),
@@ -142,7 +144,6 @@ export class GncProgramsService implements OnInit {
             );
     }
 
-
     getProgramAreas(id: number): Observable<FeatureCollection> {
         return this.http
             .get<FeatureCollection>(`${this.URL}/areas/programs/${id}`)
@@ -150,6 +151,34 @@ export class GncProgramsService implements OnInit {
                 catchError(
                     this.handleError<FeatureCollection>(
                         `getProgramAreas id=${id}`
+                    )
+                )
+            );
+    }
+
+    getProgramSpeciesSites(id: number): Observable<FeatureCollection> {
+        return this.http
+            .get<FeatureCollection>(
+                `${this.URL}/areas/program/${id}/species_sites/`
+            )
+            .pipe(
+                catchError(
+                    this.handleError<FeatureCollection>(
+                        `getProgramSpeciesSites id=${id}`
+                    )
+                )
+            );
+    }
+
+    getProgramSpeciesSitesObservations(id: number): Observable<FeatureCollection> {
+        return this.http
+            .get<FeatureCollection>(
+                `${this.URL}/areas/program/${id}/observations/`
+            )
+            .pipe(
+                catchError(
+                    this.handleError<FeatureCollection>(
+                        `getProgramSpeciesSitesObservations id=${id}`
                     )
                 )
             );

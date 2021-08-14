@@ -8,7 +8,8 @@ from shapely.geometry import asShape, Point
 from geoalchemy2.shape import from_shape
 from flask_jwt_extended import jwt_required
 
-from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, MediaOnSpeciesSiteObservationModel
+from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, \
+    MediaOnSpeciesSiteObservationModel
 from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.jwt import get_id_role_if_exists
 from gncitizen.utils.media import save_upload_files
@@ -55,6 +56,7 @@ obs_keys = (
     "json_data",
 )
 
+
 def generate_observation(id_species_site_observation):
     """generate observation from observation id
 
@@ -70,20 +72,21 @@ def generate_observation(id_species_site_observation):
         db.session.query(
             SpeciesSiteObservationModel, UserModel.username
         )
-        .join(SpeciesSiteModel, SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site, full=True)
-        .join(UserModel, SpeciesSiteObservationModel.id_role == UserModel.id_user, full=True)
-        .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
+            .join(SpeciesSiteModel, SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site,
+                  full=True)
+            .join(UserModel, SpeciesSiteObservationModel.id_role == UserModel.id_user, full=True)
+            .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
     ).one()
 
     photos = (
         db.session.query(MediaModel, SpeciesSiteObservationModel)
-        .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
-        .join(
+            .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
+            .join(
             MediaOnSpeciesSiteObservationModel,
             MediaOnSpeciesSiteObservationModel.id_data_source == SpeciesSiteObservationModel.id_species_site_observation,
         )
-        .join(MediaModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
-        .all()
+            .join(MediaModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
+            .all()
     )
 
     result_dict = observation.SpeciesSiteObservationModel.as_dict(True)
@@ -112,8 +115,8 @@ def generate_observation(id_species_site_observation):
         ProgramsModel.query.filter_by(
             id_program=observation.SpeciesSiteObservationModel.species_site.area.id_program
         )
-        .one()
-        .taxonomy_list
+            .one()
+            .taxonomy_list
     )
     taxon_repository = mkTaxonRepository(taxhub_list_id)
     try:
@@ -175,7 +178,6 @@ def get_species_site_obs_jsonschema(pk):
         return {"error_message": str(e)}, 400
 
 
-
 @areas_api.route("/program/<int:pk>/species_site/jsonschema", methods=["GET"])
 @json_resp
 def get_species_site_jsonschema_by_program(pk):
@@ -209,6 +211,69 @@ def get_program_areas(id):
     try:
         areas = AreaModel.query.filter_by(id_program=id).all()
         return prepare_list(areas)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/program/<int:id>/species_sites/", methods=["GET"])
+@json_resp
+def get_species_sites_by_program(id):
+    """Get all program's species sites
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: species site properties
+        geometry:
+          type: geojson
+          description: GeoJson geometry
+    responses:
+      200:
+        description: List of all species sites
+    """
+    try:
+        species_sites = (SpeciesSiteModel.query
+                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                         .filter_by(id_program=id)
+                         .all()
+                         )
+
+        return prepare_list(species_sites)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/program/<int:id>/observations/", methods=["GET"])
+@json_resp
+def get_observations_by_program(id):
+    """Get all program's observations
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: species site properties
+        geometry:
+          type: geojson
+          description: GeoJson geometry
+    responses:
+      200:
+        description: List of all species sites
+    """
+    try:
+        observations = (SpeciesSiteObservationModel.query
+                         .join(SpeciesSiteModel, SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                         .filter_by(id_program=id)
+                         .all()
+                         )
+
+        return prepare_list(observations, with_geom=False)
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -306,7 +371,6 @@ def get_species_site(pk):
         return {"features": [formatted_species_site]}, 200
     except Exception as e:
         return {"error_message": str(e)}, 400
-
 
 
 @areas_api.route("/", methods=["POST"])
@@ -489,8 +553,6 @@ def post_species_site():
         return {"error_message": str(e)}, 400
 
 
-
-
 @areas_api.route("/species_sites/<int:species_site_id>/observations", methods=["POST"])
 @json_resp
 @jwt_required(optional=True)
@@ -499,7 +561,8 @@ def post_observation(species_site_id):
         request_data = request.get_json()
 
         new_observation = SpeciesSiteObservationModel(
-            id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"], json_data=request_data["data"]
+            id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"],
+            json_data=request_data["data"]
         )
 
         id_role = get_id_role_if_exists()

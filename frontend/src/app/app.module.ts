@@ -70,15 +70,22 @@ import { SiteService } from './programs/sites/sites.service';
 import { AreasComponent } from './programs/areas/areas.component';
 import { AreaDetailComponent } from './programs/areas/areas/detail/detail.component';
 import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
+import { SpeciesSitesObsComponent } from './programs/areas/observations/observations.component';
 import { SpeciesSiteDetailComponent } from './programs/areas/species_sites/detail/detail.component';
 import { AreaFormComponent } from './programs/areas/areas/areaform/areaform.component';
 import { SpeciesSiteFormComponent } from './programs/areas/species_sites/species_site_form/species_site_form.component';
 import { SpeciesSiteObservationFormComponent } from './programs/areas/observations/observation_form/form.component';
 import { AreasListComponent } from './programs/areas/areas/list/list.component';
+import { SpeciesSitesListComponent } from './programs/areas/species_sites/list/list.component';
+import { SpeciesSitesObsListComponent } from './programs/areas/observations/list/list.component';
 import {
     AreasMapComponent,
     AreaMarkerPopupComponent,
 } from './programs/areas/areas/map/areamap.component';
+import {
+    SpeciesSitesMapComponent,
+    SpeciesSiteMarkerPopupComponent,
+} from './programs/areas/species_sites/map/species_sites_map.component';
 import { AreaStepComponent } from './programs/areas/modalflow/steps/area/area_step.component';
 import { SpeciesSiteStepComponent } from './programs/areas/modalflow/steps/species_site/species_site_step.component';
 import { SpeciesSiteObsStepComponent } from './programs/areas/modalflow/steps/observation/species_site_obs_step.component';
@@ -133,10 +140,15 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         SitesComponent,
         AreasComponent,
         SpeciesSitesComponent,
+        SpeciesSitesObsComponent,
         AreaFormComponent,
         AreasListComponent,
+        SpeciesSitesListComponent,
+        SpeciesSitesObsListComponent,
         AreasMapComponent,
         AreaMarkerPopupComponent,
+        SpeciesSitesMapComponent,
+        SpeciesSiteMarkerPopupComponent,
         AreaDetailComponent,
         SiteFormComponent,
         SiteVisitFormComponent,
@@ -225,6 +237,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         MarkerPopupComponent,
         SiteMarkerPopupComponent,
         AreaMarkerPopupComponent,
+        SpeciesSiteMarkerPopupComponent,
     ],
     exports: [AdminComponent],
 })

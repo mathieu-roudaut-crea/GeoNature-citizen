@@ -7,6 +7,7 @@ import { ObsComponent } from './programs/observations/obs.component';
 import { SitesComponent } from './programs/sites/sites.component';
 import { AreasComponent } from './programs/areas/areas.component';
 import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
+import { SpeciesSitesObsComponent } from './programs/areas/observations/observations.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { ProgramsComponent } from './programs/programs.component';
 import { ProgramsResolve } from './programs/programs-resolve.service';
@@ -67,11 +68,6 @@ const appRoutes: Routes = [
         component: AreasComponent,
         resolve: { programs: ProgramsResolve },
     },
-    {
-        path: 'programs/:id/species_sites',
-        component: SpeciesSitesComponent,
-        resolve: { programs: ProgramsResolve },
-    },
     { path: 'synthesis/species/:id', component: SpeciesComponent },
     {
         path: 'programs/:program_id/sites/:site_id',
@@ -80,9 +76,19 @@ const appRoutes: Routes = [
     {
         path: 'programs/:program_id/areas/:area_id',
         component: AreaDetailComponent,
+        resolve: { programs: ProgramsResolve },
     },
     {
-        path: 'programs/:program_id/species_site/:species_site_id',
+        path: 'programs/:program_id/species_sites',
+        component: SpeciesSitesComponent,
+        resolve: { programs: ProgramsResolve },
+    },
+    {
+        path: 'programs/:program_id/areas-observations',
+        component: SpeciesSitesObsComponent,
+    },
+    {
+        path: 'programs/:program_id/species_sites/:species_site_id',
         component: SpeciesSiteDetailComponent,
     },
     {
@@ -90,7 +96,7 @@ const appRoutes: Routes = [
         component: ObsDetailComponent,
     },
     {
-        path: 'programs/:program_id/species-site/observations/:obs_id',
+        path: 'programs/:program_id/areas-observations/:obs_id',
         component: SpeciesSiteObsDetailComponent,
     },
     { path: '**', component: PageNotFoundComponent },

@@ -14,20 +14,13 @@ import { BaseMapComponent } from './map.component';
 import { MapService } from '../../../base/map/map.service';
 
 @Component({
-    selector: 'app-areas-map',
-    template: `
-        <div
-            [id]="'areasMap'"
-            class="obsMap"
-            #map
-            data-observation-zoom-statement-warning="Veuillez zoomer pour localiser votre zone."
-        ></div>
-    `,
+    selector: 'app-species-sites-map',
+    template: ` <div [id]="'speciesSitesMap'" class="obsMap" #map></div> `,
     styleUrls: ['../../../base/map/map.component.css'],
     encapsulation: ViewEncapsulation.None,
 })
-export class AreasMapComponent extends BaseMapComponent {
-    feature_id_key = 'id_area';
+export class SpeciesSitesMapComponent extends BaseMapComponent {
+    feature_id_key = 'id_species_site';
 
     constructor(
         @Inject(LOCALE_ID) readonly localeId: string,
@@ -39,7 +32,9 @@ export class AreasMapComponent extends BaseMapComponent {
     }
 
     getPopupComponentFactory(): any {
-        return this.resolver.resolveComponentFactory(AreaMarkerPopupComponent);
+        return this.resolver.resolveComponentFactory(
+            SpeciesSiteMarkerPopupComponent
+        );
     }
 }
 
@@ -70,18 +65,18 @@ export class AreasMapComponent extends BaseMapComponent {
                 [routerLink]="[
                     '/programs',
                     data.id_program,
-                    'areas',
-                    data.id_area
+                    'species_sites',
+                    data.id_species_site
                 ]"
                 style="cursor:pointer"
-                title="Voir les détails de cette zone"
+                title="Voir les détails de cet individu"
             >
                 <img class="icon" src="assets/binoculars.png" />
             </div>
         </ng-container>
     `,
 })
-export class AreaMarkerPopupComponent {
+export class SpeciesSiteMarkerPopupComponent {
     @Input() data;
     public appConfig = AppConfig;
 }

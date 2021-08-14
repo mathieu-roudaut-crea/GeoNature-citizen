@@ -14,8 +14,8 @@ import { GncProgramsService } from '../../../api/gnc-programs.service';
 import { Program } from '../../programs.models';
 import { AreaModalFlowService } from '../modalflow/modalflow.service';
 import { AreaService } from '../areas.service';
-import { AreasMapComponent } from '../../areas/areas/map/areamap.component';
-import { AreasListComponent } from '../areas/list/list.component';
+import { SpeciesSitesMapComponent } from './map/species_sites_map.component';
+import { SpeciesSitesListComponent } from './list/list.component';
 import { AreaModalFlowComponent } from '../modalflow/modalflow.component';
 import { ProgramBaseComponent } from '../../base/program-base.component';
 
@@ -33,14 +33,16 @@ export class SpeciesSitesComponent
     extends ProgramBaseComponent
     implements OnInit
 {
-    title = 'Areas';
-    areas: FeatureCollection;
+    title = 'SpeciesSites';
+    speciesSites: FeatureCollection;
     userDashboard = false;
-    @ViewChild(AreasMapComponent, { static: true }) areasMap: AreasMapComponent;
-    @ViewChild(AreasListComponent, { static: true })
-    areasList: AreasListComponent;
+    @ViewChild(SpeciesSitesMapComponent, { static: true })
+    speciesSitesMap: SpeciesSitesMapComponent;
+    @ViewChild(SpeciesSitesListComponent, { static: true })
+    speciesSitesList: SpeciesSitesListComponent;
     @ViewChildren(AreaModalFlowComponent)
     modalFlow: QueryList<AreaModalFlowComponent>;
+    area_id: number;
 
     constructor(
         private router: Router,
@@ -50,15 +52,17 @@ export class SpeciesSitesComponent
         public areaService: AreaService
     ) {
         super();
-        this.route.params.subscribe(
-            (params) => (this.program_id = params['id'])
-        );
+        this.route.params.subscribe((params) => {
+            this.program_id = params['program_id'];
+        });
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
-        this.areaService.newAreaCreated.subscribe((newAreaFeature) => {
-            this.loadAreas();
-        });
+        this.areaService.newSpeciesSiteCreated.subscribe(
+            (newSpeciesSiteFeature) => {
+                this.loadSpeciesSites();
+            }
+        );
     }
 
     ngOnInit() {
@@ -68,22 +72,18 @@ export class SpeciesSitesComponent
             this.program = this.programs.find(
                 (p) => p.id_program == this.program_id
             );
-            this.loadAreas();
+            this.loadSpeciesSites();
             this.programService
                 .getProgram(this.program_id)
                 .subscribe((program) => (this.programFeature = program));
         });
     }
 
-    loadAreas() {
+    loadSpeciesSites() {
         this.programService
-            .getProgramAreas(this.program_id)
-            .subscribe((areas) => {
-                this.areas = areas;
+            .getProgramSpeciesSites(this.program_id)
+            .subscribe((speciesSites) => {
+                this.speciesSites = speciesSites;
             });
-    }
-
-    addAreaClicked() {
-        this.modalFlow.first.clicked();
     }
 }

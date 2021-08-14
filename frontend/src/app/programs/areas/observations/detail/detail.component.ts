@@ -34,7 +34,7 @@ export class SpeciesSiteObsDetailComponent
             this.obs_id = params['obs_id'];
             this.program_id = params['program_id'];
         });
-        this.module = 'observations';
+        this.module = 'areas-observations';
     }
 
     ngAfterViewInit() {

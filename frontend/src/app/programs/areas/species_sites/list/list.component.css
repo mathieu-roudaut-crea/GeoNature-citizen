@@ -25,6 +25,7 @@
     cursor: pointer;
 }
 
+
 #list .espece img {
     object-fit: cover;
     min-width: 80px !important;
@@ -55,13 +56,13 @@
     width: 100%;
 }
 
-#list .espece .add-species-site {
+#list .espece .add-species-site-observation {
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 0 1em;
 }
-#list .espece .add-species-site > div {
+#list .espece .add-species-site-observation > div {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -71,7 +72,7 @@
     box-shadow: 1px 3px 15px -5px rgba(0, 0, 0, 0.50);
     font-size: 24px;
 }
-#list .espece .add-species-site > div:hover {
+#list .espece .add-species-site-observation > div:hover {
     box-shadow: 1px 3px 15px -5px rgba(0, 0, 0, 1);
     background-color: #eeeeee;
 }
