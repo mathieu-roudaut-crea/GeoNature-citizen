@@ -18,6 +18,8 @@ import { AreasMapComponent } from '../../programs/areas/areas/map/areamap.compon
 import { AreasListComponent } from './areas/list/list.component';
 import { AreaModalFlowComponent } from './modalflow/modalflow.component';
 import { ProgramBaseComponent } from '../base/program-base.component';
+import { AuthService } from '../../auth/auth.service';
+import { ModalsTopbarService } from '../../core/topbar/modalTopbar.service';
 
 @Component({
     selector: 'app-areas',
@@ -44,9 +46,12 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
         private route: ActivatedRoute,
         private programService: GncProgramsService,
         public flowService: AreaModalFlowService,
-        public areaService: AreaService
+        public areaService: AreaService,
+        private modalService: ModalsTopbarService,
+        authService: AuthService
     ) {
-        super();
+        super(authService);
+
         this.route.params.subscribe(
             (params) => (this.program_id = params['id'])
         );
@@ -54,7 +59,7 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
             this.fragment = fragment;
         });
         this.areaService.newAreaCreated.subscribe((newAreaFeature) => {
-            this.loadAreas();
+            this.loadData();
         });
     }
 
@@ -65,14 +70,18 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
             this.program = this.programs.find(
                 (p) => p.id_program == this.program_id
             );
-            this.loadAreas();
+
+            this.verifyProgramPrivacyAndUser();
+
             this.programService
                 .getProgram(this.program_id)
                 .subscribe((program) => (this.programFeature = program));
+
+            this.loadData();
         });
     }
 
-    loadAreas() {
+    loadData() {
         this.programService
             .getProgramAreas(this.program_id)
             .subscribe((areas) => {

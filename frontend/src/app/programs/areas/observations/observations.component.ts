@@ -11,12 +11,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FeatureCollection } from 'geojson';
 
 import { GncProgramsService } from '../../../api/gnc-programs.service';
-import { Program } from '../../programs.models';
 import { AreaModalFlowService } from '../modalflow/modalflow.service';
 import { AreaService } from '../areas.service';
 import { SpeciesSitesObsListComponent } from './list/list.component';
-import { AreaModalFlowComponent } from '../modalflow/modalflow.component';
 import { ProgramBaseComponent } from '../../base/program-base.component';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
     selector: 'app-species-sites-obs',
@@ -43,9 +42,10 @@ export class SpeciesSitesObsComponent
         private route: ActivatedRoute,
         private programService: GncProgramsService,
         public flowService: AreaModalFlowService,
-        public areaService: AreaService
+        public areaService: AreaService,
+        authService: AuthService
     ) {
-        super();
+        super(authService);
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
@@ -54,11 +54,18 @@ export class SpeciesSitesObsComponent
     ngOnInit() {
         this.route.params.subscribe((params) => {
             this.program_id = params['program_id'];
-            this.programService
-                .getProgramSpeciesSitesObservations(this.program_id)
-                .subscribe((observations) => {
-                    this.observations = observations;
-                });
+
+            this.verifyProgramPrivacyAndUser();
+
+            this.loadData();
         });
+    }
+
+    loadData() {
+        this.programService
+            .getProgramSpeciesSitesObservations(this.program_id)
+            .subscribe((observations) => {
+                this.observations = observations;
+            });
     }
 }

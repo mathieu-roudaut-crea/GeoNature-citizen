@@ -1,6 +1,7 @@
 <div class="modal-header">
     <h4 class="modal-title" i18n="login@@login">Se connecter</h4>
     <button
+        *ngIf="canBeClosed"
         type="button"
         class="close rounded-0"
         aria-label="Close"

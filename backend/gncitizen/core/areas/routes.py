@@ -191,6 +191,7 @@ def get_species_site_jsonschema_by_program(pk):
 
 @areas_api.route("/programs/<int:id>", methods=["GET"])
 @json_resp
+@jwt_required(optional=True)
 def get_program_areas(id):
     """Get all areas
     ---
@@ -209,7 +210,17 @@ def get_program_areas(id):
         description: List of all areas
     """
     try:
-        areas = AreaModel.query.filter_by(id_program=id).all()
+        areas_query = AreaModel.query.filter_by(id_program=id)
+
+        program = ProgramsModel.query.get(id)
+        if program.is_private:
+            user_id = get_id_role_if_exists()
+            if user_id:
+                areas_query = areas_query.filter_by(id_role=user_id)
+            else:
+                return prepare_list([])
+
+        areas = areas_query.all()
         return prepare_list(areas)
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -217,6 +228,7 @@ def get_program_areas(id):
 
 @areas_api.route("/program/<int:id>/species_sites/", methods=["GET"])
 @json_resp
+@jwt_required(optional=True)
 def get_species_sites_by_program(id):
     """Get all program's species sites
     ---
@@ -235,11 +247,20 @@ def get_species_sites_by_program(id):
         description: List of all species sites
     """
     try:
-        species_sites = (SpeciesSiteModel.query
-                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                         .filter_by(id_program=id)
-                         .all()
-                         )
+        species_sites_query = (SpeciesSiteModel.query
+                               .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                               .filter_by(id_program=id)
+                               )
+
+        program = ProgramsModel.query.get(id)
+        if program.is_private:
+            user_id = get_id_role_if_exists()
+            if user_id:
+                species_sites_query = species_sites_query.filter(SpeciesSiteModel.id_role == user_id)
+            else:
+                return prepare_list([])
+
+        species_sites = species_sites_query.all()
 
         return prepare_list(species_sites)
     except Exception as e:
@@ -248,6 +269,7 @@ def get_species_sites_by_program(id):
 
 @areas_api.route("/program/<int:id>/observations/", methods=["GET"])
 @json_resp
+@jwt_required(optional=True)
 def get_observations_by_program(id):
     """Get all program's observations
     ---
@@ -266,12 +288,22 @@ def get_observations_by_program(id):
         description: List of all species sites
     """
     try:
-        observations = (SpeciesSiteObservationModel.query
-                         .join(SpeciesSiteModel, SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
-                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                         .filter_by(id_program=id)
-                         .all()
-                         )
+        observations_query = (SpeciesSiteObservationModel.query
+                              .join(SpeciesSiteModel,
+                                    SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                              .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                              .filter_by(id_program=id)
+                              )
+
+        program = ProgramsModel.query.get(id)
+        if program.is_private:
+            user_id = get_id_role_if_exists()
+            if user_id:
+                observations_query = observations_query.filter(SpeciesSiteObservationModel.id_role == user_id)
+            else:
+                return prepare_list([])
+
+        observations = observations_query.all()
 
         return prepare_list(observations, with_geom=False)
     except Exception as e:

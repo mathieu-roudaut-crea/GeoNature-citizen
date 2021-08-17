@@ -174,6 +174,7 @@ class ProgramsModel(TimestampMixinModel, db.Model):
     module = relationship("TModules")
     taxonomy_list = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean(), server_default=expression.true(), default=True)
+    is_private = db.Column(db.Boolean(), server_default=expression.false(), default=False)
     id_geom = db.Column(
         db.Integer, db.ForeignKey(GeometryModel.id_geom), nullable=False
     )

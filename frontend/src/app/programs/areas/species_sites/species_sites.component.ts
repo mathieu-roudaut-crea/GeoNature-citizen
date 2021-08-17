@@ -18,6 +18,7 @@ import { SpeciesSitesMapComponent } from './map/species_sites_map.component';
 import { SpeciesSitesListComponent } from './list/list.component';
 import { AreaModalFlowComponent } from '../modalflow/modalflow.component';
 import { ProgramBaseComponent } from '../../base/program-base.component';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
     selector: 'app-species-sites',
@@ -49,9 +50,11 @@ export class SpeciesSitesComponent
         private route: ActivatedRoute,
         private programService: GncProgramsService,
         public flowService: AreaModalFlowService,
-        public areaService: AreaService
+        public areaService: AreaService,
+        authService: AuthService
     ) {
-        super();
+        super(authService);
+
         this.route.params.subscribe((params) => {
             this.program_id = params['program_id'];
         });
@@ -60,7 +63,7 @@ export class SpeciesSitesComponent
         });
         this.areaService.newSpeciesSiteCreated.subscribe(
             (newSpeciesSiteFeature) => {
-                this.loadSpeciesSites();
+                this.loadData();
             }
         );
     }
@@ -72,14 +75,18 @@ export class SpeciesSitesComponent
             this.program = this.programs.find(
                 (p) => p.id_program == this.program_id
             );
-            this.loadSpeciesSites();
+
+            this.verifyProgramPrivacyAndUser();
+
             this.programService
                 .getProgram(this.program_id)
                 .subscribe((program) => (this.programFeature = program));
+
+            this.loadData();
         });
     }
 
-    loadSpeciesSites() {
+    loadData() {
         this.programService
             .getProgramSpeciesSites(this.program_id)
             .subscribe((speciesSites) => {

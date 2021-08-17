@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subject, throwError } from 'rxjs';
@@ -14,6 +14,8 @@ import { AuthService } from './../auth.service';
     styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
+    @Input() public canBeClosed = true;
+
     AppConfig = AppConfig;
     private _error = new Subject<string>();
     private _success = new Subject<string>();
