@@ -57,7 +57,6 @@ export class SpeciesSiteObservationFormComponent
     selectedStage = 0;
     selectedStep = 0;
     steps: any[] = [];
-    currentStep = 1;
     partialLayout: any[] = [];
     advancedMode = false;
     jsonData: object = {};
@@ -116,44 +115,17 @@ export class SpeciesSiteObservationFormComponent
         this.updatePartialLayout();
         this.formInputObject = {
             schema: this.jsonSchema.schema,
-            data: this.jsonData[this.currentStep],
+            data: this.jsonData,
             layout: this.partialLayout,
         };
     }
-    nextStep() {
-        this.currentStep += 1;
-        this.updateFormInput();
-    }
-    previousStep() {
-        this.currentStep -= 1;
-        this.updateFormInput();
-    }
     updatePartialLayout() {
-        if (this.jsonSchema.steps) {
-            this.partialLayout =
-                this.jsonSchema.steps[this.currentStep - 1].layout;
-        } else {
-            this.partialLayout = this.jsonSchema.layout;
-        }
+        this.partialLayout = this.jsonSchema.layout;
         this.partialLayout[this.partialLayout.length - 1].expanded =
             this.advancedMode;
     }
-    isFirstStep() {
-        return this.currentStep === 1;
-    }
-    isLastStep() {
-        return this.currentStep === this.totalSteps();
-    }
-    totalSteps() {
-        return this.jsonSchema.steps ? this.jsonSchema.steps.length : 1;
-    }
-    invalidStep() {
-        return (
-            this.currentStep === 1 && this.observationForm.get('date').invalid
-        );
-    }
     yourOnChangesFn(e) {
-        this.jsonData[this.currentStep] = e;
+        this.jsonData = e;
     }
     getTotalJsonData() {
         let resp = {};
@@ -196,7 +168,7 @@ export class SpeciesSiteObservationFormComponent
         );
     }
 
-    onFormSubmit(): boolean {
+    onFormSubmit(): Observable<any> {
         console.debug('formValues:', this.observationForm.value);
 
         if (this.stepIsNotSelected()) {
@@ -206,22 +178,14 @@ export class SpeciesSiteObservationFormComponent
             this.observationForm.get(field).setErrors({
                 notSelected: true,
             });
-            return false;
+            return null;
         }
+
         if (this.selectedStep === 0) {
             this.observationForm.get('stages_step_id').setValue(null);
         }
 
-
-        this.postSpeciesSiteObservation().subscribe(
-            (data) => {
-                console.debug(data);
-            },
-            (err) => console.error(err),
-            () => console.log('done')
-            // TODO: queue obs in list
-        );
-        return true;
+        return this.postSpeciesSiteObservation();
     }
 
     postSpeciesSiteObservation(): Observable<any> {

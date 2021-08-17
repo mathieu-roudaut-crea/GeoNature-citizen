@@ -26,6 +26,14 @@
         class="btn btn-default btn-outline-primary rounded-0"
         (click)="committed()"
     >
+        Valider et ajouter un individu
+    </button>
+    <button
+        type="submit"
+        [disabled]="!form.areaForm.valid"
+        class="btn btn-default btn-outline-primary rounded-0"
+        (click)="committedThenClose()"
+    >
         Valider la zone
     </button>
 </div>

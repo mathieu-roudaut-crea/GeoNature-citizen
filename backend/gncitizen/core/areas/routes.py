@@ -582,7 +582,9 @@ def post_observation(species_site_id):
 
         # Réponse en retour
         result = SpeciesSiteObservationModel.query.get(new_observation.id_species_site_observation)
-        return {"message": "New observation created.", "features": [result.as_dict()]}, 200
+        response_dict = result.as_dict()
+        response_dict['program_id'] = result.species_site.area.id_program
+        return {"message": "New observation created.", "features": [response_dict]}, 200
     except Exception as e:
         current_app.logger.warning("Error: %s", str(e))
         return {"error_message": str(e)}, 400

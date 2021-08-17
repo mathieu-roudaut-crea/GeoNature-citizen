@@ -1,14 +1,4 @@
 <div *ngIf="readyToDisplay">
-    <div *ngIf="jsonSchema.steps">
-        <h3>
-            Etape {{ currentStep }}/{{ totalSteps() }} :
-            {{ jsonSchema.steps[currentStep - 1].title }}
-        </h3>
-        <p
-            class="h6"
-            [innerHTML]="jsonSchema.steps[currentStep - 1].description"
-        ></p>
-    </div>
     <form id="observationForm" [formGroup]="observationForm">
         <div *ngIf="speciesSite?.properties?.stages?.count" class="d-flex flex-column align-items-center mb-3">
             <div *ngIf="observationForm.get('species_stage_id').errors?.notSelected" class="alert alert-danger">
@@ -33,7 +23,7 @@
                 </option>
             </select>
         </div>
-        <div class="row" [ngClass]="currentStep === 1 ? '' : 'hidden'">
+        <div class="row">
             <div class="col-md-6">
                 <div class="input-group">
                     <label for="obs-date">Date de l'observation</label>
@@ -68,7 +58,7 @@
                         </div>
                     </div>
                 </div>
-                <div>
+            <div>
                     <div *ngFor="let step of steps" class="step-radio-container">
                         <input
                             formControlName="stages_step_id"

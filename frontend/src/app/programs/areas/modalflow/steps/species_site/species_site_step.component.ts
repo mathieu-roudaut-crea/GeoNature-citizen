@@ -11,30 +11,52 @@ import { AreaService } from '../../../areas.service';
 })
 export class SpeciesSiteStepComponent implements IFlowComponent {
     @Input() data: any;
-    @ViewChild(SpeciesSiteFormComponent, { static: true }) form: SpeciesSiteFormComponent;
+    @ViewChild(SpeciesSiteFormComponent, { static: true })
+    form: SpeciesSiteFormComponent;
+    closeAfterSending = false;
 
     constructor(public areaService: AreaService) {}
 
+    committedThenClose() {
+        this.closeAfterSending = true;
+        this.sendForm();
+    }
+
     committed() {
+        this.closeAfterSending = false;
+        this.sendForm();
+    }
+
+    sendForm() {
         let resp: any;
         resp = this.form.onFormSubmit();
         console.debug('committed action > data:', this.data);
         // Wait for resolution of http promise "resp"
         // to get new created species_site's id and pass it to next step as extra_data
-        let that = this;
-        resp.then(function (result) {
-            if (result.features) {
-                // SpeciesSite created
-                let species_site_id = result.features[0].properties.id_species_site;
-                that.areaService.newSpeciesSiteCreated.emit(result.features[0]);
-                that.data.next({ ...that.data, species_site_id: species_site_id });
-            } else {
-                // SpeciesSite edited
-                that.data.next(that.data);
-                that.areaService.speciesSiteEdited.emit();
-                that.closeModal();
-            }
-        });
+        resp.then(
+            function (result) {
+                if (result.features) {
+                    // SpeciesSite created
+                    const species_site_id =
+                        result.features[0].properties.id_species_site;
+                    this.areaService.newSpeciesSiteCreated.emit(
+                        result.features[0]
+                    );
+                    this.data.next({
+                        ...this.data,
+                        species_site_id: species_site_id,
+                    });
+                    if (this.closeAfterSending) {
+                        this.closeModal();
+                    }
+                } else {
+                    // SpeciesSite edited
+                    this.data.next(this.data);
+                    this.areaService.speciesSiteEdited.emit();
+                    this.closeModal();
+                }
+            }.bind(this)
+        );
     }
 
     closeModal() {
