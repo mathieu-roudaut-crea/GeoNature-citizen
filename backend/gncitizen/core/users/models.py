@@ -187,6 +187,7 @@ class UserGroupsModel(TimestampMixinModel, db.Model):
         nullable=False,
     )
 
+
 class ObserverMixinModel(object):
     @declared_attr
     def id_role(cls):
