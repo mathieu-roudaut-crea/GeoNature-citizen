@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from passlib.hash import pbkdf2_sha256 as sha256
+from passlib.context import CryptContext
 
 from gncitizen.core.commons.models import (
     TModules,
@@ -84,7 +85,8 @@ class UserModel(TimestampMixinModel, db.Model):
 
     @staticmethod
     def verify_hash(password, hash):
-        return sha256.verify(password, hash)
+        pwd_context = CryptContext(default="pbkdf2_sha256", schemes=["django_pbkdf2_sha256", "pbkdf2_sha256"])
+        return pwd_context.verify(password, hash)
 
     @classmethod
     def find_by_username(cls, username):
@@ -102,16 +104,6 @@ class UserModel(TimestampMixinModel, db.Model):
             }
 
         return {"users": list(map(lambda x: to_json(x), UserModel.query.all()))}
-
-    # @classmethod
-    # def delete_all(cls):
-    #     try:
-    #         num_rows_deleted = db.session.query(cls).delete()
-    #         db.session.commit()
-    #         return {'message': '{} row(s) deleted'.format(num_rows_deleted)}
-    #     except:
-    #         return {'message': 'Something went wrong'}
-
 
 class GroupsModel(db.Model):
     """Table des groupes d'utilisateurs"""
