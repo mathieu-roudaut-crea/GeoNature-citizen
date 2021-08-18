@@ -15,13 +15,17 @@
         <tbody>
         <tr *ngFor="let observation of observations">
             <td>
-                <span [ngbTooltip]="observation.properties.date">
-                    {{ observation.properties.date }}
+                <span [ngbTooltip]="observation.properties.date.substring(0, 10) | date: 'longDate'">
+                    {{
+                        observation.properties.date.substring(0, 10) | date: 'longDate'
+                    }}
                 </span>
             </td>
             <td>
-                <span [ngbTooltip]="observation.properties.timestamp_create">
-                    {{ observation.properties.timestamp_create }}
+                <span [ngbTooltip]="observation.properties.timestamp_create.substring(0, 10) | date: 'longDate'">
+                    {{
+                        observation.properties.timestamp_create.substring(0, 10) | date: 'longDate'
+                    }}
                 </span>
             </td>
             <td>

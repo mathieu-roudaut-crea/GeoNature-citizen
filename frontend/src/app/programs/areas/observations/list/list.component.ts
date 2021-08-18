@@ -36,8 +36,8 @@ export class SpeciesSitesObsListComponent implements OnChanges {
 
     ngOnChanges() {
         if (this.observationsCollection) {
-            this.observations = this.observationsCollection['features'];
             this.collectionSize = this.observationsCollection['count'];
+            this.refreshList();
         }
     }
     refreshList() {

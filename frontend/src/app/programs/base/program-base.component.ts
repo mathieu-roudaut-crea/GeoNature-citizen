@@ -41,7 +41,7 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
     }
 
     verifyProgramPrivacyAndUser() {
-        if (!this.program.is_private) {
+        if (!this.program || !this.program.is_private) {
             return;
         }
 

@@ -18,6 +18,9 @@ from gncitizen.utils.taxonomy import get_specie_from_cd_nom, mkTaxonRepository
 from gncitizen.core.users.models import UserModel
 from gncitizen.core.commons.models import ProgramsModel, MediaModel
 
+from utils_flask_sqla_geo.utilsgeometry import circle_from_point
+import shapely
+
 areas_api = Blueprint("areas", __name__)
 
 
@@ -467,8 +470,24 @@ def post_area():
             raise GeonatureApiError(e)
 
         try:
-            shape = asShape(request_data["geometry"])
-            new_area.geom = from_shape(Point(shape), srid=4326)
+            # print("point:" + request_data["geometry"])
+            coordinates = request_data.get("geometry", {}).get("coordinates", [])
+
+            if len(coordinates) == 2:
+                latitude = coordinates[1]
+                longitude = coordinates[0]
+            else:
+                message = "[post_areas] invalid coordinates"
+                current_app.logger.warning(message)
+                raise GeonatureApiError(message)
+
+            p = shapely.geometry.Point(longitude, latitude)
+
+            wkt = circle_from_point(p, radius=500, nb_point=100)
+            new_area.geom = from_shape(wkt, srid=4326)
+
+            # shape = asShape(request_data["geometry"])
+            # new_area.geom = from_shape(Point(shape), srid=4326)
         except Exception as e:
             current_app.logger.debug(e)
             raise GeonatureApiError(e)
@@ -596,6 +615,9 @@ def post_observation(species_site_id):
             id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"],
             json_data=request_data["data"]
         )
+
+        print("-------------------------------------------")
+        print(request_data["data"])
 
         id_role = get_id_role_if_exists()
         if id_role is not None:

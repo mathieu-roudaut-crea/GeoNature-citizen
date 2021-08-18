@@ -246,7 +246,7 @@ export abstract class BaseMapComponent implements OnChanges {
                 programBounds = this.programArea.getBounds();
                 console.debug('programBounds', programBounds);
                 this.observationMap.fitBounds(programBounds);
-                // this.observationMap.setMaxBounds(programBounds);
+                this.observationMap.setMaxBounds(programBounds);
             }
 
             this.newObsMarker = null;
@@ -316,23 +316,18 @@ export abstract class BaseMapComponent implements OnChanges {
 
             const layerOptions = {
                 onEachFeature: (feature, layer) => {
+                    const center = layer.getBounds().getCenter();
                     const popupContent = this.getPopupContent(feature);
-
-                    // if (feature.properties && feature.properties.popupContent) {
-                    //   popupContent += feature.properties.popupContent;
-                    // }
-
                     layer.bindPopup(popupContent);
-                },
-                pointToLayer: (_feature, latlng): L.Circle => {
-                    const marker: L.Circle<any> = L.circle(latlng, {
-                        radius: 500,
-                    });
-                    this.markers.push({
-                        feature: _feature,
-                        marker: marker,
-                    });
-                    return marker;
+
+                    // latLng property allow to cluster polygons
+                    layer.getLatLng = function () {
+                        return center;
+                    };
+                    layer.setLatLng = function () {
+                        return center;
+                    };
+                    layer._latlng = center;
                 },
             };
             this.observationLayer.addLayer(

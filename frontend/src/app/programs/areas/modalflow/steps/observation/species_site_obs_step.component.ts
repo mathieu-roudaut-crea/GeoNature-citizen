@@ -18,21 +18,26 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
     constructor(private router: Router) {}
 
     committedAndShowObs() {
-        console.log('response', this.form.onFormSubmit());
         this.form.onFormSubmit().subscribe(
             function (result) {
-                this.router.navigate([
-                    `/programs/${result.features[0].program_id}/areas-observations`,
-                ]);
+                if (result) {
+                    this.router.navigate([
+                        `/programs/${result.features[0].program_id}/areas-observations`,
+                    ]);
+                }
             }.bind(this)
         );
     }
 
     committed() {
-        if (this.form.onFormSubmit() !== null) {
-            console.debug('committed action > data:', this.data);
-            this.data.service.close(null);
-        }
+        this.form.onFormSubmit().subscribe(
+            function (result) {
+                if (result) {
+                    console.debug('committed action > data:', this.data);
+                    this.data.service.close(null);
+                }
+            }.bind(this)
+        );
     }
 
     closeModal() {

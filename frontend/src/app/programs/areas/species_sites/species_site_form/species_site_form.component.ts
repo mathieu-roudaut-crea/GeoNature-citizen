@@ -34,7 +34,7 @@ import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 // declare let $: any;
 
-const SPECIES_SITE_STYLE = {
+const AREA_STYLE = {
     fillColor: 'transparent',
     weight: 2,
     opacity: 0.8,
@@ -239,36 +239,9 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                 zv.addTo(formMap);
                 zv.setPosition('bottomleft');
 
-                //TODO: use polygon for areas instead of point
-                const coords = this.area.features[0].geometry.coordinates;
-                const lower_latitude =
-                    coords[0] - (0.6 / 6378) * (180 / Math.PI);
-                const lower_longitude =
-                    coords[1] -
-                    ((0.4 / 6378) * (180 / Math.PI)) /
-                        Math.cos((coords[0] * Math.PI) / 180);
-                const higher_latitude =
-                    coords[0] + (0.6 / 6378) * (180 / Math.PI);
-                const higher_longitude =
-                    coords[1] +
-                    ((0.4 / 6378) * (180 / Math.PI)) /
-                        Math.cos((coords[0] * Math.PI) / 180);
-
-                this.area.features[0].geometry = {
-                    coordinates: [
-                        [
-                            [lower_latitude, lower_longitude],
-                            [higher_latitude, lower_longitude],
-                            [higher_latitude, higher_longitude],
-                            [lower_latitude, higher_longitude],
-                            [lower_latitude, lower_longitude],
-                        ],
-                    ],
-                    type: 'Polygon',
-                };
                 const leafletArea = L.geoJSON(this.area, {
                     style: function (_feature) {
-                        return SPECIES_SITE_STYLE;
+                        return AREA_STYLE;
                     },
                 }).addTo(formMap);
 

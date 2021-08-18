@@ -86,6 +86,7 @@ const appRoutes: Routes = [
     {
         path: 'programs/:program_id/areas-observations',
         component: SpeciesSitesObsComponent,
+        resolve: { programs: ProgramsResolve },
     },
     {
         path: 'programs/:program_id/species_sites/:species_site_id',

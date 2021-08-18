@@ -127,13 +127,6 @@ export class SpeciesSiteObservationFormComponent
     yourOnChangesFn(e) {
         this.jsonData = e;
     }
-    getTotalJsonData() {
-        let resp = {};
-        for (const key of Object.keys(this.jsonData)) {
-            resp = { ...resp, ...this.jsonData[key] };
-        }
-        return resp;
-    }
     toogleAdvancedMode() {
         this.advancedMode = !this.advancedMode;
         this.updatePartialLayout();
@@ -178,7 +171,9 @@ export class SpeciesSiteObservationFormComponent
             this.observationForm.get(field).setErrors({
                 notSelected: true,
             });
-            return null;
+            return new Observable((subscriber) => {
+                subscriber.next(null);
+            });
         }
 
         if (this.selectedStep === 0) {
@@ -194,15 +189,37 @@ export class SpeciesSiteObservationFormComponent
                 Accept: 'application/json',
             }),
         };
+
         const visitDate = NgbDate.from(
             this.observationForm.controls.date.value
         );
+
+        console.log(
+            'form date vvalue',
+            this.observationForm.controls.date.value
+        );
+        console.log(visitDate);
+        console.log(
+            new Date(
+                visitDate.year,
+                visitDate.month,
+                visitDate.day
+            ).toISOString()
+        );
+
         this.observationForm.patchValue({
-            data: this.getTotalJsonData(),
-            date: new Date(visitDate.year, visitDate.month, visitDate.day)
+            data: this.jsonData,
+            date: new Date(
+                visitDate.year,
+                visitDate.month - 1,
+                visitDate.day + 1
+            )
                 .toISOString()
                 .match(/\d{4}-\d{2}-\d{2}/)[0],
         });
+
+        console.log('final form value ', this.observationForm.value);
+
         return this.http.post<any>(
             `${this.URL}/areas/species_sites/${this.species_site_id}/observations`,
             this.observationForm.value,

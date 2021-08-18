@@ -16,6 +16,7 @@ import { AreaService } from '../areas.service';
 import { SpeciesSitesObsListComponent } from './list/list.component';
 import { ProgramBaseComponent } from '../../base/program-base.component';
 import { AuthService } from '../../../auth/auth.service';
+import { Program } from '../../programs.models';
 
 @Component({
     selector: 'app-species-sites-obs',
@@ -49,11 +50,18 @@ export class SpeciesSitesObsComponent
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
+        this.route.params.subscribe((params) => {
+            this.program_id = params['program_id'];
+        });
     }
 
     ngOnInit() {
-        this.route.params.subscribe((params) => {
-            this.program_id = params['program_id'];
+        this.route.data.subscribe((data: { programs: Program[] }) => {
+            // TODO: merge observables
+            this.programs = data.programs;
+            this.program = this.programs.find(
+                (p) => p.id_program == this.program_id
+            );
 
             this.verifyProgramPrivacyAndUser();
 

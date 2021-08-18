@@ -56,11 +56,11 @@ export class AreaDetailComponent
                 attribution: 'OpenStreetMap',
             }).addTo(map);
 
-            const coord = this.area.geometry.coordinates;
-            const latLng = L.latLng(coord[1], coord[0]);
-            map.setView(latLng, 13);
+            const leafletArea = L.geoJSON(this.area).addTo(map);
 
-            L.circle(latLng, { radius: 500 }).addTo(map);
+            const maxBounds = leafletArea.getBounds();
+            map.fitBounds(maxBounds);
+            map.setMaxBounds(maxBounds);
 
             // prepare data
             if (this.area.properties) {
