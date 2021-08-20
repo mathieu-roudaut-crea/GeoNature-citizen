@@ -23,6 +23,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import base64
+import requests
 
 
 users_api = Blueprint("users", __name__)
@@ -61,6 +62,26 @@ def registration():
             username:
               type: string
               example: user1
+            organism:
+              type: string
+            function:
+              type: string
+            country:
+              type: string
+            postal_code:
+              type: string
+            want_newsletter:
+              type: boolean
+            is_relay:
+              type: boolean
+            linked_relay_id:
+              type: int
+            made_known_relay_id:
+              type: int
+            category:
+              type: string
+            want_observation_contact:
+              type: boolean
             email:
               type: string
             password:
@@ -72,6 +93,18 @@ def registration():
     """
     try:
         request_datas = dict(request.get_json())
+
+        if "HCAPTCHA_SECRET_KEY" in current_app.config and current_app.config["HCAPTCHA_SECRET_KEY"] is not None:
+            if not 'captchaToken' in request_datas or request_datas['captchaToken'] is None:
+                return ({"message": "Veuillez confirmer que vous êtes un humain."}, 400)
+
+            params = {'response': request_datas['captchaToken'], 'secret': current_app.config["HCAPTCHA_SECRET_KEY"]}
+            response = requests.post('https://hcaptcha.com/siteverify', data=params)
+            captchaResponse = response.json()
+
+            if not captchaResponse['success']:
+                return ({"message": "Captcha non valide."}, 400)
+
         datas_to_save = {}
         for data in request_datas:
             if hasattr(UserModel, data) and data != "password":
@@ -80,8 +113,12 @@ def registration():
         # Hashed password
         datas_to_save["password"] = UserModel.generate_hash(request_datas["password"])
 
+        if current_app.config["CONFIRM_EMAIL"]["USE_CONFIRM_EMAIL"] == False:
+            datas_to_save["active"] = True
+
         # Protection against admin creation from API
         datas_to_save["admin"] = False
+        datas_to_save["is_relay"] = False
         if "extention" in request_datas and "avatar" in request_datas:
             extention = request_datas["extention"]
             imgdata = base64.b64decode(
@@ -140,24 +177,32 @@ def registration():
             handler = open(os.path.join(str(MEDIA_DIR), filename), "wb+")
             handler.write(imgdata)
             handler.close()
+
+
+
+        if current_app.config["CONFIRM_EMAIL"]["USE_CONFIRM_EMAIL"] == False:
+            message = """Félicitations, l'utilisateur "{}" a été créé.""".format(
+                newuser.username
+            ),
+        else:
+            message = """Félicitations, l'utilisateur "{}" a été créé.  \r\n Vous allez recevoir un email pour activer votre compte """.format(
+                newuser.username
+            ),
+            try:
+                confirm_user_email(newuser)
+            except Exception as e:
+                return {"message mail faild": str(e)}, 500
+
         # send confirm mail
-        try:
-            confirm_user_email(newuser)
-        except Exception as e:
-            return {"message mail faild": str(e)}, 500
         return (
             {
-                "message": """Félicitations, l'utilisateur "{}" a été créé.  \r\n Vous allez recevoir un email
-                pour activer votre compte """.format(
-                    newuser.username
-                ),
+                "message": message,
                 "username": newuser.username,
                 "access_token": access_token,
                 "refresh_token": refresh_token,
             },
             200,
         )
-
     except Exception as e:
         current_app.logger.critical("grab all: %s", str(e))
         return {"message": str(e)}, 500
@@ -306,9 +351,23 @@ def get_allusers():
       200:
         description: list all users
     """
-    # allusers = UserModel.return_all()
-    allusers = UserModel.return_all()
-    return allusers, 200
+    return UserModel.return_all(), 200
+
+@users_api.route("/relays", methods=["GET"])
+@json_resp
+def get_relays():
+    """list all relays
+    ---
+    tags:
+      - Relays
+    summary: List all relays
+    produces:
+      - application/json
+    responses:
+      200:
+        description: list all relays
+    """
+    return UserModel.return_relays(), 200
 
 
 @users_api.route("/user/info", methods=["GET", "PATCH"])
