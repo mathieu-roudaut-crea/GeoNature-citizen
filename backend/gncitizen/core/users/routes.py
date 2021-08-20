@@ -169,8 +169,8 @@ def registration():
             else:
                 raise GeonatureApiError(e)
 
-        access_token = create_access_token(identity=newuser.username)
-        refresh_token = create_refresh_token(identity=newuser.username)
+        access_token = create_access_token(identity=newuser.email)
+        refresh_token = create_refresh_token(identity=newuser.email)
 
         # save user avatar
         if "extention" in request_datas and "avatar" in request_datas:
@@ -193,16 +193,19 @@ def registration():
             except Exception as e:
                 return {"message mail faild": str(e)}, 500
 
+        response = {
+            "message": message,
+            "username": newuser.username,
+            "active": newuser.active,
+            "userAvatar": newuser.avatar,
+        }
+
+        if newuser.active:
+            response["access_token"] = access_token
+            response["refresh_token"] = refresh_token
+
         # send confirm mail
-        return (
-            {
-                "message": message,
-                "username": newuser.username,
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-            },
-            200,
-        )
+        return response, 200
     except Exception as e:
         current_app.logger.critical("grab all: %s", str(e))
         return {"message": str(e)}, 500

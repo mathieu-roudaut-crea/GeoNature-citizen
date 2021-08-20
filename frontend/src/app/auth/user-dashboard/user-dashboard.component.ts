@@ -15,6 +15,7 @@ import { CustomFormValidator } from './customFormValidator';
 import { ModalFlowService } from '../../programs/observations/modalflow/modalflow.service';
 import { AreaService } from '../../programs/areas/areas.service';
 import { LoginComponent } from '../login/login.component';
+import { ModalsTopbarService } from '../../core/topbar/modalTopbar.service';
 
 @Component({
     selector: 'app-user-dashboard',
@@ -58,7 +59,7 @@ export class UserDashboardComponent implements OnInit {
         private auth: AuthService,
         private userService: UserService,
         private router: Router,
-        private modalService: NgbModal,
+        private modalService: ModalsTopbarService,
         private flowService: ModalFlowService,
         private formBuilder: FormBuilder,
         public siteService: SiteService,
@@ -71,54 +72,55 @@ export class UserDashboardComponent implements OnInit {
 
     verifyUser() {
         const access_token = localStorage.getItem('access_token');
-        if (access_token) {
-            this.auth
-                .ensureAuthorized()
-                .pipe(
-                    tap((user) => {
-                        if (
-                            user &&
-                            user['features'] &&
-                            user['features']['id_role']
-                        ) {
-                            this.isLoggedIn = true;
-                            this.username = user['features']['username'];
-                            this.stats = user['features']['stats'];
-                            this.role_id = user['features']['id_role'];
-                            this.admin = user['features']['admin'];
-                            this.userService.role_id = this.role_id;
-                            if (user['features']['avatar'])
-                                this.userAvatar =
-                                    this.appConfig.API_ENDPOINT +
-                                    '/media/' +
-                                    user['features']['avatar'];
-                            // FIXME: source backend conf
-                            this.getData();
-                            this.flowService
-                                .getModalCloseSatus()
-                                .subscribe((status) => {
-                                    if (status === 'updateObs') this.getData();
-                                });
-                            this.siteService.siteEdited.subscribe(() => {
-                                this.mysites = null;
-                                this.getData();
-                            });
-                        }
-                    }),
-                    catchError((err) => {
-                        this.openLoginModal();
-                        return throwError(err);
-                    })
-                )
-                .subscribe((user) => {
-                    this.currentUser = user;
-                });
-            this.siteService.deleteSite.subscribe(($event) => {
-                this.openSiteDeleteModal(this.siteDeleteModal, $event);
-            });
-        } else {
+        if (!access_token) {
             this.openLoginModal();
+            return;
         }
+        this.auth
+            .ensureAuthorized()
+            .pipe(
+                tap((user) => {
+                    if (
+                        user &&
+                        user['features'] &&
+                        user['features']['id_role']
+                    ) {
+                        this.isLoggedIn = true;
+                        this.username = user['features']['username'];
+                        this.stats = user['features']['stats'];
+                        this.role_id = user['features']['id_role'];
+                        this.admin = user['features']['admin'];
+                        this.userService.role_id = this.role_id;
+                        if (user['features']['avatar'])
+                            this.userAvatar =
+                                this.appConfig.API_ENDPOINT +
+                                '/media/' +
+                                user['features']['avatar'];
+                        // FIXME: source backend conf
+                        this.getData();
+                        this.flowService
+                            .getModalCloseSatus()
+                            .subscribe((status) => {
+                                if (status === 'updateObs') this.getData();
+                            });
+                        this.siteService.siteEdited.subscribe(() => {
+                            this.mysites = null;
+                            this.getData();
+                        });
+                        this.modalService.close();
+                    }
+                }),
+                catchError((err) => {
+                    this.openLoginModal();
+                    return throwError(err);
+                })
+            )
+            .subscribe((user) => {
+                this.currentUser = user;
+            });
+        this.siteService.deleteSite.subscribe(($event) => {
+            this.openSiteDeleteModal(this.siteDeleteModal, $event);
+        });
     }
 
     openLoginModal() {
@@ -130,7 +132,21 @@ export class UserDashboardComponent implements OnInit {
         });
         loginModalRef.componentInstance.canBeClosed = false;
         loginModalRef.result
-            .then(this.verifyUser.bind(this))
+            .then(
+                function (result) {
+                    if (result.componentInstance) {
+                        result.result.then(
+                            function (result) {
+                                if (result === 'registered') {
+                                    this.verifyUser();
+                                }
+                            }.bind(this)
+                        );
+                        return;
+                    }
+                    this.verifyUser();
+                }.bind(this)
+            )
             .catch(this.verifyUser.bind(this));
     }
 

@@ -14,6 +14,7 @@ import { RegisterComponent } from '../../../../../auth/register/register.compone
 import { LoginComponent } from '../../../../../auth/login/login.component';
 import { AppConfig } from '../../../../../../conf/app.config';
 import { AuthService } from '../../../../../auth/auth.service';
+import { ModalsTopbarService } from '../../../../../core/topbar/modalTopbar.service';
 
 @Component({
     templateUrl: './onboard.component.html',
@@ -31,7 +32,7 @@ export class OnboardComponent implements IFlowComponent, OnInit {
     @ViewChild('LoginComponent', { static: true }) LoginComponent: ElementRef;
 
     constructor(
-        private modalService: NgbModal,
+        private modalService: ModalsTopbarService,
         private authService: AuthService,
         private route: ActivatedRoute
     ) {}
@@ -62,7 +63,7 @@ export class OnboardComponent implements IFlowComponent, OnInit {
         });
         this.RegistrationModalRef.result.then((_) => {
             this.authService.isLoggedIn().subscribe(
-                (value) => value!!,
+                (value) => value!,
                 (reason) => {
                     console.debug('registration dismissed:', reason);
                 }

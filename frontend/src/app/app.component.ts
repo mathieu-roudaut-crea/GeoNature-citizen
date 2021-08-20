@@ -8,8 +8,9 @@ import {
 import { Title, Meta } from '@angular/platform-browser';
 
 import { AppConfig } from '../conf/app.config';
-import { Router, NavigationStart } from '@angular/router';
+import { Router, NavigationStart, ActivatedRoute } from '@angular/router';
 import { ModalsTopbarService } from './core/topbar/modalTopbar.service';
+import { AuthService } from './auth/auth.service';
 
 @Component({
     selector: 'app-root',
@@ -27,13 +28,33 @@ export class AppComponent implements OnInit {
         private router: Router,
         private metaTagService: Meta,
         private titleService: Title,
-        private modalService: ModalsTopbarService
+        private modalService: ModalsTopbarService,
+        private authService: AuthService
     ) {
         this.router.events.subscribe((event) => {
             if (event instanceof NavigationStart) {
                 this.modalService.close();
             }
         });
+
+        const username = localStorage.getItem('username');
+        if (username) {
+            window.parent.postMessage(
+                {
+                    username: username,
+                    type: 'loggedIn',
+                },
+                '*'
+            );
+        }
+
+        window.addEventListener('message', receiveMessage.bind(this), false);
+
+        function receiveMessage(event) {
+            if (event.data.type === 'logout') {
+                this.authService.logout();
+            }
+        }
     }
 
     ngOnInit() {

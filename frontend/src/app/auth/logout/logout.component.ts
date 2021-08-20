@@ -18,15 +18,11 @@ export class LogoutComponent {
     onLogout(): void {
         const access_token = localStorage.getItem('access_token');
         if (access_token) {
-            this.auth
-                .logout()
-                .then((logout) => {
-                    localStorage.clear();
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
+            this.auth.logout().catch((err) => {
+                console.log(err);
+            });
             localStorage.clear();
+
             this.router.navigate(['/']);
             this.activeModal.close();
         }
