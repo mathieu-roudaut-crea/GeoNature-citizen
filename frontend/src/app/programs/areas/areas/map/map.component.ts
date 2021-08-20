@@ -11,13 +11,14 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { Feature, FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonObject } from 'geojson';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
 import { MarkerClusterGroup } from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.locatecontrol';
 import 'leaflet-gesture-handling';
 import { MapService } from '../../../base/map/map.service';
+import { Point } from 'geojson';
 
 export const conf = {
     MAP_ID: 'obsMap',
@@ -39,10 +40,10 @@ export const conf = {
         return acc;
     }, {}),
     DEFAULT_BASE_MAP: () => conf.BASE_LAYERS[MAP_CONFIG['DEFAULT_PROVIDER']],
-    ZOOM_CONTROL_POSITION: 'topright',
-    BASE_LAYER_CONTROL_POSITION: 'topright',
+    ZOOM_CONTROL_POSITION: 'topleft',
+    BASE_LAYER_CONTROL_POSITION: 'topleft',
     BASE_LAYER_CONTROL_INIT_COLLAPSED: true,
-    GEOLOCATION_CONTROL_POSITION: 'topright',
+    GEOLOCATION_CONTROL_POSITION: 'topleft',
     SCALE_CONTROL_POSITION: 'bottomleft',
     NEW_OBS_MARKER_ICON: () =>
         L.icon({
@@ -105,7 +106,7 @@ export abstract class BaseMapComponent implements OnChanges {
     newObsMarker: L.Circle;
     markers: {
         feature: Feature;
-        marker: L.Circle<any>;
+        marker: L.Marker<any>;
     }[] = [];
     obsPopup: Feature;
     openPopupAfterClose: boolean;
@@ -113,6 +114,8 @@ export abstract class BaseMapComponent implements OnChanges {
     resolver: ComponentFactoryResolver;
     injector: Injector;
     mapService: MapService;
+    markerToggle = true;
+
     abstract localeId: string;
     abstract feature_id_key: string;
     abstract getPopupComponentFactory(): any;
@@ -190,6 +193,22 @@ export abstract class BaseMapComponent implements OnChanges {
             .addTo(this.observationMap);
 
         // this.observationMap.scrollWheelZoom.disable();
+
+        const MINZOOM = 11;
+        this.observationMap.on('zoomend', (e) => {
+            // Condition to check where the we go above the MINZOOM
+            // to transform the Polygon to Marker
+            console.log('zoom', e.target.getZoom(), this.markerToggle);
+            if (e.target.getZoom() < MINZOOM && !this.markerToggle) {
+                this.markerToggle = true;
+                this.updateGeoJson();
+                // Transforms back the Marker to Polygon
+            } else if (e.target.getZoom() >= MINZOOM && this.markerToggle) {
+                this.markerToggle = false;
+                this.updateGeoJson();
+            }
+        });
+
         this.observationMap.on('popupclose', (_e) => {
             if (this.openPopupAfterClose && this.obsPopup) {
                 this.showPopup(this.obsPopup);
@@ -229,6 +248,69 @@ export abstract class BaseMapComponent implements OnChanges {
         });
 
         // if (!this.program) this.loadProgramArea();
+    }
+
+    updateGeoJson() {
+        console.log('updateGeoJson', this.features);
+
+        if (this.observationLayer) {
+            this.observationLayer.eachLayer((layer) => {
+                this.observationLayer.removeLayer(layer);
+            });
+            this.observationMap.removeLayer(this.observationLayer);
+        }
+
+        const layerOptions = {
+            onEachFeature: (feature, layer) => {
+                if (feature.geometry.type === 'Polygon') {
+                    const center = layer.getBounds().getCenter();
+
+                    // latLng property allow to cluster polygons
+                    layer.getLatLng = function () {
+                        return center;
+                    };
+                    layer.setLatLng = function () {
+                        return center;
+                    };
+                    layer._latlng = center;
+
+                    this.markers.push({
+                        feature: feature,
+                        marker: layer,
+                    });
+                }
+                const popupContent = this.getPopupContent(feature);
+                layer.bindPopup(popupContent);
+            },
+            pointToLayer: (_feature, latlng): L.Marker => {
+                const marker: L.Marker<any> = L.marker(latlng, {
+                    icon: conf.OBS_MARKER_ICON(),
+                });
+                this.markers.push({
+                    feature: _feature,
+                    marker: marker,
+                });
+                return marker;
+            },
+        };
+
+        const data = JSON.parse(JSON.stringify(this.features));
+        if (this.markerToggle) {
+            data.features = data.features.map((feature) => {
+                if (feature.geometry.type === 'Polygon') {
+                    feature.geometry = <Point>{
+                        type: 'Point',
+                        properties: feature.properties,
+                        coordinates: feature.geometry.coordinates[0][0],
+                    };
+                }
+                return feature;
+            });
+            console.log('data', data);
+        }
+
+        this.observationLayer.addLayer(L.geoJSON(data, layerOptions));
+        this.observationMap.addLayer(this.observationLayer);
     }
 
     loadProgramArea(canSubmit = true): void {
@@ -314,26 +396,7 @@ export abstract class BaseMapComponent implements OnChanges {
             this.observationLayer = this.options.OBSERVATION_LAYER();
             this.markers = [];
 
-            const layerOptions = {
-                onEachFeature: (feature, layer) => {
-                    const center = layer.getBounds().getCenter();
-                    const popupContent = this.getPopupContent(feature);
-                    layer.bindPopup(popupContent);
-
-                    // latLng property allow to cluster polygons
-                    layer.getLatLng = function () {
-                        return center;
-                    };
-                    layer.setLatLng = function () {
-                        return center;
-                    };
-                    layer._latlng = center;
-                },
-            };
-            this.observationLayer.addLayer(
-                L.geoJSON(this.features, layerOptions)
-            );
-            this.observationMap.addLayer(this.observationLayer);
+            this.updateGeoJson();
 
             this.observationLayer.on('animationend', (_e) => {
                 if (this.obsPopup) {
@@ -341,6 +404,15 @@ export abstract class BaseMapComponent implements OnChanges {
                     this.observationMap.closePopup();
                 }
             });
+
+            if (!this.program) {
+                const obsLayer = L.geoJSON(this.features);
+                console.debug('obsLayerBounds', obsLayer.getBounds());
+                this.observationMap.fitBounds(obsLayer.getBounds());
+                this.observationMap.setZoom(
+                    Math.min(this.observationMap.getZoom(), 17)
+                );
+            }
         }
     }
 

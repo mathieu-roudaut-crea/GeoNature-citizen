@@ -39,10 +39,10 @@ export const conf = {
         return acc;
     }, {}),
     DEFAULT_BASE_MAP: () => conf.BASE_LAYERS[MAP_CONFIG['DEFAULT_PROVIDER']],
-    ZOOM_CONTROL_POSITION: 'topright',
-    BASE_LAYER_CONTROL_POSITION: 'topright',
+    ZOOM_CONTROL_POSITION: 'topleft',
+    BASE_LAYER_CONTROL_POSITION: 'topleft',
     BASE_LAYER_CONTROL_INIT_COLLAPSED: true,
-    GEOLOCATION_CONTROL_POSITION: 'topright',
+    GEOLOCATION_CONTROL_POSITION: 'topleft',
     SCALE_CONTROL_POSITION: 'bottomleft',
     NEW_OBS_MARKER_ICON: () =>
         L.icon({
@@ -309,6 +309,15 @@ export abstract class BaseMapComponent implements OnChanges {
                     this.observationMap.closePopup();
                 }
             });
+
+            if (!this.program) {
+                const obsLayer = L.geoJSON(this.features);
+                console.debug('obsLayerBounds', obsLayer.getBounds());
+                this.observationMap.fitBounds(obsLayer.getBounds());
+                this.observationMap.setZoom(
+                    Math.min(this.observationMap.getZoom(), 17)
+                ); // limit zoom (eg single feature)
+            }
         }
     }
 
