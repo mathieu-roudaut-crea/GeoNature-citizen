@@ -37,7 +37,6 @@ const appRoutes: Routes = [
     {
         path: 'mydashboard',
         component: UserDashboardComponent,
-        canActivate: [AuthGuard],
     },
     {
         path: 'api/admin',

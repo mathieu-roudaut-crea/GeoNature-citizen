@@ -4,7 +4,7 @@ import {
     ViewEncapsulation,
     ViewChild,
     ViewChildren,
-    QueryList,
+    QueryList, Input,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -35,8 +35,8 @@ export class SpeciesSitesComponent
     implements OnInit
 {
     title = 'SpeciesSites';
-    speciesSites: FeatureCollection;
-    userDashboard = false;
+    @Input('speciesSites') speciesSites: FeatureCollection;
+    @Input('userDashboard') userDashboard = false;
     @ViewChild(SpeciesSitesMapComponent, { static: true })
     speciesSitesMap: SpeciesSitesMapComponent;
     @ViewChild(SpeciesSitesListComponent, { static: true })
@@ -70,7 +70,10 @@ export class SpeciesSitesComponent
 
     ngOnInit() {
         this.route.data.subscribe((data: { programs: Program[] }) => {
-            // TODO: merge observables
+            if (this.userDashboard) {
+                return;
+            }
+
             this.programs = data.programs;
             this.program = this.programs.find(
                 (p) => p.id_program == this.program_id

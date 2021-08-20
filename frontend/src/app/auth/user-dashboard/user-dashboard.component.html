@@ -18,7 +18,7 @@
                             Mes observations
                             <strong class="badge badge-pill badge-info">{{
                                 stats?.platform_attendance
-                            }}</strong>
+                                }}</strong>
                         </button>
                         <button
                             *ngIf="mysites?.features.length > 0"
@@ -31,7 +31,20 @@
                             Mes sites
                             <strong class="badge badge-pill badge-info">{{
                                 mysites?.features.length
-                            }}</strong>
+                                }}</strong>
+                        </button>
+                        <button
+                            *ngIf="myAreas?.features.length > 0"
+                            (click)="tab = 'areas'"
+                            [class]="
+                                'btn ml-1 ' +
+                                (tab === 'areas' ? 'btn-primary' : 'btn-dark')
+                            "
+                        >
+                            Mes zones
+                            <strong class="badge badge-pill badge-info">{{
+                                myAreas?.features.length
+                                }}</strong>
                         </button>
                     </span>
                     <div class="avatar-main-wrapper">
@@ -109,14 +122,36 @@
                     </div>
                 </div>
             </div>
-            <user-sites [mysites]="mysites" *ngIf="mysites && tab === 'sites'">
-            </user-sites>
-            <user-observations
-                [myobs]="myobs"
-                *ngIf="observations && tab === 'observations'"
-                (deleteObs)="openDeleteModal(deleteModal, $event)"
-            >
-            </user-observations>
+            <div>
+                <user-sites [mysites]="mysites" *ngIf="mysites && tab === 'sites'">
+                </user-sites>
+
+                <div *ngIf="myAreas && tab === 'areas'">
+                    <div class="row areas-tabs">
+                        <div (click)="selectedAreasTab='areas'"  [ngClass]="selectedAreasTab === 'areas' ? 'selected' : ''">
+                            Mes zones d'observation
+                        </div>
+                        <div (click)="selectedAreasTab='species_sites'"  [ngClass]="selectedAreasTab === 'species_sites' ? 'selected' : ''">
+                            Mes individus
+                        </div>
+                        <div (click)="selectedAreasTab='observations'"  [ngClass]="selectedAreasTab === 'observations' ? 'selected' : ''">
+                            Mes observations
+                        </div>
+                    </div>
+                    <app-areas *ngIf="selectedAreasTab === 'areas'" [areas]="myAreas" [userDashboard]="true">
+                    </app-areas>
+                    <app-species-sites *ngIf="selectedAreasTab === 'species_sites'" [speciesSites]="mySpeciesSites" [userDashboard]="true">
+                    </app-species-sites>
+                    <app-species-sites-obs *ngIf="selectedAreasTab === 'observations'" [observations]="mySpeciesSitesObs" [userDashboard]="true">
+                    </app-species-sites-obs>
+                </div>
+                <user-observations
+                    [myobs]="myobs"
+                    *ngIf="observations && tab === 'observations'"
+                    (deleteObs)="openDeleteModal(deleteModal, $event)"
+                >
+                </user-observations>
+            </div>
             <!-- <div id="myObs" class="container">
         <h3 class="title" i18n>Mes observations</h3>
         <ngx-datatable *ngIf="observations" class="material" [rows]="rows" [headerHeight]="40" [footerHeight]="40"
@@ -180,9 +215,11 @@
                     (click)="onExportPersonalData()"
                 >
                     <i class="fa fa-download"></i
-                    ><ng-container
+                    >
+                    <ng-container
                         i18n="Export personnal data btn@@exportPersonnalDataBtn"
-                        >Exporter mes données personnelles</ng-container
+                    >Exporter mes données personnelles
+                    </ng-container
                     >
                 </button>
                 <button
@@ -190,9 +227,11 @@
                     (click)="onExportObservations()"
                 >
                     <i class="fa fa-download"></i
-                    ><ng-container
+                    >
+                    <ng-container
                         i18n="Export personnal observations btn@@exportPersonnalObsBtn"
-                        >Exporter mes observations</ng-container
+                    >Exporter mes observations
+                    </ng-container
                     >
                 </button>
                 <button
@@ -200,9 +239,11 @@
                     (click)="onExportSites()"
                 >
                     <i class="fa fa-download"></i
-                    ><ng-container
+                    >
+                    <ng-container
                         i18n="Export personnal sites btn@@exportPersonnalSitesBtn"
-                        >Exporter mes sites</ng-container
+                    >Exporter mes sites
+                    </ng-container
                     >
                 </button>
                 <button
@@ -210,18 +251,13 @@
                     (click)="onDeletePersonalData()"
                 >
                     <i class="fa fa-trash"></i
-                    ><ng-container i18n="Delete Account@@deleteAccount"
-                        >Supprimer mon compte</ng-container
+                    >
+                    <ng-container i18n="Delete Account@@deleteAccount"
+                    >Supprimer mon compte
+                    </ng-container
                     >
                 </button>
             </div>
-            <section class="homeLink">
-                <a [routerLink]="['/']">
-                    <i class="fa fa-arrow-left"></i>
-                    <ng-container i18n="back@@back"></ng-container>Retour au
-                    site
-                </a>
-            </section>
         </div>
     </div>
 </div>
@@ -245,7 +281,7 @@
             *ngIf="errorMessage"
             type="danger"
             (close)="errorMessage = null"
-            >{{ errorMessage }}
+        >{{ errorMessage }}
         </ngb-alert>
         <form
             [formGroup]="userForm"
@@ -277,12 +313,12 @@
                         <label
                             for="username"
                             i18n="your username@@yourUsernameLabel"
-                            >Votre nom d'utilisateur *</label
+                        >Votre nom d'utilisateur *</label
                         >
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"
-                                    ><i class="fa fa-user"></i
+                                ><i class="fa fa-user"></i
                                 ></span>
                             </div>
                             <input
@@ -303,12 +339,12 @@
                         <label
                             for="email"
                             i18n="your email label@@yourEmailInputLabel"
-                            >Votre email *</label
+                        >Votre email *</label
                         >
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"
-                                    ><i class="fa fa-envelope"></i
+                                ><i class="fa fa-envelope"></i
                                 ></span>
                             </div>
                             <input
@@ -331,7 +367,7 @@
                         <label
                             for="name"
                             i18n="your first name@@yourFirstnameInputLabel"
-                            >Votre prénom *</label
+                        >Votre prénom *</label
                         >
                         <input
                             type="text"
@@ -350,7 +386,7 @@
                         <label
                             for="surname"
                             i18n="your surname label@@yourSurnameInputLabel"
-                            >Votre nom *</label
+                        >Votre nom *</label
                         >
                         <input
                             type="text"
@@ -383,7 +419,7 @@
                         <label
                             for="newPassword"
                             i18n="your password label@@yourPasswordLabel"
-                            >Votre nouveau mot de passe</label
+                        >Votre nouveau mot de passe</label
                         >
                         <input
                             type="password"
@@ -406,7 +442,7 @@
                             i18n="
                                 your password confirm
                                 label@@yourConfirmPasswordLabel"
-                            >Confirmez votre nouveau mot de passe</label
+                        >Confirmez votre nouveau mot de passe</label
                         >
                         <input
                             type="password"
@@ -451,7 +487,7 @@
     </div>
     <div class="modal-delete-body">
         Êtes-vous sûr de vouloir supprimer cette observation ?
-        <br />
+        <br/>
         Sa suppression sera définitive
     </div>
     <div class="modal-delete-footer">
@@ -476,7 +512,7 @@
     <div class="modal-delete-body">
         Êtes-vous sûr de vouloir supprimer ce site et toutes les informations
         qui y sont rattachées ?
-        <br />
+        <br/>
         La suppression sera définitive
     </div>
     <div class="modal-delete-footer">

@@ -229,6 +229,97 @@ def get_program_areas(id):
         return {"error_message": str(e)}, 400
 
 
+@areas_api.route("/current_user", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_user_areas():
+    """Get all user's areas
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: area properties
+        geometry:
+          type: geojson
+          description: GeoJson geometry
+    responses:
+      200:
+        description: List of all areas
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        areas = AreaModel.query.filter_by(id_role=user_id).all()
+        return prepare_list(areas)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/species_sites/current_user", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_user_species_sites():
+    """Get all user's species sites
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: species site properties
+        geometry:
+          type: geojson
+          description: GeoJson geometry
+    responses:
+      200:
+        description: List of all species sites
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        species_sites = (SpeciesSiteModel.query
+                         .filter_by(id_role=user_id)
+                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                         .all())
+        return prepare_list(species_sites)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/observations/current_user", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_user_observations():
+    """Get all user's observations
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: observation properties
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        observations = (SpeciesSiteObservationModel.query
+                        .join(SpeciesSiteModel,
+                              SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                        .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                        .filter(SpeciesSiteObservationModel.id_role == user_id)
+                        .all()
+                        )
+
+        return prepare_list(observations, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
 @areas_api.route("/program/<int:id>/species_sites/", methods=["GET"])
 @json_resp
 @jwt_required(optional=True)

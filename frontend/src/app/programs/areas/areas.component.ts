@@ -5,6 +5,7 @@ import {
     ViewChild,
     ViewChildren,
     QueryList,
+    Input,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -33,8 +34,8 @@ import { ModalsTopbarService } from '../../core/topbar/modalTopbar.service';
 })
 export class AreasComponent extends ProgramBaseComponent implements OnInit {
     title = 'Areas';
-    areas: FeatureCollection;
-    userDashboard = false;
+    @Input('areas') areas: FeatureCollection;
+    @Input('userDashboard') userDashboard = false;
     @ViewChild(AreasMapComponent, { static: true }) areasMap: AreasMapComponent;
     @ViewChild(AreasListComponent, { static: true })
     areasList: AreasListComponent;
@@ -65,7 +66,10 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
 
     ngOnInit() {
         this.route.data.subscribe((data: { programs: Program[] }) => {
-            // TODO: merge observables
+            if (this.userDashboard) {
+                return;
+            }
+
             this.programs = data.programs;
             this.program = this.programs.find(
                 (p) => p.id_program == this.program_id

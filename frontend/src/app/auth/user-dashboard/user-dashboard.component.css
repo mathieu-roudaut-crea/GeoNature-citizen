@@ -330,3 +330,22 @@ app-modalflow {
 .observations {
     margin-top: -160px;
 }
+
+.areas-tabs {
+    background-color: white;
+}
+.areas-tabs > div {
+    flex: 1;
+    text-align: center;
+    padding: 15px 8px;
+    text-transform: uppercase;
+    color: #5FB3A7;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 3px solid #e2e2e2;
+    cursor: pointer;
+}
+.areas-tabs > div.selected {
+    border-bottom: 3px solid #5FB3A7;
+    color: #000000;
+}

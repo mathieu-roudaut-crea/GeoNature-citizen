@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError, forkJoin } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, first } from 'rxjs/operators';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AppConfig } from '../../../conf/app.config';
 import { AuthService } from './../auth.service';
@@ -13,6 +13,8 @@ import { Point } from 'leaflet';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomFormValidator } from './customFormValidator';
 import { ModalFlowService } from '../../programs/observations/modalflow/modalflow.service';
+import { AreaService } from '../../programs/areas/areas.service';
+import { LoginComponent } from '../login/login.component';
 
 @Component({
     selector: 'app-user-dashboard',
@@ -27,6 +29,7 @@ export class UserDashboardComponent implements OnInit {
     username = 'not defined';
     role_id: number;
     isLoggedIn = false;
+    admin = false;
     stats: any;
     personalInfo: any = {};
     badges: any;
@@ -36,6 +39,9 @@ export class UserDashboardComponent implements OnInit {
     observations: any;
     myobs: any;
     mysites: any;
+    myAreas: any;
+    mySpeciesSites: any;
+    mySpeciesSitesObs: any;
     rows: any = [];
     obsToExport: any = [];
     userForm: FormGroup;
@@ -46,6 +52,7 @@ export class UserDashboardComponent implements OnInit {
     idObsToDelete: number;
     idSiteToDelete: number;
     tab = 'observations';
+    selectedAreasTab = 'areas';
 
     constructor(
         private auth: AuthService,
@@ -54,10 +61,15 @@ export class UserDashboardComponent implements OnInit {
         private modalService: NgbModal,
         private flowService: ModalFlowService,
         private formBuilder: FormBuilder,
-        public siteService: SiteService
+        public siteService: SiteService,
+        public areaService: AreaService
     ) {}
 
     ngOnInit(): void {
+        this.verifyUser();
+    }
+
+    verifyUser() {
         const access_token = localStorage.getItem('access_token');
         if (access_token) {
             this.auth
@@ -73,6 +85,7 @@ export class UserDashboardComponent implements OnInit {
                             this.username = user['features']['username'];
                             this.stats = user['features']['stats'];
                             this.role_id = user['features']['id_role'];
+                            this.admin = user['features']['admin'];
                             this.userService.role_id = this.role_id;
                             if (user['features']['avatar'])
                                 this.userAvatar =
@@ -92,7 +105,10 @@ export class UserDashboardComponent implements OnInit {
                             });
                         }
                     }),
-                    catchError((err) => throwError(err))
+                    catchError((err) => {
+                        this.openLoginModal();
+                        return throwError(err);
+                    })
                 )
                 .subscribe((user) => {
                     this.currentUser = user;
@@ -100,7 +116,22 @@ export class UserDashboardComponent implements OnInit {
             this.siteService.deleteSite.subscribe(($event) => {
                 this.openSiteDeleteModal(this.siteDeleteModal, $event);
             });
+        } else {
+            this.openLoginModal();
         }
+    }
+
+    openLoginModal() {
+        const loginModalRef = this.modalService.open(LoginComponent, {
+            size: 'lg',
+            centered: true,
+            backdrop: 'static',
+            keyboard: false,
+        });
+        loginModalRef.componentInstance.canBeClosed = false;
+        loginModalRef.result
+            .then(this.verifyUser.bind(this))
+            .catch(this.verifyUser.bind(this));
     }
 
     getData() {
@@ -120,8 +151,16 @@ export class UserDashboardComponent implements OnInit {
         );
         const userSites = this.userService.getSitesByUserId(this.role_id);
 
+        const userAreas = this.userService.getCurrentUserAreas();
+        const userSpeciesSites = this.userService.getCurrentUserSpeciesSites();
+        const userSpeciesSitesObs =
+            this.userService.getCurrentUserSpeciesSitesObs();
+
         data.push(userObservations);
         data.push(userSites);
+        data.push(userAreas);
+        data.push(userSpeciesSites);
+        data.push(userSpeciesSitesObs);
         if (AppConfig['REWARDS']) {
             data.push(badgeCategories);
         }
@@ -129,9 +168,21 @@ export class UserDashboardComponent implements OnInit {
             if (data.length > 1) {
                 this.myobs = data[0];
                 this.mysites = data[1];
+                this.myAreas = data[2];
+
+                if (!this.myobs.count) {
+                    if (this.mysites.count) {
+                        this.tab = 'sites';
+                    } else if (this.myAreas.count) {
+                        this.tab = 'areas';
+                    }
+                }
+
+                this.mySpeciesSites = data[3];
+                this.mySpeciesSitesObs = data[4];
                 if (AppConfig['REWARDS']) {
-                    console.log('data3', data[2]);
-                    this.badges = data[2];
+                    console.log('data5', data[5]);
+                    this.badges = data[5];
                     localStorage.setItem('badges', JSON.stringify(this.badges));
                     console.log('badges', this.badges);
                     if (this.badges.length > 0) {
@@ -166,6 +217,13 @@ export class UserDashboardComponent implements OnInit {
                     site.properties.coords = coords; // for use in user obs component
                     // this.rowData(obs, coords);
                     // this.obsExport(obs);
+                });
+                this.myAreas.features.forEach((area) => {
+                    const coords: Point = new Point(
+                        area.geometry.coordinates[0],
+                        area.geometry.coordinates[1]
+                    );
+                    area.properties.coords = coords;
                 });
             } else {
                 this.observations = data[0].features;
@@ -236,21 +294,9 @@ export class UserDashboardComponent implements OnInit {
     }
 
     onDeletePersonalData() {
-        const access_token = localStorage.getItem('access_token');
-        this.auth
-            .selfDeleteAccount(access_token)
-            .then((data) => {
-                localStorage.clear();
-                const getBackHome = confirm(
-                    data.hasOwnProperty('message')
-                        ? `${data.message}\nRevenir à l'accueil ?`
-                        : data
-                );
-                if (getBackHome) {
-                    this.router.navigate(['/home']);
-                }
-            })
-            .catch((err) => console.log('err', err));
+        window.open(
+            'mailto:crea@montblanc.fr?subject=Suppression de mon compte'
+        );
     }
 
     onExportPersonalData() {

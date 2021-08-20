@@ -53,6 +53,24 @@ export class UserService {
         );
     }
 
+    getCurrentUserAreas() {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/current_user`
+        );
+    }
+
+    getCurrentUserSpeciesSites() {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/species_sites/current_user`
+        );
+    }
+
+    getCurrentUserSpeciesSitesObs() {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/observations/current_user`
+        );
+    }
+
     deleteObsservation(idObs: any) {
         return this.http.delete<Object>(
             `${AppConfig.API_ENDPOINT}/observations/${idObs}`
