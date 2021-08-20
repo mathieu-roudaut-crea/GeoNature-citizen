@@ -8,6 +8,7 @@ import {
     BaseDetailComponent,
     markerIcon,
 } from '../../../base/detail/detail.component';
+import { Location } from '@angular/common';
 
 declare let $: any;
 
@@ -27,6 +28,7 @@ export class SpeciesSiteObsDetailComponent
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
+        private location: Location,
         private programService: GncProgramsService
     ) {
         super();

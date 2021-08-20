@@ -10,6 +10,8 @@
 #back_link {
     padding-top: 1rem;
     color: var(--primary);
+    cursor: pointer;
+    user-select: none;
 }
 
 .btn-primary {

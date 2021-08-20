@@ -1,6 +1,9 @@
 <div class="container">
     <div class="row">
-        <a [routerLink]="['/programs', program_id, module]" id="back_link">< Retour au programme</a>
+        <div *ngIf="location; else backToProgram" (click)="location.back()" id="back_link">< Retour</div>
+        <ng-template #backToProgram>
+            <a [routerLink]="['/programs', program_id, module]" id="back_link">< Retour au programme</a>
+        </ng-template>
     </div>
     <div class="row">
         <h1 class="mt-3 title">

@@ -1,7 +1,17 @@
 import * as L from 'leaflet';
 import { AppConfig } from '../../../../conf/app.config';
+import { Location } from '@angular/common';
+import { AuthService } from '../../../auth/auth.service';
+import { UserService } from '../../../auth/user-dashboard/user.service.service';
+import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ModalFlowService } from '../../observations/modalflow/modalflow.service';
+import { FormBuilder } from '@angular/forms';
+import { SiteService } from '../../sites/sites.service';
+import { AreaService } from '../../areas/areas.service';
 
 declare let $: any;
+declare let window: any;
 
 export const markerIcon = L.icon({
     iconUrl: 'assets/pointer-blue2.png',
