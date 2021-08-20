@@ -15,6 +15,14 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ModalsTopbarService } from './modalTopbar.service';
 
+declare global {
+    interface Window {
+        googleTranslateElementInit: any;
+    }
+}
+window.googleTranslateElementInit = window.googleTranslateElementInit || null;
+declare let google: any;
+
 @Component({
     selector: 'app-topbar',
     templateUrl: './topbar.component.html',
@@ -33,6 +41,7 @@ export class TopbarComponent implements OnInit {
     adminUrl: SafeUrl;
     userAvatar: string;
     logoImage: string;
+    translationLanguage: string;
 
     @Input()
     displayTopbar: boolean;
@@ -65,6 +74,13 @@ export class TopbarComponent implements OnInit {
                 catchError((error) => throwError(error))
             )
             .subscribe();
+
+        this.route.queryParams.subscribe((params) => {
+            if (params['language']) {
+                this.translationLanguage = params['language'];
+                this.loadTranslation();
+            }
+        });
     }
 
     isLoggedIn(): Observable<boolean> {
@@ -173,5 +189,36 @@ export class TopbarComponent implements OnInit {
         })
       );*/
         }
+    }
+
+    loadTranslation() {
+        window.googleTranslateElementInit = function () {
+            new google.translate.TranslateElement(
+                { pageLanguage: 'fr' },
+                'google_translate_element'
+            );
+            setTimeout(
+                function () {
+                    const select = <HTMLInputElement>(
+                        document.getElementsByClassName('goog-te-combo')[0]
+                    );
+                    if (select) {
+                        select.value = this.translationLanguage;
+                        select.addEventListener('click', function () {
+                            select.dispatchEvent(new Event('change'));
+                        });
+                        select.click();
+                    }
+                }.bind(this),
+                100
+            );
+        }.bind(this);
+
+        const node = document.createElement('script');
+        node.type = 'text/javascript';
+        node.async = true;
+        node.src =
+            '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        document.getElementsByTagName('head')[0].appendChild(node);
     }
 }
