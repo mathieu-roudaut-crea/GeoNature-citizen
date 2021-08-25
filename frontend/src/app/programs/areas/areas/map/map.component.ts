@@ -11,14 +11,13 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { Feature, FeatureCollection, GeoJsonObject } from 'geojson';
+import { Feature, FeatureCollection, Point } from 'geojson';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
 import { MarkerClusterGroup } from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.locatecontrol';
 import 'leaflet-gesture-handling';
 import { MapService } from '../../../base/map/map.service';
-import { Point } from 'geojson';
 
 export const conf = {
     MAP_ID: 'obsMap',
@@ -327,7 +326,9 @@ export abstract class BaseMapComponent implements OnChanges {
                 }).addTo(this.observationMap);
                 programBounds = this.programArea.getBounds();
                 console.debug('programBounds', programBounds);
-                this.observationMap.fitBounds(programBounds);
+                if (!this.features) {
+                    this.observationMap.fitBounds(programBounds);
+                }
                 this.observationMap.setMaxBounds(programBounds);
             }
 
@@ -405,14 +406,12 @@ export abstract class BaseMapComponent implements OnChanges {
                 }
             });
 
-            if (!this.program) {
-                const obsLayer = L.geoJSON(this.features);
-                console.debug('obsLayerBounds', obsLayer.getBounds());
-                this.observationMap.fitBounds(obsLayer.getBounds());
-                this.observationMap.setZoom(
-                    Math.min(this.observationMap.getZoom(), 17)
-                );
-            }
+            const obsLayer = L.geoJSON(this.features);
+            console.debug('obsLayerBounds', obsLayer.getBounds());
+            this.observationMap.fitBounds(obsLayer.getBounds());
+            this.observationMap.setZoom(
+                Math.min(this.observationMap.getZoom(), 17)
+            );
         }
     }
 

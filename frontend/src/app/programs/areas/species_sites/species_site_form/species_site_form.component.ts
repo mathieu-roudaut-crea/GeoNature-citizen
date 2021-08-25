@@ -11,8 +11,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 // import { map, tap } from 'rxjs/operators';
 
-import { NgbDate, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { Position, Point, FeatureCollection } from 'geojson';
+import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { Position, Point } from 'geojson';
 import * as L from 'leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 import 'leaflet-fullscreen/dist/Leaflet.fullscreen';

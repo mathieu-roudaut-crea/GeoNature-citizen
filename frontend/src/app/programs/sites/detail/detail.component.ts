@@ -24,6 +24,8 @@ declare let $: any;
 export class SiteDetailComponent
     extends BaseDetailComponent
     implements AfterViewInit {
+    location;
+
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,

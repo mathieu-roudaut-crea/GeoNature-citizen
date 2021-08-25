@@ -243,8 +243,13 @@ export abstract class BaseMapComponent implements OnChanges {
                 }).addTo(this.observationMap);
                 programBounds = this.programArea.getBounds();
                 console.debug('programBounds', programBounds);
-                this.observationMap.fitBounds(programBounds);
-                // this.observationMap.setMaxBounds(programBounds);
+
+                if (!this.features) {
+                    console.log('no features', this.features);
+                    this.observationMap.fitBounds(programBounds);
+                }
+
+                this.observationMap.setMaxBounds(programBounds);
             }
 
             if (canSubmit) {
@@ -270,6 +275,7 @@ export abstract class BaseMapComponent implements OnChanges {
     }
 
     loadFeatures(): void {
+        console.log('load features');
         if (this.features) {
             if (this.observationLayer) {
                 this.observationMap.removeLayer(this.observationLayer);
@@ -310,14 +316,12 @@ export abstract class BaseMapComponent implements OnChanges {
                 }
             });
 
-            if (!this.program) {
-                const obsLayer = L.geoJSON(this.features);
-                console.debug('obsLayerBounds', obsLayer.getBounds());
-                this.observationMap.fitBounds(obsLayer.getBounds());
-                this.observationMap.setZoom(
-                    Math.min(this.observationMap.getZoom(), 17)
-                ); // limit zoom (eg single feature)
-            }
+            const obsLayer = L.geoJSON(this.features);
+            console.debug('obsLayerBounds', obsLayer.getBounds());
+            this.observationMap.fitBounds(obsLayer.getBounds());
+            this.observationMap.setZoom(
+                Math.min(this.observationMap.getZoom(), 17)
+            );
         }
     }
 

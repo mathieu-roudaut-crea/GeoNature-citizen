@@ -28,7 +28,7 @@ export class SpeciesSiteObsDetailComponent
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
-        private location: Location,
+        public location: Location,
         private programService: GncProgramsService
     ) {
         super();

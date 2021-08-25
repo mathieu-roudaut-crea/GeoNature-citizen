@@ -311,7 +311,7 @@ export class UserDashboardComponent implements OnInit {
 
     onDeletePersonalData() {
         window.open(
-            'mailto:crea@montblanc.fr?subject=Suppression de mon compte'
+            'mailto:web@creamontblanc.org?subject=Suppression de mon compte'
         );
     }
 

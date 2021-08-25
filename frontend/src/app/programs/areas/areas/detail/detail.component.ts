@@ -30,7 +30,7 @@ export class AreaDetailComponent
         private http: HttpClient,
         private route: ActivatedRoute,
         private programService: GncProgramsService,
-        private location: Location,
+        public location: Location,
         public flowService: AreaModalFlowService
     ) {
         super();

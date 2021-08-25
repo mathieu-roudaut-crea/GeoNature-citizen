@@ -7,22 +7,22 @@ import {
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { AreasListComponent } from './list.component';
+import { SpeciesSitesListComponent } from './list.component';
 
-describe('AreasListComponent', () => {
-    let component: AreasListComponent;
-    let fixture: ComponentFixture<AreasListComponent>;
+describe('SpeciesSitesListComponent', () => {
+    let component: SpeciesSitesListComponent;
+    let fixture: ComponentFixture<SpeciesSitesListComponent>;
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, RouterTestingModule],
             providers: [NgbModal],
-            declarations: [AreasListComponent],
+            declarations: [SpeciesSitesListComponent],
         }).compileComponents();
     }));
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(AreasListComponent);
+        fixture = TestBed.createComponent(SpeciesSitesListComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

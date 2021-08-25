@@ -24,6 +24,8 @@ export class ObsDetailComponent
     extends BaseDetailComponent
     implements AfterViewInit
 {
+    location;
+
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
