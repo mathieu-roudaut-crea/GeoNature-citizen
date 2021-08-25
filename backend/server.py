@@ -92,10 +92,6 @@ def get_app(config, _app=None, with_external_mods=True, url_prefix="/api"):
 
     with app.app_context():
 
-        create_schemas(db)
-        db.create_all()
-        populate_modules(db)
-
         from gncitizen.core.users.routes import users_api
         from gncitizen.core.commons.routes import commons_api
         from gncitizen.core.observations.routes import obstax_api
@@ -136,6 +132,10 @@ def get_app(config, _app=None, with_external_mods=True, url_prefix="/api"):
                 module.backend.blueprint.blueprint.config = conf
                 app.config[manifest["module_name"]] = conf
 
+
+        create_schemas(db)
+        db.create_all()
+        populate_modules(db)
         # _app = app
 
 
