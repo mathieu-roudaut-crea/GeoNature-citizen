@@ -37,7 +37,7 @@ class AreaModel(TimestampMixinModel, ObserverMixinModel, db.Model):
     )
     program = relationship("ProgramsModel")
     name = db.Column(db.String(250))
-    geom = db.Column(Geometry("POINT", 4326))
+    geom = db.Column(Geometry("POLYGON"))
     municipality = db.Column(db.Integer, db.ForeignKey(LAreas.id_area), nullable=True)
     json_data = db.Column(JSONB, nullable=True)
 
