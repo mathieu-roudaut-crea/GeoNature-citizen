@@ -250,13 +250,9 @@ export abstract class BaseMapComponent implements OnChanges {
     }
 
     updateGeoJson() {
-        console.log('updateGeoJson', this.features);
-
         if (this.observationLayer) {
-            this.observationLayer.eachLayer((layer) => {
-                this.observationLayer.removeLayer(layer);
-            });
             this.observationMap.removeLayer(this.observationLayer);
+            this.observationLayer = this.options.OBSERVATION_LAYER();
         }
 
         const layerOptions = {
@@ -307,7 +303,6 @@ export abstract class BaseMapComponent implements OnChanges {
             });
             console.log('data', data);
         }
-
         this.observationLayer.addLayer(L.geoJSON(data, layerOptions));
         this.observationMap.addLayer(this.observationLayer);
     }
