@@ -11,9 +11,14 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { Feature, FeatureCollection } from 'geojson';
+import {
+    Feature,
+    FeatureCollection,
+    GeoJsonProperties,
+    Geometry,
+} from 'geojson';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
-import { MarkerClusterGroup } from 'leaflet';
+import {LatLngBounds, MarkerClusterGroup} from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.locatecontrol';
 import 'leaflet-gesture-handling';
@@ -92,10 +97,19 @@ export const conf = {
     },
 };
 
+interface GNCFeatureCollection<
+    G extends Geometry | null = Geometry,
+    P = GeoJsonProperties
+> extends FeatureCollection {
+    type: 'FeatureCollection';
+    count: number;
+    features: Array<Feature<G, P>>;
+}
+
 export abstract class BaseMapComponent implements OnChanges {
     @ViewChild('map', { static: true }) map: ElementRef;
-    @Input('features') features: FeatureCollection;
-    @Input('program') program: FeatureCollection;
+    @Input('features') features: GNCFeatureCollection;
+    @Input('program') program: GNCFeatureCollection;
     @Output() onClick: EventEmitter<L.Point> = new EventEmitter();
     options: any;
     observationMap: L.Map;
@@ -261,21 +275,11 @@ export abstract class BaseMapComponent implements OnChanges {
             }
             this.programMaxBounds = programBounds;
         } else {
-            console.debug('this features', this.features);
-            // No program -> user-dashboard -> adapt bounds to observations
-            if (this.features) {
-                const obsLayer = L.geoJSON(this.features);
-                console.debug('obsLayerBounds', obsLayer.getBounds());
-                this.observationMap.fitBounds(obsLayer.getBounds());
-                this.observationMap.setZoom(
-                    Math.min(this.observationMap.getZoom(), 17)
-                ); // limit zoom (eg single feature)
-            }
+            this.loadFeatures();
         }
     }
 
     loadFeatures(): void {
-        console.log('load features');
         if (this.features) {
             if (this.observationLayer) {
                 this.observationMap.removeLayer(this.observationLayer);
@@ -316,12 +320,17 @@ export abstract class BaseMapComponent implements OnChanges {
                 }
             });
 
-            const obsLayer = L.geoJSON(this.features);
-            console.debug('obsLayerBounds', obsLayer.getBounds());
-            this.observationMap.fitBounds(obsLayer.getBounds());
-            this.observationMap.setZoom(
-                Math.min(this.observationMap.getZoom(), 17)
-            );
+            if (this.features.count > 0) {
+                this.observationMap.fitBounds(
+                    this.observationLayer.getBounds()
+                );
+                this.observationMap.setZoom(
+                    Math.min(this.observationMap.getZoom(), 16)
+                );
+            } else {
+                const franceCenter = L.latLng(45.6659, 2.64924);
+                this.observationMap.setView(franceCenter, 6);
+            }
         }
     }
 

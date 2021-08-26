@@ -11,7 +11,14 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { Feature, FeatureCollection, Point } from 'geojson';
+import {
+    Feature,
+    FeatureCollection,
+    GeoJsonObject,
+    GeoJsonProperties,
+    Geometry,
+    Point,
+} from 'geojson';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
 import { MarkerClusterGroup } from 'leaflet';
 import 'leaflet.markercluster';
@@ -92,10 +99,19 @@ export const conf = {
     },
 };
 
+interface GNCFeatureCollection<
+    G extends Geometry | null = Geometry,
+    P = GeoJsonProperties
+> extends FeatureCollection {
+    type: 'FeatureCollection';
+    count: number;
+    features: Array<Feature<G, P>>;
+}
+
 export abstract class BaseMapComponent implements OnChanges {
     @ViewChild('map', { static: true }) map: ElementRef;
-    @Input('features') features: FeatureCollection;
-    @Input('program') program: FeatureCollection;
+    @Input('features') features: GNCFeatureCollection;
+    @Input('program') program: GNCFeatureCollection;
     @Output() onClick: EventEmitter<L.Point> = new EventEmitter();
     options: any;
     observationMap: L.Map;
@@ -117,6 +133,7 @@ export abstract class BaseMapComponent implements OnChanges {
 
     abstract localeId: string;
     abstract feature_id_key: string;
+
     abstract getPopupComponentFactory(): any;
 
     constructor(
@@ -320,20 +337,16 @@ export abstract class BaseMapComponent implements OnChanges {
             if (this.programArea !== undefined) {
                 this.observationMap.removeLayer(this.programArea);
             }
-            let programBounds: L.LatLngBounds;
-            if (this.program) {
-                console.log('this.program', this.program);
-                this.programArea = L.geoJSON(this.program, {
-                    style: (_feature) =>
-                        this.options.PROGRAM_AREA_STYLE(_feature),
-                }).addTo(this.observationMap);
-                programBounds = this.programArea.getBounds();
-                console.debug('programBounds', programBounds);
-                if (!this.features) {
-                    this.observationMap.fitBounds(programBounds);
-                }
-                this.observationMap.setMaxBounds(programBounds);
+            this.programArea = L.geoJSON(this.program, {
+                style: (_feature) => this.options.PROGRAM_AREA_STYLE(_feature),
+            }).addTo(this.observationMap);
+            this.programMaxBounds = this.programArea.getBounds();
+
+            console.debug('programBounds', this.programMaxBounds);
+            if (!this.features) {
+                this.observationMap.fitBounds(this.programMaxBounds);
             }
+            this.observationMap.setMaxBounds(this.programMaxBounds);
 
             this.newObsMarker = null;
             if (canSubmit) {
@@ -366,7 +379,10 @@ export abstract class BaseMapComponent implements OnChanges {
                     // https://stackoverflow.com/questions/31790344/determine-if-a-point-reside-inside-a-leaflet-polygon
                     if (
                         this.program &&
-                        programBounds.contains([e.latlng.lat, e.latlng.lng])
+                        this.programMaxBounds.contains([
+                            e.latlng.lat,
+                            e.latlng.lng,
+                        ])
                     ) {
                         this.newObsMarker = L.circle(e.latlng, {
                             radius: 500,
@@ -377,7 +393,6 @@ export abstract class BaseMapComponent implements OnChanges {
                     this.onClick.emit(coords);
                 });
             }
-            this.programMaxBounds = programBounds;
         } else {
             this.loadFeatures();
         }
@@ -385,19 +400,21 @@ export abstract class BaseMapComponent implements OnChanges {
 
     loadFeatures(): void {
         if (this.features) {
+            if (this.features.count === 1) {
+                this.markerToggle = false;
+            }
+
             this.updateGeoJson();
 
-            setTimeout(
-                function () {
-                    this.observationMap.fitBounds(
-                        this.observationLayer.getBounds()
-                    );
-                    this.observationMap.setZoom(
-                        Math.min(this.observationMap.getZoom(), 17)
-                    );
-                }.bind(this),
-                1000
-            );
+            if (this.features.count > 0) {
+                this.observationMap.fitBounds(this.observationLayer.getBounds());
+                this.observationMap.setZoom(
+                    Math.min(this.observationMap.getZoom(), 15)
+                );
+            } else {
+                const franceCenter = L.latLng(45.6659, 2.64924);
+                this.observationMap.setView(franceCenter, 6);
+            }
         }
     }
 
@@ -439,5 +456,6 @@ export abstract class BaseMapComponent implements OnChanges {
         this.observationMap.off();
         this.observationMap.remove();
     }
+
     canStart(): void {}
 }
