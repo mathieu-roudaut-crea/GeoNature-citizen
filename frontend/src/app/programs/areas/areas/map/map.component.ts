@@ -254,6 +254,13 @@ export abstract class BaseMapComponent implements OnChanges {
             this.observationMap.removeLayer(this.observationLayer);
         }
         this.observationLayer = this.options.OBSERVATION_LAYER();
+        this.observationLayer.on('animationend', (_e) => {
+            if (this.obsPopup) {
+                this.openPopupAfterClose = true;
+                this.observationMap.closePopup();
+            }
+        });
+
         this.markers = [];
 
         const layerOptions = {
@@ -372,16 +379,7 @@ export abstract class BaseMapComponent implements OnChanges {
             }
             this.programMaxBounds = programBounds;
         } else {
-            console.debug('this features', this.features);
-            // No program -> user-dashboard -> adapt bounds to observations
-            if (this.features) {
-                const obsLayer = L.geoJSON(this.features);
-                console.debug('obsLayerBounds', obsLayer.getBounds());
-                this.observationMap.fitBounds(obsLayer.getBounds());
-                this.observationMap.setZoom(
-                    Math.min(this.observationMap.getZoom(), 17)
-                ); // limit zoom (eg single feature)
-            }
+            this.loadFeatures();
         }
     }
 
@@ -389,18 +387,16 @@ export abstract class BaseMapComponent implements OnChanges {
         if (this.features) {
             this.updateGeoJson();
 
-            this.observationLayer.on('animationend', (_e) => {
-                if (this.obsPopup) {
-                    this.openPopupAfterClose = true;
-                    this.observationMap.closePopup();
-                }
-            });
-
-            const obsLayer = L.geoJSON(this.features);
-            console.debug('obsLayerBounds', obsLayer.getBounds());
-            this.observationMap.fitBounds(obsLayer.getBounds());
-            this.observationMap.setZoom(
-                Math.min(this.observationMap.getZoom(), 17)
+            setTimeout(
+                function () {
+                    this.observationMap.fitBounds(
+                        this.observationLayer.getBounds()
+                    );
+                    this.observationMap.setZoom(
+                        Math.min(this.observationMap.getZoom(), 17)
+                    );
+                }.bind(this),
+                1000
             );
         }
     }
