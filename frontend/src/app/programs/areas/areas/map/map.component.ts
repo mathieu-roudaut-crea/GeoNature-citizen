@@ -252,8 +252,9 @@ export abstract class BaseMapComponent implements OnChanges {
     updateGeoJson() {
         if (this.observationLayer) {
             this.observationMap.removeLayer(this.observationLayer);
-            this.observationLayer = this.options.OBSERVATION_LAYER();
         }
+        this.observationLayer = this.options.OBSERVATION_LAYER();
+        this.markers = [];
 
         const layerOptions = {
             onEachFeature: (feature, layer) => {
@@ -386,12 +387,6 @@ export abstract class BaseMapComponent implements OnChanges {
 
     loadFeatures(): void {
         if (this.features) {
-            if (this.observationLayer) {
-                this.observationMap.removeLayer(this.observationLayer);
-            }
-            this.observationLayer = this.options.OBSERVATION_LAYER();
-            this.markers = [];
-
             this.updateGeoJson();
 
             this.observationLayer.on('animationend', (_e) => {
