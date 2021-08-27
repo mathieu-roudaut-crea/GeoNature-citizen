@@ -1,13 +1,6 @@
-import {
-    Component,
-    OnChanges,
-    Input,
-    EventEmitter,
-    Output,
-} from '@angular/core';
+import { Component, OnChanges, Input } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
-import { UserService } from '../../../../auth/user-dashboard/user.service.service';
 import { AppConfig } from '../../../../../conf/app.config';
 
 @Component({

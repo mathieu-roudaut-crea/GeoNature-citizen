@@ -1,28 +1,24 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import {
-    HttpClientTestingModule,
-    HttpTestingController,
-} from '@angular/common/http/testing';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { SpeciesSitesObsListComponent } from './list.component';
+import { ObserversListComponent } from './observers-list.component';
 
-describe('SpeciesSitesObsListComponent', () => {
-    let component: SpeciesSitesObsListComponent;
-    let fixture: ComponentFixture<SpeciesSitesObsListComponent>;
+describe('ObserversListComponent', () => {
+    let component: ObserversListComponent;
+    let fixture: ComponentFixture<ObserversListComponent>;
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule, RouterTestingModule],
             providers: [NgbModal],
-            declarations: [SpeciesSitesObsListComponent],
+            declarations: [ObserversListComponent],
         }).compileComponents();
     }));
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(SpeciesSitesObsListComponent);
+        fixture = TestBed.createComponent(ObserversListComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
