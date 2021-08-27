@@ -7,18 +7,19 @@ import {
 } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
+import { UserService } from '../../../../auth/user-dashboard/user.service.service';
 import { AppConfig } from '../../../../../conf/app.config';
 
 @Component({
-    selector: 'app-species-sites-obs-list',
-    templateUrl: './list.component.html',
-    styleUrls: ['./list.component.css'],
+    selector: 'observers-list',
+    templateUrl: './observers-list.component.html',
+    styleUrls: ['./observers-list.component.css'],
 })
-export class SpeciesSitesObsListComponent implements OnChanges {
-    @Input('observations') observationsCollection: FeatureCollection;
+export class ObserversListComponent implements OnChanges {
+    @Input('observers') observersCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('program_id') program_id: number;
-    observations: Feature[] = [];
+    observers: Feature[] = [];
     taxa: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
     page = 1;
@@ -26,13 +27,14 @@ export class SpeciesSitesObsListComponent implements OnChanges {
     collectionSize = 0;
 
     ngOnChanges() {
-        if (this.observationsCollection) {
-            this.collectionSize = this.observationsCollection['count'];
+        if (this.observersCollection) {
+            this.collectionSize = this.observersCollection['count'];
             this.refreshList();
         }
     }
+
     refreshList() {
-        this.observations = this.observationsCollection['features'].slice(
+        this.observers = this.observersCollection['features'].slice(
             (this.page - 1) * this.pageSize,
             (this.page - 1) * this.pageSize + this.pageSize
         );

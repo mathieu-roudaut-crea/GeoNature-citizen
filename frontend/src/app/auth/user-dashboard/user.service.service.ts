@@ -76,6 +76,30 @@ export class UserService {
         );
     }
 
+    getAdminAreas() {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/admin`
+        );
+    }
+
+    getAdminSpeciesSites() {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/species_sites/admin`
+        );
+    }
+
+    getAdminSpeciesSitesObs() {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/observations/admin`
+        );
+    }
+
+    getAdminObservers() {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/observers/admin`
+        );
+    }
+
     deleteObsservation(idObs: any) {
         return this.http.delete<Object>(
             `${AppConfig.API_ENDPOINT}/observations/${idObs}`

@@ -71,6 +71,8 @@ import { AreasComponent } from './programs/areas/areas.component';
 import { AreaDetailComponent } from './programs/areas/areas/detail/detail.component';
 import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
 import { SpeciesSitesObsComponent } from './programs/areas/observations/observations.component';
+import { ObserversListComponent } from './auth/user-dashboard/admin-observers/list/observers-list.component';
+import { AdminObserversComponent } from './auth/user-dashboard/admin-observers/admin-observers.component';
 import { SpeciesSiteDetailComponent } from './programs/areas/species_sites/detail/detail.component';
 import { AreaFormComponent } from './programs/areas/areas/areaform/areaform.component';
 import { SpeciesSiteFormComponent } from './programs/areas/species_sites/species_site_form/species_site_form.component';
@@ -141,6 +143,8 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         AreasComponent,
         SpeciesSitesComponent,
         SpeciesSitesObsComponent,
+        ObserversListComponent,
+        AdminObserversComponent,
         AreaFormComponent,
         AreasListComponent,
         SpeciesSitesListComponent,

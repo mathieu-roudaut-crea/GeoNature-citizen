@@ -37,12 +37,19 @@ export class UserDashboardComponent implements OnInit {
     main_badges: any = [];
     programs_badges: any = [];
     recognition_badges: any = [];
+
     observations: any;
     myobs: any;
     mysites: any;
     myAreas: any;
     mySpeciesSites: any;
     mySpeciesSitesObs: any;
+
+    adminAreas: any;
+    adminSpeciesSites: any;
+    adminSpeciesSitesObs: any;
+    adminObservers: any;
+
     rows: any = [];
     obsToExport: any = [];
     userForm: FormGroup;
@@ -151,6 +158,8 @@ export class UserDashboardComponent implements OnInit {
     }
 
     getData() {
+        this.getAdminData();
+
         const data = [];
         this.rows = [];
         this.obsToExport = [];
@@ -193,6 +202,8 @@ export class UserDashboardComponent implements OnInit {
                         this.tab = 'areas';
                     }
                 }
+
+                this.tab = 'admin';
 
                 this.mySpeciesSites = data[3];
                 this.mySpeciesSitesObs = data[4];
@@ -252,6 +263,31 @@ export class UserDashboardComponent implements OnInit {
                     this.rowData(obs, coords);
                     this.obsExport(obs);
                 });
+            }
+        });
+    }
+
+    getAdminData() {
+        if (!this.admin) {
+            return;
+        }
+        const adminData = [];
+        const adminAreas = this.userService.getAdminAreas();
+        const adminSpeciesSites = this.userService.getAdminSpeciesSites();
+        const adminSpeciesSitesObs = this.userService.getAdminSpeciesSitesObs();
+        const adminObservers = this.userService.getAdminObservers();
+
+        adminData.push(adminAreas);
+        adminData.push(adminSpeciesSites);
+        adminData.push(adminSpeciesSitesObs);
+        adminData.push(adminObservers);
+
+        forkJoin(adminData).subscribe((data: any) => {
+            if (data.length > 1) {
+                this.adminAreas = data[0];
+                this.adminSpeciesSites = data[1];
+                this.adminSpeciesSitesObs = data[2];
+                this.adminObservers = data[3];
             }
         });
     }

@@ -14,7 +14,6 @@ import {
 import {
     Feature,
     FeatureCollection,
-    GeoJsonObject,
     GeoJsonProperties,
     Geometry,
     Point,
@@ -326,7 +325,6 @@ export abstract class BaseMapComponent implements OnChanges {
                 }
                 return feature;
             });
-            console.log('data', data);
         }
         this.observationLayer.addLayer(L.geoJSON(data, layerOptions));
         this.observationMap.addLayer(this.observationLayer);

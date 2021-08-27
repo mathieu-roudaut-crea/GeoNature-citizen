@@ -1,0 +1,17 @@
+.see-more-link {
+    cursor: pointer;
+}
+.see-more-link img {
+    height: 24px;
+}
+td {
+    max-width: 80px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+td span {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

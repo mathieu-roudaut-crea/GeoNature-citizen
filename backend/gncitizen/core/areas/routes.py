@@ -320,6 +320,137 @@ def get_user_observations():
         return {"error_message": str(e)}, 400
 
 
+@areas_api.route("/admin", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_admin_areas():
+    """Get all users' areas
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: area properties
+        geometry:
+          type: geojson
+          description: GeoJson geometry
+    responses:
+      200:
+        description: List of all areas
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        user = UserModel.query.get(user_id)
+        if user.admin != 1:
+            return prepare_list([])
+
+        areas = AreaModel.query.all()
+        return prepare_list(areas)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/species_sites/admin", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_admin_species_sites():
+    """Get all users' species sites
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: species site properties
+        geometry:
+          type: geojson
+          description: GeoJson geometry
+    responses:
+      200:
+        description: List of all species sites
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        user = UserModel.query.get(user_id)
+        if user.admin != 1:
+            return prepare_list([])
+
+        species_sites = (SpeciesSiteModel.query
+                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                         .all())
+        return prepare_list(species_sites)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/observations/admin", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_admin_observations():
+    """Get all users' observations
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: observation properties
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        user = UserModel.query.get(user_id)
+        if user.admin != 1:
+            return prepare_list([])
+
+        observations = (SpeciesSiteObservationModel.query
+                        .join(SpeciesSiteModel,
+                              SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                        .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                        .all()
+                        )
+
+        return prepare_list(observations, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/observers/admin", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_admin_observers():
+    """Get all users
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: observation properties
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        user = UserModel.query.get(user_id)
+        if user.admin != 1:
+            return prepare_list([])
+
+        observers = (UserModel.query.all())
+
+        return prepare_list(observers, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
 @areas_api.route("/program/<int:id>/species_sites/", methods=["GET"])
 @json_resp
 @jwt_required(optional=True)

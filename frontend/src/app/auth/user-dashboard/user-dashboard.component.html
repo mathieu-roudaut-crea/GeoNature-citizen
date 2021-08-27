@@ -6,45 +6,14 @@
                 <div class="user-infos">
                     <span>
                         <button
-                            *ngIf="stats?.platform_attendance > 0"
-                            (click)="tab = 'observations'"
-                            [class]="
-                                'btn ' +
-                                (tab === 'observations'
-                                    ? 'btn-primary'
-                                    : 'btn-dark')
-                            "
-                        >
-                            Mes observations
-                            <strong class="badge badge-pill badge-info">{{
-                                stats?.platform_attendance
-                                }}</strong>
-                        </button>
-                        <button
-                            *ngIf="mysites?.features.length > 0"
-                            (click)="tab = 'sites'"
+                            *ngIf="admin && adminObservers?.features.length > 0"
+                            (click)="tab = 'admin'"
                             [class]="
                                 'btn ml-1 ' +
-                                (tab === 'sites' ? 'btn-primary' : 'btn-dark')
+                                (tab === 'admin' ? 'btn-primary' : 'btn-dark')
                             "
                         >
-                            Mes sites
-                            <strong class="badge badge-pill badge-info">{{
-                                mysites?.features.length
-                                }}</strong>
-                        </button>
-                        <button
-                            *ngIf="myAreas?.features.length > 0"
-                            (click)="tab = 'areas'"
-                            [class]="
-                                'btn ml-1 ' +
-                                (tab === 'areas' ? 'btn-primary' : 'btn-dark')
-                            "
-                        >
-                            Mes zones
-                            <strong class="badge badge-pill badge-info">{{
-                                myAreas?.features.length
-                                }}</strong>
+                            Administration
                         </button>
                     </span>
                     <div class="avatar-main-wrapper">
@@ -125,6 +94,31 @@
             <div>
                 <user-sites [mysites]="mysites" *ngIf="mysites && tab === 'sites'">
                 </user-sites>
+
+                <div *ngIf="admin && tab === 'admin'">
+                    <div class="row areas-tabs">
+                        <div (click)="selectedAreasTab='observers'"  [ngClass]="selectedAreasTab === 'observers' ? 'selected' : ''">
+                            Mes observateurs
+                        </div>
+                        <div (click)="selectedAreasTab='areas'"  [ngClass]="selectedAreasTab === 'areas' ? 'selected' : ''">
+                            Leurs zones
+                        </div>
+                        <div (click)="selectedAreasTab='species_sites'"  [ngClass]="selectedAreasTab === 'species_sites' ? 'selected' : ''">
+                            Leurs individus
+                        </div>
+                        <div (click)="selectedAreasTab='observations'"  [ngClass]="selectedAreasTab === 'observations' ? 'selected' : ''">
+                            Leurs observations
+                        </div>
+                    </div>
+                    <admin-observers *ngIf="selectedAreasTab === 'observers'" [observers]="adminObservers" [userDashboard]="true">
+                    </admin-observers>
+                    <app-areas *ngIf="selectedAreasTab === 'areas'" [areas]="adminAreas" [userDashboard]="true">
+                    </app-areas>
+                    <app-species-sites *ngIf="selectedAreasTab === 'species_sites'" [speciesSites]="adminSpeciesSites" [userDashboard]="true">
+                    </app-species-sites>
+                    <app-species-sites-obs *ngIf="selectedAreasTab === 'observations'" [observations]="adminSpeciesSitesObs" [userDashboard]="true">
+                    </app-species-sites-obs>
+                </div>
 
                 <div *ngIf="myAreas && tab === 'areas'">
                     <div class="row areas-tabs">
