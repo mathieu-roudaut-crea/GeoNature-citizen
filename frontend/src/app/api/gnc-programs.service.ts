@@ -170,7 +170,9 @@ export class GncProgramsService implements OnInit {
             );
     }
 
-    getProgramSpeciesSitesObservations(id: number): Observable<FeatureCollection> {
+    getProgramSpeciesSitesObservations(
+        id: number
+    ): Observable<FeatureCollection> {
         return this.http
             .get<FeatureCollection>(
                 `${this.URL}/areas/program/${id}/observations/`
@@ -208,9 +210,15 @@ export class GncProgramsService implements OnInit {
             );
     }
 
-    getSpeciesSiteDetails(id: number): Observable<FeatureCollection> {
+    getSpeciesSiteDetails(
+        id: number,
+        withObservations = true,
+        withStages = false
+    ): Observable<FeatureCollection> {
         return this.http
-            .get<FeatureCollection>(`${this.URL}/areas/species_sites/${id}`)
+            .get<FeatureCollection>(
+                `${this.URL}/areas/species_sites/${id}?with_observations=${withObservations}&with_stages=${withStages}`
+            )
             .pipe(
                 catchError(
                     this.handleError<FeatureCollection>(

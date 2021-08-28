@@ -143,6 +143,7 @@ class MediaOnStagesStepsModel(TimestampMixinModel, db.Model):
         db.ForeignKey(MediaModel.id_media, ondelete="CASCADE"),
         nullable=False,
     )
+    media = relationship("MediaModel")
 
 
 @serializable

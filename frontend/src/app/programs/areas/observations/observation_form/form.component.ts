@@ -75,13 +75,16 @@ export class SpeciesSiteObservationFormComponent
     formInputObject: object = {};
 
     photos: any[] = [];
+    apiEndpoint = "";
 
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
         private programService: GncProgramsService,
         public areaService: AreaService
-    ) {}
+    ) {
+        this.apiEndpoint = AppConfig.API_ENDPOINT;
+    }
 
     ngOnInit() {
         console.debug('ngOnInit');
@@ -94,7 +97,7 @@ export class SpeciesSiteObservationFormComponent
 
     ngAfterViewInit() {
         this.programService
-            .getSpeciesSiteDetails(this.species_site_id)
+            .getSpeciesSiteDetails(this.species_site_id, false, true)
             .subscribe((speciesSites) => {
                 this.speciesSite = speciesSites['features'][0];
             });

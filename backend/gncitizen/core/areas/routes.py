@@ -3,13 +3,16 @@ import uuid
 from flask import Blueprint, request, current_app, json
 from geojson import FeatureCollection
 from server import db
+from sqlalchemy import inspect
 
+import shapely
 from shapely.geometry import asShape, Point
 from geoalchemy2.shape import from_shape
 from flask_jwt_extended import jwt_required
+from utils_flask_sqla_geo.utilsgeometry import circle_from_point
 
 from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, \
-    MediaOnSpeciesSiteObservationModel
+    MediaOnSpeciesSiteObservationModel, MediaOnStagesStepsModel
 from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.jwt import get_id_role_if_exists
 from gncitizen.utils.media import save_upload_files
@@ -18,8 +21,6 @@ from gncitizen.utils.taxonomy import get_specie_from_cd_nom, mkTaxonRepository
 from gncitizen.core.users.models import UserModel
 from gncitizen.core.commons.models import ProgramsModel, MediaModel
 
-from utils_flask_sqla_geo.utilsgeometry import circle_from_point
-import shapely
 
 areas_api = Blueprint("areas", __name__)
 
@@ -586,6 +587,14 @@ def get_species_site(pk):
         type: integer
         required: true
         example: 1
+      - name: with_stages
+        in: query
+        type: boolean
+        description: stages and steps desired (true) or not (false, default)
+      - name: with_observations
+        in: query
+        type: boolean
+        description: observations desired (true, default) or not (false)
     definitions:
       properties:
         type: dict
@@ -600,30 +609,52 @@ def get_species_site(pk):
     try:
         species_site = SpeciesSiteModel.query.get(pk)
         formatted_species_site = format_entity(species_site)
-        observations = prepare_list(
-            SpeciesSiteObservationModel.query.filter_by(id_species_site=pk)
-                .order_by(SpeciesSiteObservationModel.timestamp_update.desc())
-                .all(),
-            with_geom=False
-        )
-        stages = prepare_list(
-            SpeciesStageModel.query.filter_by(cd_nom=species_site.cd_nom)
-                .order_by(SpeciesStageModel.order.asc())
-                .all(),
-            with_geom=False
-        )
-        formatted_species_site["properties"]["observations"] = observations
 
-        for stage in stages.features:
-            steps = prepare_list(
-                StagesStepModel.query.filter_by(id_species_stage=stage['properties']['id_species_stage'])
-                    .order_by(StagesStepModel.order.asc())
+        print('----------------dd-----')
+        print(request.args.get("with_observations"))
+        print(request.args.get("with_observations") is None or request.args.get("with_observations") != 'false')
+
+        if request.args.get("with_observations") is None or request.args.get("with_observations") != 'false':
+            observations = prepare_list(
+                SpeciesSiteObservationModel.query.filter_by(id_species_site=pk)
+                    .order_by(SpeciesSiteObservationModel.timestamp_update.desc())
                     .all(),
                 with_geom=False
             )
-            stage["properties"]["steps"] = steps
+            formatted_species_site["properties"]["observations"] = observations
 
-        formatted_species_site["properties"]["stages"] = stages
+        if request.args.get("with_stages"):
+            stages = prepare_list(
+                SpeciesStageModel.query.filter_by(cd_nom=species_site.cd_nom)
+                    .order_by(SpeciesStageModel.order.asc())
+                    .all(),
+                with_geom=False
+            )
+            for stage in stages.features:
+                steps = prepare_list(
+                    StagesStepModel.query.filter_by(id_species_stage=stage['properties']['id_species_stage'])
+                        .order_by(StagesStepModel.order.asc())
+                        .all(),
+                    with_geom=False
+                )
+
+                for step in steps.features:
+                    photos = (
+                        MediaOnStagesStepsModel.query.filter_by(id_data_source=step['properties']['id_stages_step'])
+                        .order_by(MediaOnStagesStepsModel.id_match.asc())
+                        .all())
+
+                    step["properties"]["photos"] = [
+                        {
+                            "url": "/media/{}".format(photo.media.filename),
+                        }
+                        for photo in photos
+                    ]
+
+
+                stage["properties"]["steps"] = steps
+
+            formatted_species_site["properties"]["stages"] = stages
 
         return {"features": [formatted_species_site]}, 200
     except Exception as e:

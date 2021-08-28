@@ -58,7 +58,7 @@
                         </div>
                     </div>
                 </div>
-            <div>
+                <div>
                     <div *ngFor="let step of steps" class="step-radio-container">
                         <input
                             formControlName="stages_step_id"
@@ -77,8 +77,29 @@
                         Veuillez sélectionner une étape
                     </div>
                 </div>
+
+
+                <json-schema-form
+                    [form]="formInputObject"
+                    [options]="formOptions"
+                    (onChanges)="yourOnChangesFn($event)"
+                    [framework]="GNCBootstrap4Framework"
+                >
+                </json-schema-form>
             </div>
             <div class="col-md-6">
+                <div class="photos-container">
+                    <ng-container  *ngFor="let step of steps;let stepIndex=index;" >
+                        <div *ngFor="let photo of step.properties.photos;let photoIndex=index;" class="photo-container">
+                            <div>
+                                <img [src]="apiEndpoint + photo.url" alt="step photo" width="100%" />
+                            </div>
+                            <div style="text-align:center;">
+                                {{ (stepIndex + 1) + '.' + (photoIndex + 1) }}
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
                 <image-upload
                     buttonCaption="Ajouter une photo"
                     dropBoxMessage="Déposez vos photos ici !"
@@ -89,14 +110,6 @@
             </div>
         </div>
     </form>
-
-    <json-schema-form
-        [form]="formInputObject"
-        [options]="formOptions"
-        (onChanges)="yourOnChangesFn($event)"
-        [framework]="GNCBootstrap4Framework"
-    >
-    </json-schema-form>
     <!-- <p>
     <button class="btn btn-link" (click)="toogleAdvancedMode()">{{ advancedMode ? "Masquer" : "Afficher" }} par défaut les champs avancés</button>
   </p> -->
