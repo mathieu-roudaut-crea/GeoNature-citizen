@@ -6,7 +6,7 @@
                 <div class="user-infos">
                     <span>
                         <button
-                            *ngIf="admin && adminObservers?.features.length > 0"
+                            *ngIf="(admin || isRelay)"
                             (click)="tab = 'admin'"
                             [class]="
                                 'btn ml-1 ' +
@@ -95,7 +95,7 @@
                 <user-sites [mysites]="mysites" *ngIf="mysites && tab === 'sites'">
                 </user-sites>
 
-                <div *ngIf="admin && tab === 'admin'">
+                <div *ngIf="(admin || isRelay) && tab === 'admin'">
                     <div class="row areas-tabs">
                         <div (click)="selectedAreasTab='observers'"  [ngClass]="selectedAreasTab === 'observers' ? 'selected' : ''">
                             Mes observateurs

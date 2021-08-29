@@ -3,7 +3,7 @@ import uuid
 from flask import Blueprint, request, current_app, json
 from geojson import FeatureCollection
 from server import db
-from sqlalchemy import inspect
+from sqlalchemy.orm import aliased
 
 import shapely
 from shapely.geometry import asShape, Point
@@ -20,7 +20,6 @@ from gncitizen.utils.sqlalchemy import get_geojson_feature, json_resp
 from gncitizen.utils.taxonomy import get_specie_from_cd_nom, mkTaxonRepository
 from gncitizen.core.users.models import UserModel
 from gncitizen.core.commons.models import ProgramsModel, MediaModel
-
 
 areas_api = Blueprint("areas", __name__)
 
@@ -344,10 +343,22 @@ def get_admin_areas():
     try:
         user_id = get_id_role_if_exists()
         user = UserModel.query.get(user_id)
-        if user.admin != 1:
+        if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        areas = AreaModel.query.all()
+        if user.admin == 1:
+            areas = AreaModel.query.all()
+        else:
+            creator = aliased(UserModel)
+            relay = aliased(UserModel)
+            areas = (
+                AreaModel.query
+                    .join(creator, AreaModel.id_role == creator.id_user)
+                    .join(relay, relay.id_user == creator.linked_relay_id)
+                    .filter(relay.id_user == user_id)
+                    .all()
+            )
+
         return prepare_list(areas)
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -376,12 +387,27 @@ def get_admin_species_sites():
     try:
         user_id = get_id_role_if_exists()
         user = UserModel.query.get(user_id)
-        if user.admin != 1:
+        if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        species_sites = (SpeciesSiteModel.query
-                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                         .all())
+        if user.admin == 1:
+            species_sites = (
+                SpeciesSiteModel.query
+                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                    .all()
+            )
+        else:
+            creator = aliased(UserModel)
+            relay = aliased(UserModel)
+            species_sites = (
+                SpeciesSiteModel.query
+                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                    .join(creator, SpeciesSiteModel.id_role == creator.id_user)
+                    .join(relay, relay.id_user == creator.linked_relay_id)
+                    .filter(relay.id_user == user_id)
+                    .all()
+            )
+
         return prepare_list(species_sites)
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -407,15 +433,30 @@ def get_admin_observations():
     try:
         user_id = get_id_role_if_exists()
         user = UserModel.query.get(user_id)
-        if user.admin != 1:
+        if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        observations = (SpeciesSiteObservationModel.query
-                        .join(SpeciesSiteModel,
-                              SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
-                        .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                        .all()
-                        )
+        if user.admin == 1:
+            observations = (
+                SpeciesSiteObservationModel.query
+                    .join(SpeciesSiteModel,
+                          SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                    .all()
+            )
+        else:
+            creator = aliased(UserModel)
+            relay = aliased(UserModel)
+            observations = (
+                SpeciesSiteObservationModel.query
+                    .join(SpeciesSiteModel,
+                          SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                    .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
+                    .join(relay, relay.id_user == creator.linked_relay_id)
+                    .filter(relay.id_user == user_id)
+                    .all()
+            )
 
         return prepare_list(observations, with_geom=False)
     except Exception as e:
@@ -442,10 +483,19 @@ def get_admin_observers():
     try:
         user_id = get_id_role_if_exists()
         user = UserModel.query.get(user_id)
-        if user.admin != 1:
+        if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        observers = (UserModel.query.all())
+        if user.admin == 1:
+            observers = (UserModel.query.all())
+        else:
+            relay = aliased(UserModel)
+            observers = (
+                UserModel.query
+                    .join(relay, relay.id_user == UserModel.linked_relay_id)
+                    .filter(relay.id_user == user_id)
+                    .all()
+            )
 
         return prepare_list(observers, with_geom=False)
     except Exception as e:
@@ -641,8 +691,8 @@ def get_species_site(pk):
                 for step in steps.features:
                     photos = (
                         MediaOnStagesStepsModel.query.filter_by(id_data_source=step['properties']['id_stages_step'])
-                        .order_by(MediaOnStagesStepsModel.id_match.asc())
-                        .all())
+                            .order_by(MediaOnStagesStepsModel.id_match.asc())
+                            .all())
 
                     step["properties"]["photos"] = [
                         {
@@ -650,7 +700,6 @@ def get_species_site(pk):
                         }
                         for photo in photos
                     ]
-
 
                 stage["properties"]["steps"] = steps
 

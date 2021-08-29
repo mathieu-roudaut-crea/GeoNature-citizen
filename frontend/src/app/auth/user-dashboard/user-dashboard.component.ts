@@ -31,6 +31,7 @@ export class UserDashboardComponent implements OnInit {
     role_id: number;
     isLoggedIn = false;
     admin = false;
+    isRelay = false;
     stats: any;
     personalInfo: any = {};
     badges: any;
@@ -97,6 +98,7 @@ export class UserDashboardComponent implements OnInit {
                         this.stats = user['features']['stats'];
                         this.role_id = user['features']['id_role'];
                         this.admin = user['features']['admin'];
+                        this.isRelay = user['features']['is_relay'];
                         this.userService.role_id = this.role_id;
                         if (user['features']['avatar'])
                             this.userAvatar =
@@ -268,7 +270,7 @@ export class UserDashboardComponent implements OnInit {
     }
 
     getAdminData() {
-        if (!this.admin) {
+        if (!this.admin && !this.isRelay) {
             return;
         }
         const adminData = [];

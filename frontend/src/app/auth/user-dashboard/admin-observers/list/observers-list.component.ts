@@ -16,7 +16,7 @@ export class ObserversListComponent implements OnChanges {
     taxa: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
     page = 1;
-    pageSize = 4;
+    pageSize = 10;
     collectionSize = 0;
 
     ngOnChanges() {
