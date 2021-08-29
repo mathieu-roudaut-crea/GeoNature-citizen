@@ -328,6 +328,11 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
         if (this.jsonData) {
             formData.json_data = JSON.stringify(this.jsonData);
         }
+
+        if (this.speciesSiteForm.value.cd_nom.cd_nom) {
+            formData.cd_nom = this.speciesSiteForm.value.cd_nom.cd_nom;
+        }
+
         return this.postSpeciesSite(formData)
             .toPromise()
             .then(

@@ -75,11 +75,13 @@
                             "
                                 (click)="onTaxonSelected(s)"
                             />
-                            <span>{{
+                            <span>
+                                {{
                                 !!s.nom_francais
                                     ? s.nom_francais
                                     : s.taxref.nom_vern
-                                }}</span>
+                                }}
+                            </span>
                         </div>
                     </div>
                 </div>
