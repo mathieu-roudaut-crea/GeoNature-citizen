@@ -3,6 +3,11 @@
         <thead>
         <tr>
             <th scope="col">Pseudo</th>
+            <th scope="col">Email</th>
+            <th scope="col">Statut</th>
+            <th scope="col">Catégorie</th>
+            <th scope="col">Organism</th>
+            <th scope="col">Relai</th>
             <th scope="col">Actions</th>
         </tr>
         </thead>
@@ -11,6 +16,31 @@
             <td>
                 <span [ngbTooltip]="observer.properties.username">
                     {{ observer.properties.username }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observer.properties.email">
+                    {{ observer.properties.email }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observer.properties.admin ? 'Admin' : observer.properties.is_relay ? 'Relai': 'Utilisateur'">
+                    {{ observer.properties.admin ? 'Admin' : observer.properties.is_relay ? 'Relai': 'Utilisateur' }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observer.properties.category">
+                    {{ observer.properties.category }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observer.properties.organism">
+                    {{ observer.properties.organism }}
+                </span>
+            </td>
+            <td>
+                <span [ngbTooltip]="observer.properties.linked_relay">
+                    {{ observer.properties.linked_relay ? observer.properties.linked_relay.organism : '' }}
                 </span>
             </td>
             <td>

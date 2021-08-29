@@ -10,7 +10,7 @@ from gncitizen.core.commons.models import (
 from gncitizen.utils.sqlalchemy import serializable
 from server import db
 from sqlalchemy.ext.declarative import declared_attr
-
+from sqlalchemy.orm import relationship
 
 class RevokedTokenModel(db.Model):
     __tablename__ = "t_revoked_tokens"
@@ -58,6 +58,7 @@ class UserModel(TimestampMixinModel, db.Model):
     want_newsletter = db.Column(db.Boolean, default=False)
     is_relay = db.Column(db.Boolean, default=False)
     linked_relay_id = db.Column(db.Integer, db.ForeignKey('gnc_core.t_users.id_user', ondelete="SET NULL"))
+    linked_relay = relationship("UserModel", foreign_keys='UserModel.linked_relay_id', remote_side=[id_user])
     birth_year = db.Column(db.Integer)
     gender = db.Column(db.String(100))
     comments = db.Column(db.Text)
