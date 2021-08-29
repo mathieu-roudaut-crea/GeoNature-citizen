@@ -3,6 +3,7 @@ import { Component, Inject, Input, LOCALE_ID, ViewChild } from '@angular/core';
 import { IFlowComponent } from '../../../../observations/modalflow/flow/flow';
 import { SpeciesSiteObservationFormComponent } from '../../../observations/observation_form/form.component';
 import { Router } from '@angular/router';
+import { AreaService } from '../../../areas.service';
 
 @Component({
     templateUrl: './species_site_obs_step.component.html',
@@ -15,12 +16,13 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
     form: SpeciesSiteObservationFormComponent;
     program_id: number;
 
-    constructor(private router: Router) {}
+    constructor(private router: Router, private areaService: AreaService) {}
 
     committedAndShowObs() {
         this.form.onFormSubmit().subscribe(
             function (result) {
                 if (result) {
+                    this.closeModal();
                     this.router.navigate([
                         `/programs/${result.features[0].program_id}/areas-observations`,
                     ]);
@@ -34,7 +36,10 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
             function (result) {
                 if (result) {
                     console.debug('committed action > data:', this.data);
-                    this.data.service.close(null);
+                    this.areaService.newSpeciesSiteObsCreated.emit(
+                        result.features[0]
+                    );
+                    this.closeModal();
                 }
             }.bind(this)
         );

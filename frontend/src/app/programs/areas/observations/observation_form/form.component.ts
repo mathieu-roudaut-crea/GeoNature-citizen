@@ -72,7 +72,7 @@ export class SpeciesSiteObservationFormComponent
     GNCBootstrap4Framework: any = {
         framework: GNCFrameworkComponent,
     };
-    formInputObject: object = {};
+    formInputObject: object;
 
     photos: any[] = [];
     apiEndpoint = "";

@@ -8,6 +8,7 @@ export class AreaService {
     @Output() areaEdited: EventEmitter<any> = new EventEmitter();
     @Output() deleteArea = new EventEmitter();
     @Output() newSpeciesSiteCreated: EventEmitter<any> = new EventEmitter();
+    @Output() newSpeciesSiteObsCreated: EventEmitter<any> = new EventEmitter();
     @Output() speciesSiteEdited: EventEmitter<any> = new EventEmitter();
     @Output() deleteSpeciesSite = new EventEmitter();
 }

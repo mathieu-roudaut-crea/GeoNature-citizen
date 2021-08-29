@@ -3,17 +3,21 @@
     <div class="form-row">
         <div class="form-group col-lg-6 col-md-12 half">
             <h5>Informations</h5>
-            <label for="counting">*Nom de l'individu</label>
-            <input type="text" formControlName="name" class="form-control" />
+            <label for="species-site-name">*Nom de l'individu</label>
+            <input id="species-site-name" type="text" formControlName="name" class="form-control" placeholder="ex : Noisetier1 ; Noisetier près de la maison" />
 
-            <div class="form-group col-lg-8">
-                <input formControlName="id_program" type="hidden" />
-                <h5 class="m-0">
-                    <label for="cd_nom" class="m-0"
-                    >{ autocomplete, select, isOn {Rechercher une esp&egrave;ce}
-                        isOff {S&eacute;lectionnez une esp&egrave;ce}}</label
-                    >
-                </h5>
+            <div class="form-group">
+                <input formControlName="id_area" type="hidden" />
+                <div class="mt-2 mb-2">
+                    <label for="cd_nom" class="m-0">
+                        {
+                            autocomplete, select,
+                                isOn {Rechercher une esp&egrave;ce}
+                                isOff {S&eacute;lectionnez une esp&egrave;ce}
+                        }
+                    </label>
+                    <i ngbTooltip="Un doute sur une espèce ? Vous pouvez consulter les fiches espèces, ajouter une photo que nous examinerons, ou encore nous envoyer un mail à phenoclim@creamontblanc.org" class="fa fa-question-circle ml-1" placement="bottom"></i>
+                </div>
                 <!-- TAXON SELECT -->
                 <div
                     *ngIf="
@@ -103,6 +107,7 @@
             </div>
 
             <json-schema-form
+                *ngIf="formInputObject"
                 [form]="formInputObject"
                 [options]="formOptions"
                 (onChanges)="yourOnChangesFn($event)"

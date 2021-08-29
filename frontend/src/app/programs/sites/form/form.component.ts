@@ -62,7 +62,7 @@ export class SiteVisitFormComponent implements OnInit, AfterViewInit {
     GNCBootstrap4Framework: any = {
         framework: GNCFrameworkComponent,
     };
-    formInputObject: object = {};
+    formInputObject: object;
 
     photos: any[] = [];
 

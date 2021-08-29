@@ -10,6 +10,7 @@ import {
     markerIcon,
 } from '../../../base/detail/detail.component';
 import { Location } from '@angular/common';
+import { AreaService } from '../../areas.service';
 
 declare let $: any;
 
@@ -30,6 +31,7 @@ export class AreaDetailComponent
         private http: HttpClient,
         private route: ActivatedRoute,
         private programService: GncProgramsService,
+        private areaService: AreaService,
         public location: Location,
         public flowService: AreaModalFlowService
     ) {
@@ -39,18 +41,20 @@ export class AreaDetailComponent
             this.program_id = params['program_id'];
         });
         this.module = 'areas';
+        this.areaService.newSpeciesSiteCreated.subscribe(
+            function (newSpeciesSiteFeature) {
+                this.programService
+                    .getAreaDetails(this.area_id)
+                    .subscribe((areas) => {
+                        this.area = areas['features'][0];
+                    });
+            }.bind(this)
+        );
     }
 
     ngAfterViewInit() {
         this.programService.getAreaDetails(this.area_id).subscribe((areas) => {
             this.area = areas['features'][0];
-            this.photos = this.area.properties.photos;
-            if (Array.isArray(this.photos)) {
-                for (let i = 0; i < this.photos.length; i++) {
-                    this.photos[i]['url'] =
-                        AppConfig.API_ENDPOINT + this.photos[i]['url'];
-                }
-            }
 
             // setup map
             const map = L.map('map');
@@ -67,20 +71,21 @@ export class AreaDetailComponent
             // prepare data
             if (this.area.properties) {
                 const data = this.area.properties.json_data;
-                const that = this;
-                this.loadJsonSchema().subscribe((json_schema: any) => {
-                    const schema = json_schema.schema.properties;
-                    const layout = json_schema.layout;
-                    for (const item of layout) {
-                        const v = data[item.key];
-                        if (v !== undefined) {
-                            that.attributes.push({
-                                name: schema[item.key].title,
-                                value: v.toString(),
-                            });
+                this.loadJsonSchema().subscribe(
+                    function (json_schema: any) {
+                        const schema = json_schema.schema.properties;
+                        const layout = json_schema.layout;
+                        for (const item of layout) {
+                            const v = data[item.key];
+                            if (v !== undefined) {
+                                this.attributes.push({
+                                    name: schema[item.key].title,
+                                    value: v.toString(),
+                                });
+                            }
                         }
-                    }
-                });
+                    }.bind(this)
+                );
             }
         });
     }

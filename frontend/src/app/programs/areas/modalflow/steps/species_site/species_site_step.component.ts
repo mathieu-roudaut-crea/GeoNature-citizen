@@ -28,8 +28,7 @@ export class SpeciesSiteStepComponent implements IFlowComponent {
     }
 
     sendForm() {
-        let resp: any;
-        resp = this.form.onFormSubmit();
+        const resp = this.form.onFormSubmit();
         console.debug('committed action > data:', this.data);
         // Wait for resolution of http promise "resp"
         // to get new created species_site's id and pass it to next step as extra_data

@@ -50,7 +50,7 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
             .pipe(first())
             .subscribe(
                 function (isLoggedIn) {
-                    if (isLoggedIn) {
+                    if (isLoggedIn || !this.modalService) {
                         return;
                     }
                     const loginModalRef = this.modalService.open(

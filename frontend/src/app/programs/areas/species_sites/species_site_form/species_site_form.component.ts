@@ -94,7 +94,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     GNCBootstrap4Framework: any = {
         framework: GNCFrameworkComponent,
     };
-    formInputObject: object = {};
+    formInputObject: object;
     readyToDisplay = false;
     partialLayout: any[] = [];
     advancedMode = false;

@@ -4,7 +4,8 @@ import {
     ViewEncapsulation,
     ViewChild,
     ViewChildren,
-    QueryList, Input,
+    QueryList,
+    Input,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -19,6 +20,7 @@ import { SpeciesSitesListComponent } from './list/list.component';
 import { AreaModalFlowComponent } from '../modalflow/modalflow.component';
 import { ProgramBaseComponent } from '../../base/program-base.component';
 import { AuthService } from '../../../auth/auth.service';
+import { ModalsTopbarService } from '../../../core/topbar/modalTopbar.service';
 
 @Component({
     selector: 'app-species-sites',
@@ -51,6 +53,7 @@ export class SpeciesSitesComponent
         private programService: GncProgramsService,
         public flowService: AreaModalFlowService,
         public areaService: AreaService,
+        private modalService: ModalsTopbarService,
         authService: AuthService
     ) {
         super(authService);

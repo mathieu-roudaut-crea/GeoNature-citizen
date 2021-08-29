@@ -10,6 +10,7 @@ import {
     markerIcon,
 } from '../../../base/detail/detail.component';
 import { Location } from '@angular/common';
+import { AreaService } from '../../areas.service';
 
 declare let $: any;
 
@@ -30,6 +31,7 @@ export class SpeciesSiteDetailComponent
         private http: HttpClient,
         private route: ActivatedRoute,
         private programService: GncProgramsService,
+        private areaService: AreaService,
         public location: Location,
         public flowService: AreaModalFlowService
     ) {
@@ -39,6 +41,16 @@ export class SpeciesSiteDetailComponent
             this.program_id = params['program_id'];
         });
         this.module = 'species_sites';
+
+        this.areaService.newSpeciesSiteObsCreated.subscribe(
+            function (newSpeciesSiteObsFeature) {
+                this.programService
+                    .getSpeciesSiteDetails(this.species_site_id)
+                    .subscribe((speciesSites) => {
+                        this.speciesSite = speciesSites['features'][0];
+                    });
+            }.bind(this)
+        );
     }
 
     ngAfterViewInit() {
@@ -69,21 +81,21 @@ export class SpeciesSiteDetailComponent
                 // prepare data
                 if (this.speciesSite.properties) {
                     const data = this.speciesSite.properties.json_data;
-                    const that = this;
-                    this.loadJsonSchema().subscribe((json_schema: any) => {
-                        const schema = json_schema.schema.properties;
-                        const layout = json_schema.layout;
-                        for (const item of layout) {
-                            const v = data[item.key];
-                            if (v !== undefined) {
-                                that.attributes.push({
-                                    name: schema[item.key].title,
-                                    value: v.toString(),
-                                });
+                    this.loadJsonSchema().subscribe(
+                        function (json_schema: any) {
+                            const schema = json_schema.schema.properties;
+                            const layout = json_schema.layout;
+                            for (const item of layout) {
+                                const v = data[item.key];
+                                if (v !== undefined) {
+                                    this.attributes.push({
+                                        name: schema[item.key].title,
+                                        value: v.toString(),
+                                    });
+                                }
                             }
-                        }
-
-                    });
+                        }.bind(this)
+                    );
                 }
             });
     }
