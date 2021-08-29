@@ -56,6 +56,9 @@
                         <div *ngIf="observationForm.get('date').errors.ngbDate">
                             Date invalide
                         </div>
+                        <div *ngIf="observationForm.get('date').errors.stepThisYear">
+                            Ce stade a déjà été renseigné cette année
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -67,6 +70,7 @@
                             [id]="'step-'+step.properties.id_stages_step"
                             [value]="step.properties.id_stages_step"
                             [(ngModel)]="selectedStep"
+                            (ngModelChange)="onSelectedStepChange()"
                         >
                         <label [for]="'step-'+step.properties.id_stages_step">
                             {{ step.properties.name }}

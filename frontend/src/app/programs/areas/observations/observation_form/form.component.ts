@@ -9,13 +9,7 @@ import {
 } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import {
-    AbstractControl,
-    FormControl,
-    FormGroup,
-    ValidatorFn,
-    Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
 import { NgbDate } from '@ng-bootstrap/ng-bootstrap';
@@ -75,7 +69,7 @@ export class SpeciesSiteObservationFormComponent
     formInputObject: object;
 
     photos: any[] = [];
-    apiEndpoint = "";
+    apiEndpoint = '';
 
     constructor(
         private http: HttpClient,
@@ -97,7 +91,7 @@ export class SpeciesSiteObservationFormComponent
 
     ngAfterViewInit() {
         this.programService
-            .getSpeciesSiteDetails(this.species_site_id, false, true)
+            .getSpeciesSiteDetails(this.species_site_id, true, true)
             .subscribe((speciesSites) => {
                 this.speciesSite = speciesSites['features'][0];
             });
@@ -158,10 +152,36 @@ export class SpeciesSiteObservationFormComponent
         this.steps = newSteps;
     }
 
+    onSelectedStepChange(): void {
+        this.observationForm.get('date').setErrors(null);
+    }
+
     stepIsNotSelected() {
         return (
             this.speciesSite.properties.stages.count && this.selectedStep === 0
         );
+    }
+
+    stageWasSetThisYear() {
+        const observations = this.speciesSite.properties.observations;
+        let sameStageThisYear = false;
+        observations.features.forEach((observation) => {
+            if (
+                !sameStageThisYear &&
+                observation.properties.stages_step &&
+                observation.properties.date.startsWith(
+                    this.observationForm.value.date.year + ''
+                ) &&
+                this.observationForm.value.species_stage_id ==
+                    observation.properties.stages_step.id_species_stage &&
+                (this.observationForm.value.stages_step_id ==
+                    observation.properties.stages_step.id_stages_step ||
+                    observation.properties.stages_step.order > 1)
+            ) {
+                sameStageThisYear = true;
+            }
+        });
+        return sameStageThisYear;
     }
 
     onFormSubmit(): Observable<any> {
@@ -174,6 +194,16 @@ export class SpeciesSiteObservationFormComponent
             this.observationForm.get(field).setErrors({
                 notSelected: true,
             });
+            return new Observable((subscriber) => {
+                subscriber.next(null);
+            });
+        }
+
+        if (this.stageWasSetThisYear()) {
+            this.observationForm.get('date').setErrors({
+                stepThisYear: true,
+            });
+
             return new Observable((subscriber) => {
                 subscriber.next(null);
             });
@@ -197,10 +227,6 @@ export class SpeciesSiteObservationFormComponent
             this.observationForm.controls.date.value
         );
 
-        console.log(
-            'form date vvalue',
-            this.observationForm.controls.date.value
-        );
         console.log(visitDate);
         console.log(
             new Date(
@@ -220,8 +246,6 @@ export class SpeciesSiteObservationFormComponent
                 .toISOString()
                 .match(/\d{4}-\d{2}-\d{2}/)[0],
         });
-
-        console.log('final form value ', this.observationForm.value);
 
         return this.http.post<any>(
             `${this.URL}/areas/species_sites/${this.species_site_id}/observations`,
