@@ -62,6 +62,14 @@ export class AuthService {
         this.authenticated$.next(true);
         localStorage.setItem('username', user.username);
         localStorage.setItem('userAvatar', user.userAvatar);
+
+        window.parent.postMessage(
+            {
+                username: user.username,
+                type: 'loggedIn',
+            },
+            '*'
+        );
     }
 
     logout(): Promise<any> {

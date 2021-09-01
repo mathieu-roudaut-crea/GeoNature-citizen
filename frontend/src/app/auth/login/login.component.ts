@@ -55,14 +55,6 @@ export class LoginComponent {
                             this.router.navigate([this.auth.redirectUrl]);
                         }
 
-                        window.parent.postMessage(
-                            {
-                                username: user.username,
-                                type: 'loggedIn',
-                            },
-                            '*'
-                        );
-
                         return user;
                     }
                 }),
