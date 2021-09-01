@@ -8,7 +8,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     jwt_required,
 )
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from gncitizen.utils.mail_check import confirm_user_email, confirm_token
 from gncitizen.utils.errors import GeonatureApiError
@@ -160,9 +160,7 @@ def registration():
             ):
                 return (
                     {
-                        "message": """Un email correspondant est déjà enregistré.""".format(
-                            newuser.email
-                        )
+                        "message": "Un email correspondant est déjà enregistré."
                     },
                     400,
                 )
@@ -354,23 +352,9 @@ def get_allusers():
       200:
         description: list all users
     """
-    return UserModel.return_all(), 200
-
-@users_api.route("/relays", methods=["GET"])
-@json_resp
-def get_relays():
-    """list all relays
-    ---
-    tags:
-      - Relays
-    summary: List all relays
-    produces:
-      - application/json
-    responses:
-      200:
-        description: list all relays
-    """
-    return UserModel.return_relays(), 200
+    # allusers = UserModel.return_all()
+    allusers = UserModel.return_all()
+    return allusers, 200
 
 
 @users_api.route("/user/info", methods=["GET", "PATCH"])
