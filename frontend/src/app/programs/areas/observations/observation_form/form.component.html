@@ -74,7 +74,7 @@
                         >
                         <label [for]="'step-'+step.properties.id_stages_step">
                             {{ step.properties.name }}
-                            <i [ngbTooltip]="step.properties.tooltip" class="fa fa-question-circle ml-1" placement="top"></i>
+                            <i *ngIf="step.properties.tooltip && step.properties.tooltip.length" [ngbTooltip]="step.properties.tooltip" class="fa fa-question-circle ml-1" placement="top"></i>
                         </label>
                     </div>
                     <div *ngIf="observationForm.get('stages_step_id').errors?.notSelected" class="alert alert-danger">
