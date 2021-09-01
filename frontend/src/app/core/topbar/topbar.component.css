@@ -176,8 +176,6 @@ div.btn-group a:first-child {
     background-position: center;
     float: left;
     margin-right: 8px;
-    display: flex;
-    justify-content: center;
 }
 
 @media screen and (max-width: 576px) {

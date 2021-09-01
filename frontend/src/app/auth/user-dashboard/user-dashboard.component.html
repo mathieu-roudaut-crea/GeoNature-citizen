@@ -22,12 +22,12 @@
                             class="profile-pic"
                             (click)="onEditInfos(personalInfos)"
                         ></div>
-                        <img
+                        <div
                             *ngIf="userAvatar"
-                            class="profile-pic"
-                            src="{{ userAvatar }}"
+                            class="profile-pic-background"
                             (click)="onEditInfos(personalInfos)"
-                        />
+                            [ngStyle]="{'background-image': 'url(' + userAvatar + ')'}"
+                        ></div>
                     </div>
                     <p (click)="onEditInfos(personalInfos)">
                         {{ username }} <i class="fa fa-pencil"></i>
@@ -284,11 +284,11 @@
             <div class="d-flex justify-content-center">
                 <div class="avatar-wrapper">
                     <div *ngIf="!userAvatar" class="profile-pic"></div>
-                    <img
+                    <div
                         *ngIf="userAvatar"
-                        class="profile-pic"
-                        src="{{ userAvatar }}"
-                    />
+                        class="profile-pic-background"
+                        [ngStyle]="{'background-image': 'url(' + userAvatar + ')'}"
+                    ></div>
                     <div class="upload-button" (click)="fileToUpload.click()">
                         <i class="fa fa-arrow-circle-up" aria-hidden="true"></i>
                     </div>

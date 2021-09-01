@@ -68,6 +68,7 @@
 
 .user-infos img,
 .user-infos svg {
+    min-width: 100%;
     height: auto;
     margin: 0 auto;
     border-radius: 50%;
@@ -302,19 +303,11 @@ app-modalflow {
     height: 100%;
     transition: all 0.3s ease;
 }
-
-.avatar-main-wrapper .profile-pic:after {
-    font-family: FontAwesome;
-    content: '\f007';
-    top: 0;
-    left: 0;
-    width: 100%;
+.profile-pic-background {
     height: 100%;
-    position: absolute;
-    font-size: 140px;
-    background: #ecf0f1;
-    color: #34495e;
-    text-align: center;
+    width: 100%;
+    background-position: center;
+    background-size: cover;
 }
 
 .green-btn {
