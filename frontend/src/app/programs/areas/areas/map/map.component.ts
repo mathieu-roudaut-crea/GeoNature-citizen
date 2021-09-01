@@ -405,7 +405,9 @@ export abstract class BaseMapComponent implements OnChanges {
             this.updateGeoJson();
 
             if (this.features.count > 0) {
-                this.observationMap.fitBounds(this.observationLayer.getBounds());
+                this.observationMap.fitBounds(
+                    this.observationLayer.getBounds()
+                );
                 this.observationMap.setZoom(
                     Math.min(this.observationMap.getZoom(), 15)
                 );
