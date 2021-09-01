@@ -195,7 +195,7 @@ def get_species_site_jsonschema_by_program(pk):
 @areas_api.route("/programs/<int:id>", methods=["GET"])
 @json_resp
 @jwt_required(optional=True)
-def get_program_areas(id):
+def get_areas_by_program(id):
     """Get all areas
     ---
     tags:

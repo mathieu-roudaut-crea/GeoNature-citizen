@@ -245,10 +245,12 @@ def login():
         email = request_datas["email"]
         password = request_datas["password"]
         try:
-            current_user = UserModel.query.filter_by(email=email).one()
+            current_user = UserModel.query.filter(
+                or_(UserModel.email == email, UserModel.username == email)
+            ).one()
         except Exception:
             return (
-                {"message": """L'email "{}" n'est pas enregistré.""".format(email)},
+                {"message": """L'email ou le pseudo "{}" n'est pas enregistré.""".format(email)},
                 400,
             )
         if not current_user.active:
@@ -256,6 +258,9 @@ def login():
                 {"message": "Votre compte n'a pas été activé"},
                 400,
             )
+
+        email = current_user.email
+
         if UserModel.verify_hash(password, current_user.password):
             access_token = create_access_token(identity=email)
             refresh_token = create_refresh_token(identity=email)
