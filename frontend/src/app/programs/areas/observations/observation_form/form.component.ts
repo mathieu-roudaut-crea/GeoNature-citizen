@@ -162,9 +162,20 @@ export class SpeciesSiteObservationFormComponent
         );
     }
 
-    stageWasSetThisYear() {
+    getCurrentStepOrder() {
+        let stepOrder = 0;
+        this.steps.forEach((step) => {
+            if (step.properties.id_stages_step === this.selectedStep) {
+                stepOrder = step.properties.order;
+            }
+        });
+        return stepOrder;
+    }
+
+    stageAlreadyAddedThisYear() {
         const observations = this.speciesSite.properties.observations;
         let sameStageThisYear = false;
+        let dateOfStageStep = null;
         observations.features.forEach((observation) => {
             if (
                 !sameStageThisYear &&
@@ -172,15 +183,32 @@ export class SpeciesSiteObservationFormComponent
                 observation.properties.date.startsWith(
                     this.observationForm.value.date.year + ''
                 ) &&
-                this.observationForm.value.species_stage_id ==
-                    observation.properties.stages_step.id_species_stage &&
                 (this.observationForm.value.stages_step_id ==
                     observation.properties.stages_step.id_stages_step ||
                     observation.properties.stages_step.order > 1)
             ) {
+                dateOfStageStep = observation.properties.date;
                 sameStageThisYear = true;
             }
         });
+
+        if (this.getCurrentStepOrder() === 1) {
+            const dateParts = dateOfStageStep.split('-');
+            const latestStepDate = new Date(
+                dateParts[0],
+                dateParts[1] - 1,
+                dateParts[2]
+            );
+            const formDate = new Date(
+                this.observationForm.value.date.year,
+                this.observationForm.value.date.month - 1,
+                this.observationForm.value.date.day
+            );
+            if (latestStepDate > formDate) {
+                return false;
+            }
+        }
+
         return sameStageThisYear;
     }
 
@@ -199,7 +227,7 @@ export class SpeciesSiteObservationFormComponent
             });
         }
 
-        if (this.stageWasSetThisYear()) {
+        if (this.stageAlreadyAddedThisYear()) {
             this.observationForm.get('date').setErrors({
                 stepThisYear: true,
             });
