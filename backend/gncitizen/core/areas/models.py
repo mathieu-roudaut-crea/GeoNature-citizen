@@ -119,7 +119,7 @@ class StagesStepModel(db.Model):
     __table_args__ = {"schema": "gnc_areas"}
     id_stages_step = db.Column(db.Integer, primary_key=True, unique=True)
     name = db.Column(db.String(250))
-    tooltip = db.Column(db.String(250))
+    tooltip = db.Column(db.String(350))
     id_species_stage = db.Column(
         db.Integer, db.ForeignKey(SpeciesStageModel.id_species_stage, ondelete="CASCADE")
     )
