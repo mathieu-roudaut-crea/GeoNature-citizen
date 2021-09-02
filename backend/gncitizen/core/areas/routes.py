@@ -8,7 +8,8 @@ from sqlalchemy.orm import aliased
 import shapely
 from shapely.geometry import asShape, Point
 from geoalchemy2.shape import from_shape
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 from utils_flask_sqla_geo.utilsgeometry import circle_from_point
 
 from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, \
@@ -18,6 +19,7 @@ from gncitizen.utils.jwt import get_id_role_if_exists
 from gncitizen.utils.media import save_upload_files
 from gncitizen.utils.sqlalchemy import get_geojson_feature, json_resp
 from gncitizen.utils.taxonomy import get_specie_from_cd_nom, mkTaxonRepository
+from gncitizen.utils.geo import get_municipality_id_from_wkb
 from gncitizen.core.users.models import UserModel
 from gncitizen.core.commons.models import ProgramsModel, MediaModel
 
@@ -312,6 +314,7 @@ def get_user_observations():
                               SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                         .filter(SpeciesSiteObservationModel.id_role == user_id)
+                        .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
                         .all()
                         )
 
@@ -347,7 +350,7 @@ def get_admin_areas():
             return prepare_list([])
 
         if user.admin == 1:
-            areas = AreaModel.query.all()
+            areas = AreaModel.query.order_by(AreaModel.timestamp_create.desc()).all()
         else:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
@@ -356,6 +359,7 @@ def get_admin_areas():
                     .join(creator, AreaModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
                     .filter(relay.id_user == user_id)
+                    .order_by(AreaModel.timestamp_create.desc())
                     .all()
             )
 
@@ -394,6 +398,7 @@ def get_admin_species_sites():
             species_sites = (
                 SpeciesSiteModel.query
                     .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                    .order_by(SpeciesSiteModel.timestamp_create.desc())
                     .all()
             )
         else:
@@ -405,6 +410,7 @@ def get_admin_species_sites():
                     .join(creator, SpeciesSiteModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
                     .filter(relay.id_user == user_id)
+                    .order_by(SpeciesSiteModel.timestamp_create.desc())
                     .all()
             )
 
@@ -442,6 +448,7 @@ def get_admin_observations():
                     .join(SpeciesSiteModel,
                           SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
                     .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                    .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
                     .all()
             )
         else:
@@ -455,6 +462,7 @@ def get_admin_observations():
                     .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
                     .filter(relay.id_user == user_id)
+                    .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
                     .all()
             )
 
@@ -625,6 +633,137 @@ def get_area(pk):
         return {"error_message": str(e)}, 400
 
 
+@areas_api.route("/", methods=["PATCH"])
+@json_resp
+@jwt_required()
+def update_area():
+    try:
+        current_user_email = get_jwt_identity()
+        current_user = UserModel.query.filter_by(email=current_user_email).one()
+
+        update_data = dict(request.get_json())
+        area = AreaModel.query.filter_by(id_area=update_data.get("id_area"))
+        if current_user.email != UserModel.query.get(area.first().id_role).email and current_user.admin != 1:
+            return ("unauthorized"), 403
+
+        update_area = {}
+        for prop in ["name"]:
+            update_area[prop] = update_data[prop]
+        try:
+            coordinates = update_data.get("geometry", {}).get("coordinates", [])
+
+            if len(coordinates) == 2:
+                latitude = coordinates[1]
+                longitude = coordinates[0]
+            else:
+                message = "[post_areas] invalid coordinates"
+                current_app.logger.warning(message)
+                raise GeonatureApiError(message)
+
+            p = shapely.geometry.Point(longitude, latitude)
+
+            update_area["municipality"] = get_municipality_id_from_wkb(from_shape(p, srid=4326))
+
+            wkt = circle_from_point(p, radius=500, nb_point=100)
+            update_area['geom'] = from_shape(wkt, srid=4326)
+
+        except Exception as e:
+            current_app.logger.warning("[update_area] coords ", e)
+            raise GeonatureApiError(e)
+
+        try:
+            json_data = update_data.get("json_data")
+            if json_data is not None:
+                update_area["json_data"] = json.loads(json_data)
+        except Exception as e:
+            current_app.logger.warning("[update_observation] json_data ", e)
+            raise GeonatureApiError(e)
+
+        area.update(update_area, synchronize_session="fetch")
+        db.session.commit()
+        return ("area updated successfully"), 200
+    except Exception as e:
+        current_app.logger.critical("[update_area] Error: %s", str(e))
+        return {"message": str(e)}, 400
+
+
+@areas_api.route("/species_sites/", methods=["PATCH"])
+@json_resp
+@jwt_required()
+def update_species_site():
+    try:
+        current_user_email = get_jwt_identity()
+        current_user = UserModel.query.filter_by(email=current_user_email).one()
+
+        update_data = dict(request.get_json())
+        species_site = SpeciesSiteModel.query.filter_by(id_species_site=update_data.get("id_species_site"))
+        if current_user.email != UserModel.query.get(species_site.first().id_role).email and current_user.admin != 1:
+            return ("unauthorized"), 403
+
+        update_species_site = {}
+        for prop in ["name"]:
+            update_species_site[prop] = update_data[prop]
+
+        try:
+            _coordinates = update_data["geometry"]["coordinates"]
+            _point = Point(_coordinates[0], _coordinates[1])
+            _shape = asShape(_point)
+            update_species_site["geom"] = from_shape(Point(_shape), srid=4326)
+        except Exception as e:
+            current_app.logger.warning("[update_species_site] coords ", e)
+            raise GeonatureApiError(e)
+
+        try:
+            json_data = update_data.get("json_data")
+            if json_data is not None:
+                update_species_site["json_data"] = json.loads(json_data)
+                print(update_species_site["json_data"])
+        except Exception as e:
+            current_app.logger.warning("[update_observation] json_data ", e)
+            raise GeonatureApiError(e)
+
+        species_site.update(update_species_site, synchronize_session="fetch")
+        db.session.commit()
+        return ("species_site updated successfully"), 200
+    except Exception as e:
+        current_app.logger.critical("[update_species_site] Error: %s", str(e))
+        return {"message": str(e)}, 400
+
+
+@areas_api.route("/observations/", methods=["PATCH"])
+@json_resp
+@jwt_required()
+def update_observation():
+    try:
+        current_user_email = get_jwt_identity()
+        current_user = UserModel.query.filter_by(email=current_user_email).one()
+
+        update_data = dict(request.get_json())
+        observation = SpeciesSiteObservationModel.query.filter_by(id_species_site_observation=update_data.get("id_species_site_observation"))
+        if current_user.email != UserModel.query.get(observation.first().id_role).email and current_user.admin != 1:
+            return ("unauthorized"), 403
+
+        update_observation = {}
+        update_observation["date"] = update_data["date"]
+        update_observation["id_stages_step"] = update_data["stages_step_id"]
+
+        try:
+            json_data = update_data.get("json_data")
+            if json_data is not None:
+                update_observation["json_data"] = json.loads(json_data)
+                print(update_observation["json_data"])
+        except Exception as e:
+            current_app.logger.warning("[update_observation] json_data ", e)
+            raise GeonatureApiError(e)
+
+        observation.update(update_observation, synchronize_session="fetch")
+        db.session.commit()
+        return ("observation updated successfully"), 200
+    except Exception as e:
+        current_app.logger.critical("[update_observation] Error: %s", str(e))
+        return {"message": str(e)}, 400
+
+
 @areas_api.route("/species_sites/<int:pk>", methods=["GET"])
 @json_resp
 def get_species_site(pk):
@@ -660,10 +799,6 @@ def get_species_site(pk):
     try:
         species_site = SpeciesSiteModel.query.get(pk)
         formatted_species_site = format_entity(species_site)
-
-        print('----------------dd-----')
-        print(request.args.get("with_observations"))
-        print(request.args.get("with_observations") is None or request.args.get("with_observations") != 'false')
 
         if request.args.get("with_observations") is None or request.args.get("with_observations") != 'false':
             observations = prepare_list(
@@ -773,7 +908,6 @@ def post_area():
             raise GeonatureApiError(e)
 
         try:
-            # print("point:" + request_data["geometry"])
             coordinates = request_data.get("geometry", {}).get("coordinates", [])
 
             if len(coordinates) == 2:
@@ -785,12 +919,8 @@ def post_area():
                 raise GeonatureApiError(message)
 
             p = shapely.geometry.Point(longitude, latitude)
-
             wkt = circle_from_point(p, radius=500, nb_point=100)
             new_area.geom = from_shape(wkt, srid=4326)
-
-            # shape = asShape(request_data["geometry"])
-            # new_area.geom = from_shape(Point(shape), srid=4326)
         except Exception as e:
             current_app.logger.debug(e)
             raise GeonatureApiError(e)

@@ -42,15 +42,13 @@ export class SpeciesSiteDetailComponent
         });
         this.module = 'species_sites';
 
-        this.areaService.newSpeciesSiteObsCreated.subscribe(
-            function (newSpeciesSiteObsFeature) {
-                this.programService
-                    .getSpeciesSiteDetails(this.species_site_id)
-                    .subscribe((speciesSites) => {
-                        this.speciesSite = speciesSites['features'][0];
-                    });
-            }.bind(this)
-        );
+        this.areaService.newSpeciesSiteObsCreated.subscribe(() => {
+            this.programService
+                .getSpeciesSiteDetails(this.species_site_id)
+                .subscribe((speciesSites) => {
+                    this.speciesSite = speciesSites['features'][0];
+                });
+        });
     }
 
     ngAfterViewInit() {

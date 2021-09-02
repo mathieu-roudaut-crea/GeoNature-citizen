@@ -16,6 +16,7 @@ import { ModalFlowService } from '../../programs/observations/modalflow/modalflo
 import { AreaService } from '../../programs/areas/areas.service';
 import { LoginComponent } from '../login/login.component';
 import { ModalsTopbarService } from '../../core/topbar/modalTopbar.service';
+import * as L from 'leaflet';
 
 @Component({
     selector: 'app-user-dashboard',
@@ -38,6 +39,7 @@ export class UserDashboardComponent implements OnInit {
     main_badges: any = [];
     programs_badges: any = [];
     recognition_badges: any = [];
+    AppConfig = AppConfig;
 
     observations: any;
     myobs: any;
@@ -76,6 +78,16 @@ export class UserDashboardComponent implements OnInit {
 
     ngOnInit(): void {
         this.verifyUser();
+
+        this.areaService.areaEdited.subscribe(() => {
+            this.getData();
+        });
+        this.areaService.speciesSiteEdited.subscribe(() => {
+            this.getData();
+        });
+        this.areaService.speciesSiteObsEdited.subscribe(() => {
+            this.getData();
+        });
     }
 
     verifyUser() {
@@ -100,6 +112,7 @@ export class UserDashboardComponent implements OnInit {
                         this.admin = user['features']['admin'];
                         this.isRelay = user['features']['is_relay'];
                         this.userService.role_id = this.role_id;
+                        this.userService.admin = this.admin;
                         if (user['features']['avatar'])
                             this.userAvatar =
                                 this.appConfig.API_ENDPOINT +
@@ -210,7 +223,6 @@ export class UserDashboardComponent implements OnInit {
                 this.mySpeciesSites = data[3];
                 this.mySpeciesSitesObs = data[4];
                 if (AppConfig['REWARDS']) {
-                    console.log('data5', data[5]);
                     this.badges = data[5];
                     localStorage.setItem('badges', JSON.stringify(this.badges));
                     console.log('badges', this.badges);
@@ -243,9 +255,7 @@ export class UserDashboardComponent implements OnInit {
                         site.geometry.coordinates[0],
                         site.geometry.coordinates[1]
                     );
-                    site.properties.coords = coords; // for use in user obs component
-                    // this.rowData(obs, coords);
-                    // this.obsExport(obs);
+                    site.properties.coords = coords;
                 });
                 this.myAreas.features.forEach((area) => {
                     const coords: Point = new Point(
@@ -290,6 +300,22 @@ export class UserDashboardComponent implements OnInit {
                 this.adminSpeciesSites = data[1];
                 this.adminSpeciesSitesObs = data[2];
                 this.adminObservers = data[3];
+
+                this.adminAreas.features.forEach((area) => {
+                    const areaCenter = L.geoJSON(area).getBounds().getCenter();
+                    area.properties.coords = new Point(
+                        areaCenter.lng,
+                        areaCenter.lat
+                    );
+                });
+
+                this.adminSpeciesSites.features.forEach((site) => {
+                    const coords: Point = new Point(
+                        site.geometry.coordinates[0],
+                        site.geometry.coordinates[1]
+                    );
+                    site.properties.coords = coords;
+                });
             }
         });
     }

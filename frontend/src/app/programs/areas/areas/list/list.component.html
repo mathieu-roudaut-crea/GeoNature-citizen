@@ -8,35 +8,35 @@
         </div>
         <div id="list">
             <div
-                *ngFor="let o of areas"
-                (click)="onAreaClick(o)"
+                *ngFor="let area of areas"
+                (click)="onAreaClick(area)"
                 class="espece"
             >
                 <img
                     src="{{
-                        o.properties.photo
-                            ? apiEndpoint + o.properties.photo.url
+                        area.properties.photo
+                            ? apiEndpoint + area.properties.photo.url
                             : 'assets/no_photo_light.png'
                     }}"
                 />
                 <div class="infos">
                     <h5>
-                        {{ o.properties.name }}
+                        {{ area.properties.name }}
                         <span *ngIf="userDashboard" class="pull-right">
                             &nbsp;
                             <app-areamodalflow
                                 #modalFlowRef
-                                [coords]="o.properties.coords"
-                                [updateData]="o.properties"
-                                [program_id]="o.properties.id_program"
+                                [coords]="area.properties.coords"
+                                [updateData]="area.properties"
+                                [program_id]="area.properties.id_program"
                             >
                                 <i
                                     class="fa fa-edit text-primary"
                                     placement="bottom"
                                     ngbTooltip="Editer"
                                     *ngIf="
-                                        o.properties.id_role ===
-                                        userService.role_id
+                                        area.properties.id_role ===
+                                        userService.role_id || userService.admin === true
                                     "
                                     btn-open
                                 ></i>
@@ -48,30 +48,30 @@
                                 ngbTooltip="Supprimer"
                                 (click)="
                                     areaService.deleteArea.emit(
-                                        o.properties.id_area
+                                        area.properties.id_area
                                     )
                                 "
                                 *ngIf="
-                                    o.properties.creator_can_delete &&
-                                    o.properties.id_role === userService.role_id
+                                    area.properties.creator_can_delete &&
+                                    area.properties.id_role === userService.role_id
                                 "
                                 owner-actions
                             ></i>
                         </span>
                     </h5>
                     <p>
-                        ajoutée par <span>{{ o.properties.obs_txt }}</span>
+                        ajoutée par <span>{{ area.properties.obs_txt }}</span>
                     </p>
                     <p>
                         le
                         <span>{{
-                            o.properties.timestamp_create.substring(0, 10)
+                            area.properties.timestamp_create.substring(0, 10)
                                 | date: 'longDate'
                         }}</span>
                     </p>
                 </div>
                 <div class="add-species-site">
-                    <div title="Ajouter un individu" (click)="onAddSpeciesSiteClick(o.properties.id_area)">
+                    <div title="Ajouter un individu" (click)="onAddSpeciesSiteClick(area.properties.id_area)">
                         +
                     </div>
                 </div>
@@ -79,9 +79,9 @@
                     class="hide"
                     [routerLink]="[
                         '/programs',
-                        o.properties.id_program,
+                        area.properties.id_program,
                         'areas',
-                        o.properties.id_area
+                        area.properties.id_area
                     ]"
                     style="cursor: pointer"
                     title="Voir les détails sur cette zone"

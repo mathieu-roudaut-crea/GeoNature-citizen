@@ -82,6 +82,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     hasZoomAlert: boolean;
     zoomAlertTimeout: any;
     mapVars: any = {};
+    AppConfig = AppConfig;
 
     jsonData: object = {};
     formOptions: any = {
@@ -117,8 +118,8 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     ) {}
 
     ngOnInit(): void {
-        if (this.data.updateData) {
-            this.patchForm(this.data.updateData);
+        if (this.data.speciesSiteUpdateData) {
+            this.patchForm(this.data.speciesSiteUpdateData);
         }
 
         this.mapService.coordsChange.subscribe((value) => {
@@ -161,6 +162,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
             data: this.jsonData,
             layout: this.partialLayout,
         };
+        console.log('this.json', this.formInputObject);
     }
     updatePartialLayout() {
         this.partialLayout = this.jsonSchema.layout;
@@ -312,12 +314,15 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
             });
     }
 
-    patchForm(updateData): void {
+    patchForm(speciesSiteUpdateData): void {
+        this.area_id = speciesSiteUpdateData.id_area;
+        this.jsonData = speciesSiteUpdateData.json_data;
         this.speciesSiteForm.patchValue({
-            name: updateData.name,
+            name: speciesSiteUpdateData.name,
+            cd_nom: speciesSiteUpdateData.cd_nom,
             geometry: this.data.coords ? this.coords : '',
-            area_id: updateData.area_id,
-            id_species_site: updateData.id_species_site,
+            area_id: speciesSiteUpdateData.area_id,
+            id_species_site: speciesSiteUpdateData.id_species_site,
         });
     }
 
@@ -349,7 +354,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                 Accept: 'application/json',
             }),
         };
-        if (this.data.updateData) {
+        if (this.data.speciesSiteUpdateData) {
             return this.http.patch<any>(
                 `${this.URL}/areas/species_sites/`,
                 formData,

@@ -12,7 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
-import { NgbDate } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDate, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppConfig } from '../../../../../conf/app.config';
 
@@ -34,6 +34,8 @@ export class SpeciesSiteObservationFormComponent
 {
     private readonly URL = AppConfig.API_ENDPOINT;
     @Input() species_site_id: number;
+    @Input('data') data;
+
     today = new Date();
     observationForm = new FormGroup({
         date: new FormControl(
@@ -44,9 +46,10 @@ export class SpeciesSiteObservationFormComponent
             },
             [Validators.required, ngbDateMaxIsToday()]
         ),
-        data: new FormControl(''),
+        json_data: new FormControl(''),
         species_stage_id: new FormControl(0),
         stages_step_id: new FormControl(0),
+        id_species_site_observation: new FormControl(),
     });
     selectedStage = 0;
     selectedStep = 0;
@@ -75,6 +78,7 @@ export class SpeciesSiteObservationFormComponent
         private http: HttpClient,
         private route: ActivatedRoute,
         private programService: GncProgramsService,
+        private dateParser: NgbDateParserFormatter,
         public areaService: AreaService
     ) {
         this.apiEndpoint = AppConfig.API_ENDPOINT;
@@ -82,10 +86,31 @@ export class SpeciesSiteObservationFormComponent
 
     ngOnInit() {
         console.debug('ngOnInit');
-        console.debug('species_site_id:', this.species_site_id);
-        // const that = this;
+        if (this.data && this.data.obsUpdateData) {
+            this.patchForm(this.data.obsUpdateData);
+        }
+
         this.loadJsonSchema().subscribe((data: any) => {
             this.initForm(data);
+        });
+    }
+
+    patchForm(obsUpdateData): void {
+        this.species_site_id = obsUpdateData.id_species_site;
+        this.jsonData = obsUpdateData.json_data;
+
+        this.selectedStage = obsUpdateData.stages_step
+            ? obsUpdateData.stages_step.id_species_stage
+            : 0;
+        this.selectedStep = obsUpdateData.id_stages_step;
+
+        this.observationForm.patchValue({
+            name: obsUpdateData.name,
+            area_id: obsUpdateData.area_id,
+            id_stages_step: obsUpdateData.id_stages_step,
+            date: this.dateParser.parse(obsUpdateData.date),
+            id_species_site_observation:
+                obsUpdateData.id_species_site_observation,
         });
     }
 
@@ -176,6 +201,7 @@ export class SpeciesSiteObservationFormComponent
         const observations = this.speciesSite.properties.observations;
         let sameStageThisYear = false;
         let dateOfStageStep = null;
+
         observations.features.forEach((observation) => {
             if (
                 !sameStageThisYear &&
@@ -183,6 +209,8 @@ export class SpeciesSiteObservationFormComponent
                 observation.properties.date.startsWith(
                     this.observationForm.value.date.year + ''
                 ) &&
+                this.observationForm.value.id_species_site_observation !=
+                    observation.properties.id_species_site_observation &&
                 (this.observationForm.value.stages_step_id ==
                     observation.properties.stages_step.id_stages_step ||
                     observation.properties.stages_step.order > 1)
@@ -192,7 +220,7 @@ export class SpeciesSiteObservationFormComponent
             }
         });
 
-        if (this.getCurrentStepOrder() === 1) {
+        if (sameStageThisYear && this.getCurrentStepOrder() === 1) {
             const dateParts = dateOfStageStep.split('-');
             const latestStepDate = new Date(
                 dateParts[0],
@@ -255,30 +283,28 @@ export class SpeciesSiteObservationFormComponent
             this.observationForm.controls.date.value
         );
 
-        console.log(visitDate);
-        console.log(
-            new Date(
-                visitDate.year,
-                visitDate.month,
-                visitDate.day
-            ).toISOString()
-        );
+        const formData = this.observationForm.value;
+        formData.json_data = JSON.stringify(this.jsonData);
+        formData.date = new Date(
+            visitDate.year,
+            visitDate.month - 1,
+            visitDate.day + 1
+        )
+            .toISOString()
+            .match(/\d{4}-\d{2}-\d{2}/)[0];
 
-        this.observationForm.patchValue({
-            data: this.jsonData,
-            date: new Date(
-                visitDate.year,
-                visitDate.month - 1,
-                visitDate.day + 1
-            )
-                .toISOString()
-                .match(/\d{4}-\d{2}-\d{2}/)[0],
-        });
-
-        return this.http.post<any>(
-            `${this.URL}/areas/species_sites/${this.species_site_id}/observations`,
-            this.observationForm.value,
-            httpOptions
-        );
+        if (this.data.obsUpdateData) {
+            return this.http.patch<any>(
+                `${this.URL}/areas/observations/`,
+                formData,
+                httpOptions
+            );
+        } else {
+            return this.http.post<any>(
+                `${this.URL}/areas/species_sites/${this.species_site_id}/observations`,
+                formData,
+                httpOptions
+            );
+        }
     }
 }

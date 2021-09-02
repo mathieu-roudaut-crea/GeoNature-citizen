@@ -22,6 +22,13 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
         this.form.onFormSubmit().subscribe(
             function (result) {
                 if (result) {
+                    if (result.features) {
+                        this.areaService.newSpeciesSiteObsCreated.emit(
+                            result.features[0]
+                        );
+                    } else {
+                        this.areaService.speciesSiteObsEdited.emit();
+                    }
                     this.closeModal();
                     this.router.navigate([
                         `/programs/${result.features[0].program_id}/areas-observations`,
@@ -35,10 +42,14 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
         this.form.onFormSubmit().subscribe(
             function (result) {
                 if (result) {
-                    console.debug('committed action > data:', this.data);
-                    this.areaService.newSpeciesSiteObsCreated.emit(
-                        result.features[0]
-                    );
+                    if (result.features) {
+                        console.debug('committed action > data:', this.data);
+                        this.areaService.newSpeciesSiteObsCreated.emit(
+                            result.features[0]
+                        );
+                    } else {
+                        this.areaService.speciesSiteObsEdited.emit();
+                    }
                     this.closeModal();
                 }
             }.bind(this)

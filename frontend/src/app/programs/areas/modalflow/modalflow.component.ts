@@ -21,6 +21,8 @@ export class AreaModalFlowComponent {
     @Input('modalversion') modalversion = true;
     @ViewChild('content', { static: true }) content: ElementRef;
     @Input('updateData') updateData;
+    @Input('speciesSiteUpdateData') speciesSiteUpdateData;
+    @Input('obsUpdateData') obsUpdateData;
     @Input('program_id') program_id;
     flowitems: FlowItem[];
     timeout: any;
@@ -31,11 +33,12 @@ export class AreaModalFlowComponent {
     ) {}
 
     clicked() {
-        // this.flowService.openFormModal({ program_id: this.program_id, coords: this.coords });
         this.flowitems = this.flowService.getFlowItems({
             program_id: this.program_id,
             coords: this.coords,
             updateData: this.updateData,
+            speciesSiteUpdateData: this.speciesSiteUpdateData,
+            obsUpdateData: this.obsUpdateData,
         });
         if (this.modalversion) {
             const modalRef = this.flowService.open(this.content);

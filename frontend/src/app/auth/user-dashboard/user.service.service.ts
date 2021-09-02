@@ -11,6 +11,7 @@ import { Relay } from '../models';
 })
 export class UserService {
     role_id: number;
+    admin = false;
     private headers: HttpHeaders = new HttpHeaders({
         'Content-Type': 'application/json',
     });

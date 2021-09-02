@@ -9,7 +9,7 @@
             <th scope="col">Individu</th>
             <th scope="col">Etape</th>
             <th scope="col">Observation</th>
-            <th scope="col">Voir</th>
+            <th scope="col">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -54,18 +54,30 @@
                 </span>
             </td>
             <td>
-                <div
-                    [routerLink]="[
-                        '/programs',
-                        program_id,
-                        'areas-observations',
-                        observation.properties.id_species_site_observation
-                    ]"
-                    class="see-more-link"
-                    ngbTooltip="Voir les détails sur cette observation"
+                <app-areamodalflow
+                    [obsUpdateData]="observation.properties"
                 >
-                    <img src="assets/binoculars.png"/>
+                    <i
+                        class="fa fa-edit text-primary see-more-link"
+                        placement="left"
+                        ngbTooltip="Editer"
+                        btn-open
+                    ></i>
+                </app-areamodalflow>
+                <div>
+                    <i
+                        [routerLink]="[
+                            '/programs',
+                            observation.properties.species_site.area.id_program,
+                            'areas-observations',
+                            observation.properties.id_species_site_observation
+                        ]"
+                        ngbTooltip="Voir les détails sur cette observation"
+                        class="fa fa-eye see-more-link"
+                        placement="left"
+                    ></i>
                 </div>
+
             </td>
         </tr>
         </tbody>

@@ -19,7 +19,12 @@ export class AreaModalFlowService extends ModalFlowService {
         items.push(
             new FlowItem(OnboardComponent, { ...init_data, service: this })
         );
-        if (!init_data.area_id && !init_data.species_site_id) {
+        if (
+            !init_data.area_id &&
+            !init_data.species_site_id &&
+            !init_data.speciesSiteUpdateData &&
+            !init_data.obsUpdateData
+        ) {
             items.push(
                 new FlowItem(AreaStepComponent, { ...init_data, service: this })
             );
@@ -30,12 +35,18 @@ export class AreaModalFlowService extends ModalFlowService {
                 })
             );
         }
-        if (!init_data.updateData && !init_data.species_site_id) {
+        if (
+            !init_data.updateData &&
+            !init_data.obsUpdateData &&
+            !init_data.species_site_id
+        ) {
             items.push(new FlowItem(SpeciesSiteStepComponent));
-        } // else user only edits the area and do not attach species_site
-        if (!init_data.updateData) {
+        }
+
+        if (!init_data.updateData && !init_data.speciesSiteUpdateData) {
             items.push(new FlowItem(SpeciesSiteObsStepComponent));
-        } // else user only edits the area and do not attach species_site
+        }
+
         items.push(new FlowItem(RewardComponent, { service: this }));
         return items;
     }

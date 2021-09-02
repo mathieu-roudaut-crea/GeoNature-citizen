@@ -27,8 +27,7 @@
                             <app-areamodalflow
                                 #modalFlowRef
                                 [coords]="speciesSite.properties.coords"
-                                [updateData]="speciesSite.properties"
-                                [program_id]="speciesSite.properties.id_program"
+                                [speciesSiteUpdateData]="speciesSite.properties"
                             >
                                 <i
                                     class="fa fa-edit text-primary"
@@ -36,7 +35,7 @@
                                     ngbTooltip="Editer"
                                     *ngIf="
                                         speciesSite.properties.id_role ===
-                                        userService.role_id
+                                        userService.role_id || userService.admin === true
                                     "
                                     btn-open
                                 ></i>

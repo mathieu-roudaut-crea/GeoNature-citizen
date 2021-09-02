@@ -274,6 +274,7 @@ export class AreaFormComponent implements AfterViewInit {
             id_program: updateData.program_id,
             id_area: updateData.id_area,
         });
+        this.jsonData = updateData.json_data;
     }
 
     onFormSubmit(): Promise<object> {

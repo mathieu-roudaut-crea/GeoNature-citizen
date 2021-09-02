@@ -12,7 +12,7 @@
 </div>
 
 <div class="modal-body add-obs">
-    <app-species-site-obs-form [species_site_id]="data.species_site_id"></app-species-site-obs-form>
+    <app-species-site-obs-form [data]="data" [species_site_id]="data.species_site_id"></app-species-site-obs-form>
 </div>
 
 <div class="modal-footer" *ngIf="form.readyToDisplay">

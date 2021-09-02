@@ -21,10 +21,9 @@
                 <!-- TAXON SELECT -->
                 <div
                     *ngIf="
-                    taxaCount >= taxonSelectInputThreshold &&
-                    taxaCount < taxonAutocompleteInputThreshold
-                "
-                    class="d-inline-flex toolbar"
+                        taxaCount >= taxonSelectInputThreshold &&
+                        taxaCount < taxonAutocompleteInputThreshold
+                    "
                 >
                     <select formControlName="cd_nom" class="form-control rounded-0">
                         <option
