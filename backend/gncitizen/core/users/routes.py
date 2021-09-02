@@ -361,6 +361,54 @@ def get_allusers():
     allusers = UserModel.return_all()
     return allusers, 200
 
+@users_api.route("/relays", methods=["GET"])
+@json_resp
+def get_relays():
+    """list all relays
+    ---
+    tags:
+      - Relays
+    summary: List all relays
+    produces:
+      - application/json
+    responses:
+      200:
+        description: list all relays
+    """
+    return UserModel.return_relays(), 200
+
+@users_api.route("/user/<int:id>/info", methods=["GET", "PATCH"])
+@json_resp
+@jwt_required()
+def selected_user(id):
+    """get or patch user model (only if admin)
+    ---
+    tags:
+      - Authentication
+    produces:
+      - application/json
+    responses:
+      200:
+        description: selected user model
+    """
+    try:
+        current_user_email = get_jwt_identity()
+        current_user = UserModel.query.filter_by(email=current_user_email).one()
+        if current_user.admin:
+            user = UserModel.query.filter_by(id_user=id).one()
+            return get_or_patch_user(user)
+        else:
+            return (
+                {"message": "Forbidden"},
+                403,
+            )
+    except Exception as e:
+        # raise GeonatureApiError(e)
+        current_app.logger.error("AUTH ERROR:", str(e))
+        return (
+            {"message": str(e)},
+            400,
+        )
 
 @users_api.route("/user/info", methods=["GET", "PATCH"])
 @json_resp
@@ -380,6 +428,18 @@ def logged_user():
     try:
         current_user = get_jwt_identity()
         user = UserModel.query.filter_by(email=current_user).one()
+        return get_or_patch_user(user)
+    except Exception as e:
+        # raise GeonatureApiError(e)
+        current_app.logger.error("AUTH ERROR:", str(e))
+        return (
+            {"message": str(e)},
+            400,
+        )
+
+
+def get_or_patch_user(user):
+    try:
         if flask.request.method == "GET":
             # base stats, to enhance as we go
             result = user.as_secured_dict(True)

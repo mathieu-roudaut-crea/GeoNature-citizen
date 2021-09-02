@@ -39,11 +39,11 @@
                 </span>
             </td>
             <td>
-                <span [ngbTooltip]="observer.properties.linked_relay">
+                <span [ngbTooltip]="observer.properties.linked_relay ? observer.properties.linked_relay.organism : ''">
                     {{ observer.properties.linked_relay ? observer.properties.linked_relay.organism : '' }}
                 </span>
             </td>
-            <td>
+            <td (click)="onEditUserInfos(observer.properties.id_user, userEditionModal)">
                 Edit
             </td>
         </tr>
@@ -65,3 +65,115 @@
         </select>
     </div>
 </div>
+
+<ng-template #userEditionModal let-modal>
+    <div class="modal-header">
+        <h4 i18n="Update user data@@updateUserData">
+            Mettre à jour l'utilisateur
+        </h4>
+        <button
+            type="button"
+            class="close rounded-0"
+            aria-label="Close"
+            (click)="modal.dismiss('Cross click')"
+        >
+            &times;
+        </button>
+    </div>
+    <div class="modal-body">
+        <ngb-alert
+            *ngIf="errorMessage"
+            type="danger"
+            (close)="errorMessage = null"
+        >{{ errorMessage }}
+        </ngb-alert>
+        <form
+            [formGroup]="userForm"
+            (ngSubmit)="userForm.valid && onUpdateUserData(userForm.value)"
+        >
+            <div class="form-row">
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label
+                            for="username"
+                            i18n="your username@@yourUsernameLabel"
+                        >
+                            Nom d'utilisateur *
+                        </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"
+                                ><i class="fa fa-user"></i
+                                ></span>
+                            </div>
+                            <input
+                                type="text"
+                                id="username"
+                                formControlName="username"
+                                class="form-control rounded-0"
+                                i18n-placeholder="
+                                    your username
+                                    placeholder@@yourUsernameInputPlaceholder"
+                                placeholder="Entrez le nom d'utilisateur"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label
+                            for="email"
+                            i18n="your email label@@yourEmailInputLabel"
+                        >Email *</label
+                        >
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"
+                                ><i class="fa fa-envelope"></i
+                                ></span>
+                            </div>
+                            <input
+                                type="email"
+                                class="form-control rounded-0"
+                                formControlName="email"
+                                id="email"
+                                i18n-placeholder="
+                                    your email
+                                    placeholder@@yourEmailInputPlaceholder"
+                                placeholder="Entrez l'email"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <input
+                                type="checkbox"
+                                id="is_relay"
+                                formControlName="is_relay"
+                                name="is_relay"
+                            />
+                            <label
+                                for="is_relay"
+                                class="checkbox-label"
+                                i18n="Is relay?@@is_relay"
+                            >
+                                Cet utilisateur est un relais
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button
+                type="submit"
+                class="btn btn-default btn-big btn-outline-primary rounded-0"
+                i18n="update user data btn@@updateUserDataBtn"
+                [disabled]="userForm.invalid"
+            >
+                Mettre à jour
+            </button>
+        </form>
+    </div>
+</ng-template>

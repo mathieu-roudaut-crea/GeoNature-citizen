@@ -22,6 +22,11 @@ export class UserService {
         return this.http.get(url, { headers: this.headers });
     }
 
+    getUserInfo(id) {
+        const url = `${AppConfig.API_ENDPOINT}/user/${id}/info`;
+        return this.http.get(url, { headers: this.headers });
+    }
+
     getBadgeCategories(userId: number) {
         return this.http.get<Object>(
             `${AppConfig.API_ENDPOINT}/rewards/${userId}`
@@ -33,6 +38,20 @@ export class UserService {
 
         return this.http
             .patch(`${AppConfig.API_ENDPOINT}/user/info`, personalInfo, {
+                headers: this.headers,
+            })
+            .pipe(
+                catchError((error) => {
+                    return throwError(error);
+                })
+            );
+    }
+
+    updateUserData(id, personalInfo) {
+        console.log('up', personalInfo);
+
+        return this.http
+            .patch(`${AppConfig.API_ENDPOINT}/user/${id}/info`, personalInfo, {
                 headers: this.headers,
             })
             .pipe(

@@ -487,13 +487,14 @@ def get_admin_observers():
             return prepare_list([])
 
         if user.admin == 1:
-            observers = (UserModel.query.all())
+            observers = (UserModel.query.order_by(UserModel.timestamp_create.desc()).all())
         else:
             relay = aliased(UserModel)
             observers = (
                 UserModel.query
                     .join(relay, relay.id_user == UserModel.linked_relay_id)
                     .filter(relay.id_user == user_id)
+                    .order_by(UserModel.timestamp_create.desc())
                     .all()
             )
 
