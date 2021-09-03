@@ -908,7 +908,7 @@ def post_area():
             if json_data is not None:
                 new_area.json_data = json.loads(json_data)
         except Exception as e:
-            current_app.logger.warning("[post_observation] json_data ", e)
+            current_app.logger.warning("[post_areas] json_data ", e)
             raise GeonatureApiError(e)
 
         try:
@@ -1015,7 +1015,7 @@ def post_species_site():
             if json_data is not None:
                 new_species_site.json_data = json.loads(json_data)
         except Exception as e:
-            current_app.logger.warning("[post_observation] json_data ", e)
+            current_app.logger.warning("[post_species_site] json_data ", e)
             raise GeonatureApiError(e)
 
         try:
@@ -1056,11 +1056,8 @@ def post_observation(species_site_id):
 
         new_observation = SpeciesSiteObservationModel(
             id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"],
-            json_data=request_data["data"]
+            json_data=request_data["json_data"]
         )
-
-        print("-------------------------------------------")
-        print(request_data["data"])
 
         id_role = get_id_role_if_exists()
         if id_role is not None:
