@@ -8,6 +8,8 @@ from flask_jwt_extended import (
     get_jwt_identity,
     jwt_required,
 )
+
+from utils_flask_sqla.response import json_resp_accept_empty_list
 from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from gncitizen.utils.mail_check import confirm_user_email, confirm_token
@@ -362,7 +364,7 @@ def get_allusers():
     return allusers, 200
 
 @users_api.route("/relays", methods=["GET"])
-@json_resp
+@json_resp_accept_empty_list
 def get_relays():
     """list all relays
     ---

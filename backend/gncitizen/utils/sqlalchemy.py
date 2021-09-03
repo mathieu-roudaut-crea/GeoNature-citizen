@@ -195,7 +195,7 @@ def json_resp(fn):
 
 
 def to_json_resp(res, status=200, filename=None, as_file=False, indent=None):
-    if not res and type(res) != list:
+    if not res:
         status = 404
         res = {"message": "not found"}
 
