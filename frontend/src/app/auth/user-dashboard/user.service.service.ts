@@ -97,9 +97,7 @@ export class UserService {
     }
 
     getAdminAreas() {
-        return this.http.get<Object>(
-            `${AppConfig.API_ENDPOINT}/areas/admin`
-        );
+        return this.http.get<Object>(`${AppConfig.API_ENDPOINT}/areas/admin`);
     }
 
     getAdminSpeciesSites() {
@@ -108,9 +106,13 @@ export class UserService {
         );
     }
 
-    getAdminSpeciesSitesObs() {
+    getAdminSpeciesSitesObs(page = 0, pageSize = 0) {
+        let parameters = '';
+        if (page > 0 && pageSize > 0) {
+            parameters += `?page=${page}&page-size=${pageSize}`;
+        }
         return this.http.get<Object>(
-            `${AppConfig.API_ENDPOINT}/areas/observations/admin`
+            `${AppConfig.API_ENDPOINT}/areas/observations/admin${parameters}`
         );
     }
 

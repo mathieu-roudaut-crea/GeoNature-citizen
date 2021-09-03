@@ -38,7 +38,7 @@ def format_entity(data, with_geom=True):
     return feature
 
 
-def prepare_list(data, with_geom=True):
+def prepare_list(data, with_geom=True, maximum_count=0):
     count = len(data)
     features = []
     for element in data:
@@ -46,6 +46,8 @@ def prepare_list(data, with_geom=True):
         features.append(formatted)
     data = FeatureCollection(features)
     data["count"] = count
+    if maximum_count != 0:
+        data["maximum_count"] = maximum_count
     return data
 
 
@@ -437,24 +439,33 @@ def get_admin_observations():
         description: List of all observations
     """
     try:
+        if not request.args.get('page'):
+            page = 0
+        else:
+            page = int(request.args.get('page')) - 1
+
+        if not request.args.get('page-size'):
+            page_size = 1000
+        else:
+            page_size = int(request.args.get('page-size'))
+
         user_id = get_id_role_if_exists()
         user = UserModel.query.get(user_id)
         if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
         if user.admin == 1:
-            observations = (
+            observations_query = (
                 SpeciesSiteObservationModel.query
                     .join(SpeciesSiteModel,
                           SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
                     .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                     .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
-                    .all()
             )
         else:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
-            observations = (
+            observations_query = (
                 SpeciesSiteObservationModel.query
                     .join(SpeciesSiteModel,
                           SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
@@ -463,10 +474,18 @@ def get_admin_observations():
                     .join(relay, relay.id_user == creator.linked_relay_id)
                     .filter(relay.id_user == user_id)
                     .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
-                    .all()
             )
 
-        return prepare_list(observations, with_geom=False)
+        observations_count = observations_query.count()
+
+        if page_size:
+            observations_query = observations_query.limit(page_size * 1)
+        if page:
+            observations_query = observations_query.offset(page * 1 * page_size * 1)
+
+        observations = observations_query.all()
+
+        return prepare_list(observations, with_geom=False, maximum_count=observations_count)
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -573,6 +592,16 @@ def get_observations_by_program(id):
         description: List of all species sites
     """
     try:
+        if not request.args.get('page'):
+            page = 0
+        else:
+            page = int(request.args.get('page')) - 1
+
+        if not request.args.get('page-size'):
+            page_size = 1000
+        else:
+            page_size = int(request.args.get('page-size'))
+
         observations_query = (SpeciesSiteObservationModel.query
                               .join(SpeciesSiteModel,
                                     SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
@@ -588,9 +617,16 @@ def get_observations_by_program(id):
             else:
                 return prepare_list([])
 
+        observations_count = observations_query.count()
+
+        if page_size:
+            observations_query = observations_query.limit(page_size * 1)
+        if page:
+            observations_query = observations_query.offset(page * 1 * page_size * 1)
+
         observations = observations_query.all()
 
-        return prepare_list(observations, with_geom=False)
+        return prepare_list(observations, with_geom=False, maximum_count=observations_count)
     except Exception as e:
         return {"error_message": str(e)}, 400
 

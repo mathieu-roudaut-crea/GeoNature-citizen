@@ -116,7 +116,12 @@
                     </app-areas>
                     <app-species-sites *ngIf="selectedAreasTab === 'species_sites'" [speciesSites]="adminSpeciesSites" [userDashboard]="true">
                     </app-species-sites>
-                    <app-species-sites-obs *ngIf="selectedAreasTab === 'observations'" [observations]="adminSpeciesSitesObs" [userDashboard]="true">
+                    <app-species-sites-obs
+                        *ngIf="selectedAreasTab === 'observations'"
+                        [observations]="adminSpeciesSitesObs"
+                        [userDashboard]="true"
+                        (refreshListEvent)="refreshAdminObservationsList($event)"
+                    >
                     </app-species-sites-obs>
                 </div>
 

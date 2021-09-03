@@ -171,11 +171,18 @@ export class GncProgramsService implements OnInit {
     }
 
     getProgramSpeciesSitesObservations(
-        id: number
+        id: number,
+        page = 0,
+        pageSize = 0
     ): Observable<FeatureCollection> {
+        let parameters = '';
+        if (page > 0 && pageSize > 0) {
+            parameters += `?page=${page}&page-size=${pageSize}`;
+        }
+
         return this.http
             .get<FeatureCollection>(
-                `${this.URL}/areas/program/${id}/observations/`
+                `${this.URL}/areas/program/${id}/observations/${parameters}`
             )
             .pipe(
                 catchError(

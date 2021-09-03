@@ -18,6 +18,7 @@ export class SpeciesSitesObsListComponent implements OnChanges {
     @Input('observations') observationsCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('program_id') program_id: number;
+    @Output() refreshListEvent = new EventEmitter<string>();
     observations: Feature[] = [];
     taxa: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
@@ -27,14 +28,36 @@ export class SpeciesSitesObsListComponent implements OnChanges {
 
     ngOnChanges() {
         if (this.observationsCollection) {
-            this.collectionSize = this.observationsCollection['count'];
-            this.refreshList();
+            if (this.observationsCollection['maximum_count']) {
+                this.collectionSize =
+                    this.observationsCollection['maximum_count'];
+                this.observations = this.observationsCollection['features'];
+            } else {
+                this.collectionSize = this.observationsCollection['count'];
+                this.observations = this.observationsCollection[
+                    'features'
+                ].slice(
+                    (this.page - 1) * this.pageSize,
+                    (this.page - 1) * this.pageSize + this.pageSize
+                );
+            }
+        } else {
+            this.refreshListEvent.emit(
+                '{"page": ' + this.page + ', "pageSize": ' + this.pageSize + '}'
+            );
         }
     }
+
     refreshList() {
-        this.observations = this.observationsCollection['features'].slice(
-            (this.page - 1) * this.pageSize,
-            (this.page - 1) * this.pageSize + this.pageSize
-        );
+        if (this.observationsCollection['maximum_count']) {
+            this.refreshListEvent.emit(
+                '{"page": ' + this.page + ', "pageSize": ' + this.pageSize + '}'
+            );
+        } else {
+            this.observations = this.observationsCollection['features'].slice(
+                (this.page - 1) * this.pageSize,
+                (this.page - 1) * this.pageSize + this.pageSize
+            );
+        }
     }
 }

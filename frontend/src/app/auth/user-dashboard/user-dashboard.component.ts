@@ -286,20 +286,19 @@ export class UserDashboardComponent implements OnInit {
         const adminData = [];
         const adminAreas = this.userService.getAdminAreas();
         const adminSpeciesSites = this.userService.getAdminSpeciesSites();
-        const adminSpeciesSitesObs = this.userService.getAdminSpeciesSitesObs();
         const adminObservers = this.userService.getAdminObservers();
+
+        // this.refreshAdminObservationsList({ page: 1, pageSize: 10 });
 
         adminData.push(adminAreas);
         adminData.push(adminSpeciesSites);
-        adminData.push(adminSpeciesSitesObs);
         adminData.push(adminObservers);
 
         forkJoin(adminData).subscribe((data: any) => {
             if (data.length > 1) {
                 this.adminAreas = data[0];
                 this.adminSpeciesSites = data[1];
-                this.adminSpeciesSitesObs = data[2];
-                this.adminObservers = data[3];
+                this.adminObservers = data[2];
 
                 this.adminAreas.features.forEach((area) => {
                     const areaCenter = L.geoJSON(area).getBounds().getCenter();
@@ -317,6 +316,24 @@ export class UserDashboardComponent implements OnInit {
                     site.properties.coords = coords;
                 });
             }
+        });
+    }
+
+    refreshAdminObservationsList(event) {
+        let data = { page: 0, pageSize: 0 };
+        if (event) {
+            try {
+                data = JSON.parse(event);
+            } catch (e) {
+                console.log('non valid json data', event, e);
+            }
+        }
+        const adminSpeciesSitesObs = this.userService.getAdminSpeciesSitesObs(
+            data.page,
+            data.pageSize
+        );
+        adminSpeciesSitesObs.subscribe((data) => {
+            this.adminSpeciesSitesObs = data;
         });
     }
 

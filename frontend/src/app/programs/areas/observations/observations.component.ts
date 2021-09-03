@@ -6,6 +6,8 @@ import {
     ViewChildren,
     QueryList,
     Input,
+    Output,
+    EventEmitter,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -36,6 +38,7 @@ export class SpeciesSitesObsComponent
     title = 'Observations';
     @Input('observations') observations: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Output() refreshListEvent = new EventEmitter<string>();
     @ViewChild(SpeciesSitesObsListComponent, { static: true })
     observationsList: SpeciesSitesObsListComponent;
 
@@ -56,6 +59,22 @@ export class SpeciesSitesObsComponent
         });
     }
 
+    refreshList(event) {
+        if (this.userDashboard) {
+            this.refreshListEvent.emit(event);
+        } else {
+            let data = { page: 0, pageSize: 0 };
+            if (event) {
+                try {
+                    data = JSON.parse(event);
+                } catch (e) {
+                    console.log('non valid json data', event, e);
+                }
+            }
+            this.loadData(data);
+        }
+    }
+
     ngOnInit() {
         this.route.data.subscribe((data: { programs: Program[] }) => {
             if (this.userDashboard) {
@@ -67,14 +86,16 @@ export class SpeciesSitesObsComponent
             );
 
             this.verifyProgramPrivacyAndUser();
-
-            this.loadData();
         });
     }
 
-    loadData() {
+    loadData(pageData = { page: 0, pageSize: 0 }) {
         this.programService
-            .getProgramSpeciesSitesObservations(this.program_id)
+            .getProgramSpeciesSitesObservations(
+                this.program_id,
+                pageData.page,
+                pageData.pageSize
+            )
             .subscribe((observations) => {
                 this.observations = observations;
             });
