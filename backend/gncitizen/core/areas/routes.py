@@ -638,17 +638,31 @@ def get_area(pk):
 @jwt_required()
 def update_area():
     try:
-        current_user_email = get_jwt_identity()
-        current_user = UserModel.query.filter_by(email=current_user_email).one()
+        try:
+            current_user_email = get_jwt_identity()
+            current_user = UserModel.query.filter_by(email=current_user_email).one()
+        except Exception as e:
+            current_app.logger.warning("[update_area] 0 ", e)
+            raise GeonatureApiError(e)
 
-        update_data = dict(request.get_json())
-        area = AreaModel.query.filter_by(id_area=update_data.get("id_area"))
-        if current_user.email != UserModel.query.get(area.first().id_role).email and current_user.admin != 1:
-            return ("unauthorized"), 403
+        try:
+            update_data = dict(request.get_json())
+            print(update_data)
+            area = AreaModel.query.filter_by(id_area=update_data.get("id_area", 0))
+            if current_user.email != UserModel.query.get(area.first().id_role).email and current_user.admin != 1:
+                return ("unauthorized"), 403
+        except Exception as e:
+            current_app.logger.warning("[update_area] 1 ", e)
+            raise GeonatureApiError(e)
 
-        update_area = {}
-        for prop in ["name"]:
-            update_area[prop] = update_data[prop]
+        try:
+            update_area = {}
+            for prop in ["name"]:
+                update_area[prop] = update_data[prop]
+        except Exception as e:
+            current_app.logger.warning("[update_area] 2 ", e)
+            raise GeonatureApiError(e)
+
         try:
             coordinates = update_data.get("geometry", {}).get("coordinates", [])
 
@@ -676,11 +690,15 @@ def update_area():
             if json_data is not None:
                 update_area["json_data"] = json.loads(json_data)
         except Exception as e:
-            current_app.logger.warning("[update_observation] json_data ", e)
+            current_app.logger.warning("[update_area] json_data ", e)
             raise GeonatureApiError(e)
 
-        area.update(update_area, synchronize_session="fetch")
-        db.session.commit()
+        try:
+            area.update(update_area, synchronize_session="fetch")
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.warning("[update_area] 3 ", e)
+            raise GeonatureApiError(e)
         return ("area updated successfully"), 200
     except Exception as e:
         current_app.logger.critical("[update_area] Error: %s", str(e))
