@@ -640,65 +640,55 @@ def update_area():
     try:
         current_user_email = get_jwt_identity()
         current_user = UserModel.query.filter_by(email=current_user_email).one()
-    except Exception as e:
-        current_app.logger.warning("[update_area] 0 ", e)
-        raise GeonatureApiError(e)
 
-    try:
         update_data = dict(request.get_json())
         print(update_data)
         area = AreaModel.query.filter_by(id_area=update_data.get("id_area", 0))
         if current_user.email != UserModel.query.get(area.first().id_role).email and current_user.admin != 1:
             return ("unauthorized"), 403
-    except Exception as e:
-        current_app.logger.warning("[update_area] 1 ", e)
-        raise GeonatureApiError(e)
 
-    try:
         update_area = {}
         for prop in ["name"]:
             update_area[prop] = update_data[prop]
-    except Exception as e:
-        current_app.logger.warning("[update_area] 2 ", e)
-        raise GeonatureApiError(e)
+        try:
+            coordinates = update_data.get("geometry", {}).get("coordinates", [])
 
-    try:
-        coordinates = update_data.get("geometry", {}).get("coordinates", [])
+            if len(coordinates) == 2:
+                latitude = coordinates[1]
+                longitude = coordinates[0]
+            else:
+                message = "[patch_areas] invalid coordinates"
+                current_app.logger.warning(message)
+                raise GeonatureApiError(message)
 
-        if len(coordinates) == 2:
-            latitude = coordinates[1]
-            longitude = coordinates[0]
-        else:
-            message = "[post_areas] invalid coordinates"
-            current_app.logger.warning(message)
-            raise GeonatureApiError(message)
+            p = shapely.geometry.Point(longitude, latitude)
 
-        p = shapely.geometry.Point(longitude, latitude)
+            try:
+                update_area["municipality"] = get_municipality_id_from_wkb(from_shape(p, srid=4326))
+            except Exception as e:
+                current_app.logger.warning("[update_area] municipality ", e)
 
-        update_area["municipality"] = get_municipality_id_from_wkb(from_shape(p, srid=4326))
+            wkt = circle_from_point(p, radius=500, nb_point=100)
+            update_area['geom'] = from_shape(wkt, srid=4326)
 
-        wkt = circle_from_point(p, radius=500, nb_point=100)
-        update_area['geom'] = from_shape(wkt, srid=4326)
+        except Exception as e:
+            current_app.logger.warning("[update_area] coords ", e)
+            raise GeonatureApiError(e)
 
-    except Exception as e:
-        current_app.logger.warning("[update_area] coords ", e)
-        raise GeonatureApiError(e)
+        try:
+            json_data = update_data.get("json_data")
+            if json_data is not None:
+                update_area["json_data"] = json.loads(json_data)
+        except Exception as e:
+            current_app.logger.warning("[update_area] json_data ", e)
+            raise GeonatureApiError(e)
 
-    try:
-        json_data = update_data.get("json_data")
-        if json_data is not None:
-            update_area["json_data"] = json.loads(json_data)
-    except Exception as e:
-        current_app.logger.warning("[update_area] json_data ", e)
-        raise GeonatureApiError(e)
-
-    try:
         area.update(update_area, synchronize_session="fetch")
         db.session.commit()
+        return ("area updated successfully"), 200
     except Exception as e:
-        current_app.logger.warning("[update_area] 3 ", e)
-        raise GeonatureApiError(e)
-    return ("area updated successfully"), 200
+        current_app.logger.critical("[update_area] Error: %s", str(e))
+        return {"message": str(e)}, 400
 
 
 @areas_api.route("/species_sites/", methods=["PATCH"])
@@ -933,6 +923,12 @@ def post_area():
                 raise GeonatureApiError(message)
 
             p = shapely.geometry.Point(longitude, latitude)
+
+            try:
+                new_area.municipality = get_municipality_id_from_wkb(from_shape(p, srid=4326))
+            except Exception as e:
+                current_app.logger.warning("[post_area] municipality ", e)
+
             wkt = circle_from_point(p, radius=500, nb_point=100)
             new_area.geom = from_shape(wkt, srid=4326)
         except Exception as e:
