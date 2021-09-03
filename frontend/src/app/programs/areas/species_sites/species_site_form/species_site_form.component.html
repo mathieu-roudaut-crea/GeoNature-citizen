@@ -113,6 +113,7 @@
                 [options]="formOptions"
                 (onChanges)="yourOnChangesFn($event)"
                 [framework]="GNCBootstrap4Framework"
+                (isValid)="setJsonFormIsValid($event)"
             >
             </json-schema-form>
         </div>

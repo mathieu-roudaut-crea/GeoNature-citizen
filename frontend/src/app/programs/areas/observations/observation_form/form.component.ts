@@ -265,7 +265,7 @@ export class SpeciesSiteObservationFormComponent
             });
         }
 
-        if (this.selectedStep === 0) {
+        if (this.selectedStep === 0 || this.observationForm.value.stages_step_id === 0) {
             this.observationForm.get('stages_step_id').setValue(null);
         }
 

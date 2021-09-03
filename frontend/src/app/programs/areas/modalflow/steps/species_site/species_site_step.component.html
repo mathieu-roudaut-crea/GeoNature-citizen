@@ -22,7 +22,7 @@
 <div class="modal-footer">
     <button
         type="submit"
-        [disabled]="!form.speciesSiteForm.valid"
+        [disabled]="!form.speciesSiteForm.valid || ! form.jsonFormIsValid"
         class="btn btn-default btn-outline-primary rounded-0 m-1"
         (click)="committed()"
     >
@@ -30,7 +30,7 @@
     </button>
     <button
         type="submit"
-        [disabled]="!form.speciesSiteForm.valid"
+        [disabled]="!form.speciesSiteForm.valid || ! form.jsonFormIsValid"
         class="btn btn-default btn-outline-primary rounded-0 m-1"
         (click)="committedThenClose()"
     >

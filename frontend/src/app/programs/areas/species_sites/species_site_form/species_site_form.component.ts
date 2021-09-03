@@ -109,6 +109,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     species: Object[] = [];
     taxaCount: number;
     selectedTaxon: any;
+    jsonFormIsValid: any;
 
     constructor(
         private http: HttpClient,
@@ -312,6 +313,10 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                     minimapMarker: myMarker,
                 };
             });
+    }
+
+    setJsonFormIsValid(isValid) {
+        this.jsonFormIsValid = isValid;
     }
 
     patchForm(speciesSiteUpdateData): void {
