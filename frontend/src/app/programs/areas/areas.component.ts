@@ -59,7 +59,10 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
-        this.areaService.newAreaCreated.subscribe((newAreaFeature) => {
+        this.areaService.newAreaCreated.subscribe(() => {
+            this.loadData();
+        });
+        this.areaService.areaEdited.subscribe(() => {
             this.loadData();
         });
     }

@@ -11,6 +11,7 @@ import { AreaModalFlowService } from '../../modalflow/modalflow.service';
 import { UserService } from '../../../../auth/user-dashboard/user.service.service';
 import { AreaService } from '../../areas.service';
 import { AppConfig } from '../../../../../conf/app.config';
+import * as L from 'leaflet';
 
 @Component({
     selector: 'app-areas-list',
@@ -19,13 +20,13 @@ import { AppConfig } from '../../../../../conf/app.config';
 })
 export class AreasListComponent implements OnChanges {
     @Input('areas') areasCollection: FeatureCollection;
-    @Input('userDashboard') userDashboard: boolean = false;
+    @Input('userDashboard') userDashboard = false;
     @Input('program_id') program_id: number;
     @Input('displayForm') display_form: boolean;
     @Output('areaSelect')
     areaSelect: EventEmitter<Feature> = new EventEmitter();
     municipalities: string[] = [];
-    areas: Feature[] = [];
+    areas = [];
     taxa: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
 
@@ -38,6 +39,15 @@ export class AreasListComponent implements OnChanges {
     ngOnChanges() {
         if (this.areasCollection) {
             this.areas = this.areasCollection['features'];
+
+            this.areas.forEach((area) => {
+                const areaCenter = L.geoJSON(area).getBounds().getCenter();
+                area.properties.coords = new L.Point(
+                    areaCenter.lng,
+                    areaCenter.lat
+                );
+            });
+
             this.municipalities = this.areasCollection.features
                 .map((features) => features.properties)
                 .map((property) => property.municipality)

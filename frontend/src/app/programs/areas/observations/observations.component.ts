@@ -41,6 +41,7 @@ export class SpeciesSitesObsComponent
     @Output() refreshListEvent = new EventEmitter<string>();
     @ViewChild(SpeciesSitesObsListComponent, { static: true })
     observationsList: SpeciesSitesObsListComponent;
+    previousPageData;
 
     constructor(
         private router: Router,
@@ -71,6 +72,7 @@ export class SpeciesSitesObsComponent
                     console.log('non valid json data', event, e);
                 }
             }
+            this.previousPageData = data;
             this.loadData(data);
         }
     }
@@ -86,6 +88,14 @@ export class SpeciesSitesObsComponent
             );
 
             this.verifyProgramPrivacyAndUser();
+
+            this.areaService.speciesSiteObsEdited.subscribe(() => {
+                if (this.previousPageData) {
+                    this.loadData(this.previousPageData);
+                } else {
+                    this.loadData();
+                }
+            });
         });
     }
 

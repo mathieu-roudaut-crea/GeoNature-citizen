@@ -2,21 +2,20 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError, forkJoin } from 'rxjs';
 import { tap, catchError, first } from 'rxjs/operators';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AppConfig } from '../../../conf/app.config';
 import { AuthService } from './../auth.service';
 import { UserService } from './user.service.service';
 import { SiteService } from '../../programs/sites/sites.service';
 import { saveAs } from 'file-saver';
 import * as _ from 'lodash';
-import { Point } from 'leaflet';
+import { Point, geoJSON } from 'leaflet';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomFormValidator } from './customFormValidator';
 import { ModalFlowService } from '../../programs/observations/modalflow/modalflow.service';
 import { AreaService } from '../../programs/areas/areas.service';
 import { LoginComponent } from '../login/login.component';
 import { ModalsTopbarService } from '../../core/topbar/modalTopbar.service';
-import * as L from 'leaflet';
 
 @Component({
     selector: 'app-user-dashboard',
@@ -64,6 +63,7 @@ export class UserDashboardComponent implements OnInit {
     idSiteToDelete: number;
     tab = 'observations';
     selectedAreasTab = 'areas';
+    previousObsPageData;
 
     constructor(
         private auth: AuthService,
@@ -86,7 +86,7 @@ export class UserDashboardComponent implements OnInit {
             this.getData();
         });
         this.areaService.speciesSiteObsEdited.subscribe(() => {
-            this.getData();
+            this.refreshAdminObservationsList();
         });
     }
 
@@ -288,8 +288,6 @@ export class UserDashboardComponent implements OnInit {
         const adminSpeciesSites = this.userService.getAdminSpeciesSites();
         const adminObservers = this.userService.getAdminObservers();
 
-        // this.refreshAdminObservationsList({ page: 1, pageSize: 10 });
-
         adminData.push(adminAreas);
         adminData.push(adminSpeciesSites);
         adminData.push(adminObservers);
@@ -301,7 +299,7 @@ export class UserDashboardComponent implements OnInit {
                 this.adminObservers = data[2];
 
                 this.adminAreas.features.forEach((area) => {
-                    const areaCenter = L.geoJSON(area).getBounds().getCenter();
+                    const areaCenter = geoJSON(area).getBounds().getCenter();
                     area.properties.coords = new Point(
                         areaCenter.lng,
                         areaCenter.lat
@@ -319,14 +317,17 @@ export class UserDashboardComponent implements OnInit {
         });
     }
 
-    refreshAdminObservationsList(event) {
+    refreshAdminObservationsList(event = null) {
         let data = { page: 0, pageSize: 0 };
         if (event) {
             try {
                 data = JSON.parse(event);
+                this.previousObsPageData = data;
             } catch (e) {
                 console.log('non valid json data', event, e);
             }
+        } else if (this.previousObsPageData) {
+            data = this.previousObsPageData;
         }
         const adminSpeciesSitesObs = this.userService.getAdminSpeciesSitesObs(
             data.page,

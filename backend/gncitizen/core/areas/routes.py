@@ -255,7 +255,10 @@ def get_user_areas():
     """
     try:
         user_id = get_id_role_if_exists()
-        areas = AreaModel.query.filter_by(id_role=user_id).all()
+        areas = (AreaModel.query
+                 .filter_by(id_role=user_id)
+                 .order_by(AreaModel.timestamp_create.desc())
+                 .all())
         return prepare_list(areas)
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -286,6 +289,7 @@ def get_user_species_sites():
         species_sites = (SpeciesSiteModel.query
                          .filter_by(id_role=user_id)
                          .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                         .order_by(AreaModel.timestamp_create.desc())
                          .all())
         return prepare_list(species_sites)
     except Exception as e:
@@ -351,19 +355,19 @@ def get_admin_areas():
         if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        if user.admin == 1:
-            areas = AreaModel.query.order_by(AreaModel.timestamp_create.desc()).all()
-        else:
+        areas_query = AreaModel.query
+
+        if user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
-            areas = (
+            areas_query = (
                 AreaModel.query
                     .join(creator, AreaModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
                     .filter(relay.id_user == user_id)
-                    .order_by(AreaModel.timestamp_create.desc())
-                    .all()
             )
+
+        areas = areas_query.order_by(AreaModel.timestamp_create.desc()).all()
 
         return prepare_list(areas)
     except Exception as e:
@@ -396,25 +400,22 @@ def get_admin_species_sites():
         if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        if user.admin == 1:
-            species_sites = (
-                SpeciesSiteModel.query
-                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                    .order_by(SpeciesSiteModel.timestamp_create.desc())
-                    .all()
-            )
-        else:
+        species_sites_query = (
+            SpeciesSiteModel.query
+                .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+        )
+
+        if user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
-            species_sites = (
-                SpeciesSiteModel.query
-                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+            species_sites_query = (
+                species_sites_query
                     .join(creator, SpeciesSiteModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
                     .filter(relay.id_user == user_id)
-                    .order_by(SpeciesSiteModel.timestamp_create.desc())
-                    .all()
             )
+
+        species_sites = species_sites_query.order_by(SpeciesSiteModel.timestamp_create.desc()).all()
 
         return prepare_list(species_sites)
     except Exception as e:
@@ -460,7 +461,6 @@ def get_admin_observations():
                     .join(SpeciesSiteModel,
                           SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
                     .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                    .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
             )
         else:
             creator = aliased(UserModel)
@@ -473,10 +473,11 @@ def get_admin_observations():
                     .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
                     .filter(relay.id_user == user_id)
-                    .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
             )
 
         observations_count = observations_query.count()
+
+        observations_query = observations_query.order_by(SpeciesSiteObservationModel.timestamp_create.desc())
 
         if page_size:
             observations_query = observations_query.limit(page_size * 1)
@@ -513,17 +514,17 @@ def get_admin_observers():
         if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        if user.admin == 1:
-            observers = (UserModel.query.order_by(UserModel.timestamp_create.desc()).all())
-        else:
+        observers_query = UserModel.query
+
+        if user.admin != 1:
             relay = aliased(UserModel)
-            observers = (
-                UserModel.query
+            observers_query = (
+                observers_query
                     .join(relay, relay.id_user == UserModel.linked_relay_id)
                     .filter(relay.id_user == user_id)
-                    .order_by(UserModel.timestamp_create.desc())
-                    .all()
             )
+
+        observers = observers_query.order_by(UserModel.timestamp_create.desc()).all()
 
         return prepare_list(observers, with_geom=False)
     except Exception as e:
@@ -563,6 +564,8 @@ def get_species_sites_by_program(id):
                 species_sites_query = species_sites_query.filter(SpeciesSiteModel.id_role == user_id)
             else:
                 return prepare_list([])
+
+        species_sites_query = species_sites_query.order_by(SpeciesSiteModel.timestamp_create.desc())
 
         species_sites = species_sites_query.all()
 
@@ -616,6 +619,8 @@ def get_observations_by_program(id):
                 observations_query = observations_query.filter(SpeciesSiteObservationModel.id_role == user_id)
             else:
                 return prepare_list([])
+
+        observations_query = observations_query.order_by(SpeciesSiteObservationModel.timestamp_create.desc())
 
         observations_count = observations_query.count()
 
@@ -779,7 +784,8 @@ def update_observation():
         current_user = UserModel.query.filter_by(email=current_user_email).one()
 
         update_data = dict(request.get_json())
-        observation = SpeciesSiteObservationModel.query.filter_by(id_species_site_observation=update_data.get("id_species_site_observation"))
+        observation = SpeciesSiteObservationModel.query.filter_by(
+            id_species_site_observation=update_data.get("id_species_site_observation"))
         if current_user.email != UserModel.query.get(observation.first().id_role).email and current_user.admin != 1:
             return ("unauthorized"), 403
 

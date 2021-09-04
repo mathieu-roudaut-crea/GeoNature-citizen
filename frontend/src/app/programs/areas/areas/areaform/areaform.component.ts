@@ -211,6 +211,10 @@ export class AreaFormComponent implements AfterViewInit {
                     myMarker = L.circle([this.coords.y, this.coords.x], {
                         radius: 500,
                     }).addTo(formMap);
+
+                    const maxBounds = myMarker.getBounds();
+                    formMap.fitBounds(maxBounds);
+                    formMap.setMaxBounds(maxBounds);
                 }
 
                 // Update marker on click event

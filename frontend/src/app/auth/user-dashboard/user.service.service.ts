@@ -12,11 +12,20 @@ import { Relay } from '../models';
 export class UserService {
     role_id: number;
     admin = false;
+
     private headers: HttpHeaders = new HttpHeaders({
         'Content-Type': 'application/json',
     });
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) {
+        this.getPersonalInfo()
+            .toPromise()
+            .then((user) => {
+                if (user && user['features'] && user['features']['id_role']) {
+                    this.role_id = user['features']['id_role'];
+                }
+            });
+    }
 
     getPersonalInfo() {
         const url = `${AppConfig.API_ENDPOINT}/user/info`;
