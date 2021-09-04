@@ -45,7 +45,13 @@ export class AuthService {
 
     register(user: RegisterUser): Observable<any> {
         const url = `${AppConfig.API_ENDPOINT}/registration`;
-        return this.http.post(url, user).pipe(
+
+        const select = <HTMLInputElement>(
+            document.getElementsByClassName('goog-te-combo')[0]
+        );
+        const postData = select ? { ...user, language: select.value } : user;
+
+        return this.http.post(url, postData).pipe(
             map((user) => {
                 if (user['active']) {
                     this.authenticate(user);

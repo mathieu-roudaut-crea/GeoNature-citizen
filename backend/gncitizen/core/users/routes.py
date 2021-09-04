@@ -184,7 +184,7 @@ def registration():
                 message = """Félicitations, l'utilisateur "{}" a été créé.""".format(
                     newuser.username
                 ),
-                confirm_user_email(newuser, with_confirm_link=False)
+                confirm_user_email(newuser, with_confirm_link=False, language=request_datas.get("language", ""))
             else:
                 message = """Félicitations, l'utilisateur "{}" a été créé.  \r\n Vous allez recevoir un email pour activer votre compte """.format(
                     newuser.username

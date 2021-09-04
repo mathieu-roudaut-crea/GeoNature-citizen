@@ -5,11 +5,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-def confirm_user_email(newuser, with_confirm_link = True):
+def confirm_user_email(newuser, with_confirm_link = True, language = ""):
 
     token = generate_confirmation_token(newuser.email)
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = current_app.config["CONFIRM_EMAIL"]["SUBJECT"]
     msg["From"] = current_app.config["CONFIRM_EMAIL"]["FROM"]
     msg["To"] = newuser.email
 
@@ -22,10 +21,19 @@ def confirm_user_email(newuser, with_confirm_link = True):
     print("url_application", url_application)
     activate_url = url_application + "confirmEmail/" + token
 
+    msg["Subject"] = current_app.config["CONFIRM_EMAIL"]["SUBJECT"]
+
+    language = language.upper();
+    if current_app.config["CONFIRM_EMAIL"].get("SUBJECT_" + language, None):
+        msg["Subject"] = current_app.config["CONFIRM_EMAIL"]["SUBJECT_" + language]
+
     # Record the MIME  text/html.
     template = current_app.config["CONFIRM_EMAIL"]["HTML_TEMPLATE"]
     if not with_confirm_link:
         template = current_app.config["CONFIRM_EMAIL"]["NO_VALIDATION_HTML_TEMPLATE"]
+        if current_app.config["CONFIRM_EMAIL"].get("NO_VALIDATION_HTML_TEMPLATE_" + language, None):
+            template = current_app.config["CONFIRM_EMAIL"]["NO_VALIDATION_HTML_TEMPLATE_" + language]
+
     msg_body = MIMEText(
         template.format(
             activate_url=activate_url

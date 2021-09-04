@@ -192,6 +192,20 @@ export class TopbarComponent implements OnInit {
     }
 
     loadTranslation() {
+        if (this.translationLanguage) {
+            const splittedCookie = document.cookie.split('googtrans=');
+            if (splittedCookie.length > 1) {
+                const splittedEndCookie = splittedCookie[1].split(';');
+                splittedEndCookie[0] = `/fr/${this.translationLanguage}`;
+
+                let newCookie = splittedCookie[0] + 'googtrans=';
+                for (let i = 0; i < splittedEndCookie.length; i++) {
+                    newCookie += splittedEndCookie[i] + '; ';
+                }
+                document.cookie = newCookie;
+            }
+        }
+
         window.googleTranslateElementInit = function () {
             new google.translate.TranslateElement(
                 { pageLanguage: 'fr' },
