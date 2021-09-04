@@ -4,10 +4,17 @@ import {
     Input,
     EventEmitter,
     Output,
+    Inject,
+    LOCALE_ID,
 } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
 import { AppConfig } from '../../../../../conf/app.config';
+import { Router } from '@angular/router';
+import { Meta, Title } from '@angular/platform-browser';
+import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
+import { AuthService } from '../../../../auth/auth.service';
+import { PhotosModalComponent } from '../photos_modal/photos_modal.component';
 
 @Component({
     selector: 'app-species-sites-obs-list',
@@ -25,6 +32,8 @@ export class SpeciesSitesObsListComponent implements OnChanges {
     page = 1;
     pageSize = 10;
     collectionSize = 0;
+
+    constructor(private modalService: ModalsTopbarService) {}
 
     ngOnChanges() {
         if (this.observationsCollection) {
@@ -59,5 +68,14 @@ export class SpeciesSitesObsListComponent implements OnChanges {
                 (this.page - 1) * this.pageSize + this.pageSize
             );
         }
+    }
+
+    showPhotos(photos) {
+        const modalRef = this.modalService.open(PhotosModalComponent, {
+            size: 'lg',
+            windowClass: 'add-obs-modal',
+            centered: true,
+        });
+        modalRef.componentInstance.photos = photos;
     }
 }

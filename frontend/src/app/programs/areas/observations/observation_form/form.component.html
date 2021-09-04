@@ -105,6 +105,26 @@
                         </div>
                     </ng-container>
                 </div>
+
+                <div *ngIf="data.obsUpdateData && data.obsUpdateData.photos.length" class="mt-3 mb-3">
+                    <label i18n="Existing Photos@@existingPhotos">
+                        Photos existantes (cocher pour supprimer)
+                    </label><br />
+                    <span *ngFor="let p of data.obsUpdateData.photos" class="mr-4">
+                        <input
+                            type="checkbox"
+                            name=""
+                            [(ngModel)]="p.checked"
+                            [ngModelOptions]="{ standalone: true }"
+                            class="mr-1"
+                        />
+                        <img
+                            src="{{ apiEndpoint }}{{ p.url }}"
+                            height="50"
+                        />
+                    </span>
+                </div>
+
                 <image-upload
                     buttonCaption="Ajouter une photo"
                     dropBoxMessage="Déposez vos photos ici !"

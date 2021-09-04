@@ -77,6 +77,7 @@ import { SpeciesSiteDetailComponent } from './programs/areas/species_sites/detai
 import { AreaFormComponent } from './programs/areas/areas/areaform/areaform.component';
 import { SpeciesSiteFormComponent } from './programs/areas/species_sites/species_site_form/species_site_form.component';
 import { SpeciesSiteObservationFormComponent } from './programs/areas/observations/observation_form/form.component';
+import { PhotosModalComponent } from './programs/areas/observations/photos_modal/photos_modal.component';
 import { AreasListComponent } from './programs/areas/areas/list/list.component';
 import { SpeciesSitesListComponent } from './programs/areas/species_sites/list/list.component';
 import { SpeciesSitesObsListComponent } from './programs/areas/observations/list/list.component';
@@ -159,6 +160,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         SpeciesSiteDetailComponent,
         SpeciesSiteFormComponent,
         SpeciesSiteObservationFormComponent,
+        PhotosModalComponent,
         SitesListComponent,
         SitesMapComponent,
         SiteDetailComponent,
@@ -225,6 +227,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         LoginComponent,
         LogoutComponent,
         RegisterComponent,
+        PhotosModalComponent,
         OnboardComponent,
         CommittedComponent,
         VisitStepComponent,

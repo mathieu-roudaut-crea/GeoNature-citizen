@@ -1,6 +1,7 @@
 #list {
     overflow: auto;
 }
+
 .see-more-link {
     cursor: pointer;
 }
@@ -21,4 +22,8 @@ td:last-child {
     display: flex;
     justify-content: space-around;
     align-items: center;
+}
+
+td:last-child > * {
+    margin: 0 2px;
 }

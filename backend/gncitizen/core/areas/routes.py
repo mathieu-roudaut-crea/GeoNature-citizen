@@ -31,21 +31,20 @@ def format_entity(data, with_geom=True):
         feature = get_geojson_feature(data.geom)
     else:
         feature = {"properties": {}}
-    area_dict = data.as_dict(True)
-    for k in area_dict:
+    data_dict = data.as_dict(True)
+    for k in data_dict:
         if k not in ("geom",):
-            feature["properties"][k] = area_dict[k]
+            feature["properties"][k] = data_dict[k]
     return feature
 
 
 def prepare_list(data, with_geom=True, maximum_count=0):
-    count = len(data)
     features = []
     for element in data:
         formatted = format_entity(element, with_geom)
         features.append(formatted)
     data = FeatureCollection(features)
-    data["count"] = count
+    data["count"] = len(data)
     if maximum_count != 0:
         data["maximum_count"] = maximum_count
     return data
@@ -85,17 +84,6 @@ def generate_observation(id_species_site_observation):
             .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
     ).one()
 
-    photos = (
-        db.session.query(MediaModel, SpeciesSiteObservationModel)
-            .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
-            .join(
-            MediaOnSpeciesSiteObservationModel,
-            MediaOnSpeciesSiteObservationModel.id_data_source == SpeciesSiteObservationModel.id_species_site_observation,
-        )
-            .join(MediaModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
-            .all()
-    )
-
     result_dict = observation.SpeciesSiteObservationModel.as_dict(True)
     result_dict["observer"] = {"username": observation.username}
 
@@ -109,6 +97,16 @@ def generate_observation(id_species_site_observation):
         if k in obs_keys:
             feature["properties"][k] = result_dict[k]
 
+    photos = (
+        db.session.query(MediaModel, SpeciesSiteObservationModel)
+            .filter(SpeciesSiteObservationModel.id_species_site_observation == id_species_site_observation)
+            .join(
+            MediaOnSpeciesSiteObservationModel,
+            MediaOnSpeciesSiteObservationModel.id_data_source == SpeciesSiteObservationModel.id_species_site_observation,
+        )
+            .join(MediaModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
+            .all()
+    )
     feature["properties"]["photos"] = [
         {
             "url": "/media/{}".format(p.MediaModel.filename),
@@ -486,7 +484,36 @@ def get_admin_observations():
 
         observations = observations_query.all()
 
-        return prepare_list(observations, with_geom=False, maximum_count=observations_count)
+        features = []
+        for observation in observations:
+            formatted = {"properties": {}}
+
+            obs_dict = observation.as_dict(True)
+            for key in obs_dict:
+                formatted["properties"][key] = obs_dict[key]
+
+            photos = (
+                MediaModel.query
+                    .join(MediaOnSpeciesSiteObservationModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
+                    .filter(MediaOnSpeciesSiteObservationModel.id_data_source == observation.id_species_site_observation)
+                    .all()
+            )
+
+            formatted["properties"]["photos"] = [
+                {
+                    "url": "/media/{}".format(p.filename),
+                    "id_media": p.id_media,
+                }
+                for p in photos
+            ]
+
+            features.append(formatted)
+
+        data = FeatureCollection(features)
+        data["count"] = len(data)
+        data["maximum_count"] = observations_count
+
+        return data, 200
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -631,7 +658,37 @@ def get_observations_by_program(id):
 
         observations = observations_query.all()
 
-        return prepare_list(observations, with_geom=False, maximum_count=observations_count)
+        features = []
+        for observation in observations:
+            formatted = {"properties": {}}
+
+            obs_dict = observation.as_dict(True)
+            for key in obs_dict:
+                formatted["properties"][key] = obs_dict[key]
+
+            photos = (
+                MediaModel.query
+                    .join(MediaOnSpeciesSiteObservationModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
+                    .filter(MediaOnSpeciesSiteObservationModel.id_data_source == observation.id_species_site_observation)
+                    .all()
+            )
+
+            formatted["properties"]["photos"] = [
+                {
+                    "url": "/media/{}".format(p.filename),
+                    "id_media": p.id_media,
+                }
+                for p in photos
+            ]
+
+            features.append(formatted)
+
+        data = FeatureCollection(features)
+        data["count"] = len(data)
+        data["maximum_count"] = observations_count
+
+        return data, 200
+
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -783,7 +840,8 @@ def update_observation():
         current_user_email = get_jwt_identity()
         current_user = UserModel.query.filter_by(email=current_user_email).one()
 
-        update_data = dict(request.get_json())
+        update_data = request.form
+
         observation = SpeciesSiteObservationModel.query.filter_by(
             id_species_site_observation=update_data.get("id_species_site_observation"))
         if current_user.email != UserModel.query.get(observation.first().id_role).email and current_user.admin != 1:
@@ -803,6 +861,42 @@ def update_observation():
             raise GeonatureApiError(e)
 
         observation.update(update_observation, synchronize_session="fetch")
+
+        try:
+            # Delete selected existing media
+            id_media_to_delete = json.loads(update_data.get("delete_media"))
+            if len(id_media_to_delete):
+                db.session.query(MediaOnSpeciesSiteObservationModel).filter(
+                    MediaOnSpeciesSiteObservationModel.id_media.in_(tuple(id_media_to_delete)),
+                    MediaOnSpeciesSiteObservationModel.id_data_source
+                    == update_data.get("id_species_site_observation"),
+                ).delete(synchronize_session="fetch")
+                db.session.query(MediaModel).filter(
+                    MediaModel.id_media.in_(tuple(id_media_to_delete))
+                ).delete(synchronize_session="fetch")
+        except Exception as e:
+            current_app.logger.warning("[update_observation] delete media ", e)
+            raise GeonatureApiError(e)
+
+        try:
+            file = save_upload_files(
+                request.files,
+                "species_site_obs",
+                "0",
+                update_data.get("id_species_site_observation"),
+                MediaOnSpeciesSiteObservationModel,
+            )
+            current_app.logger.debug(
+                "[update_observation] ObsTax UPLOAD FILE {}".format(file)
+            )
+
+        except Exception as e:
+            current_app.logger.warning(
+                "[update_observation] ObsTax ERROR ON FILE SAVING", str(e)
+            )
+            # raise GeonatureApiError(e)
+
+
         db.session.commit()
         return ("observation updated successfully"), 200
     except Exception as e:
@@ -1094,7 +1188,7 @@ def post_species_site():
 @jwt_required(optional=True)
 def post_observation(species_site_id):
     try:
-        request_data = request.get_json()
+        request_data = request.form
 
         new_observation = SpeciesSiteObservationModel(
             id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"],
@@ -1108,7 +1202,7 @@ def post_observation(species_site_id):
             new_observation.obs_txt = role.username
             new_observation.email = role.email
         else:
-            if new_observation.obs_txt is None or len(new_visit.obs_txt) == 0:
+            if new_observation.obs_txt is None or len(new_observation.obs_txt) == 0:
                 new_observation.obs_txt = "Anonyme"
 
         new_observation.uuid_sinp = uuid.uuid4()
@@ -1116,9 +1210,29 @@ def post_observation(species_site_id):
         db.session.add(new_observation)
         db.session.commit()
 
-        # Réponse en retour
         result = SpeciesSiteObservationModel.query.get(new_observation.id_species_site_observation)
         response_dict = result.as_dict()
+
+        # Enregistrement de la photo et correspondance Obs Photo
+        try:
+            file = save_upload_files(
+                request.files,
+                "species_site_obs",
+                result.species_site.cd_nom,
+                result.id_species_site_observation,
+                MediaOnSpeciesSiteObservationModel,
+            )
+            current_app.logger.debug(
+                "[post_observation] ObsTax UPLOAD FILE {}".format(file)
+            )
+            response_dict["photos"] = file
+
+        except Exception as e:
+            current_app.logger.warning(
+                "[post_observation] ObsTax ERROR ON FILE SAVING", str(e)
+            )
+
+        # Réponse en retour
         response_dict['program_id'] = result.species_site.area.id_program
         return {"message": "New observation created.", "features": [response_dict]}, 200
     except Exception as e:

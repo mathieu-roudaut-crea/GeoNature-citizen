@@ -99,11 +99,6 @@ export class SpeciesSiteObservationFormComponent
         this.species_site_id = obsUpdateData.id_species_site;
         this.jsonData = obsUpdateData.json_data;
 
-        this.selectedStage = obsUpdateData.stages_step
-            ? obsUpdateData.stages_step.id_species_stage
-            : 0;
-        this.selectedStep = obsUpdateData.id_stages_step;
-
         this.observationForm.patchValue({
             name: obsUpdateData.name,
             area_id: obsUpdateData.area_id,
@@ -112,6 +107,12 @@ export class SpeciesSiteObservationFormComponent
             id_species_site_observation:
                 obsUpdateData.id_species_site_observation,
         });
+
+        this.selectedStage = obsUpdateData.stages_step
+            ? obsUpdateData.stages_step.id_species_stage
+            : 0;
+
+        this.selectedStep = obsUpdateData.id_stages_step;
     }
 
     ngAfterViewInit() {
@@ -119,6 +120,7 @@ export class SpeciesSiteObservationFormComponent
             .getSpeciesSiteDetails(this.species_site_id, true, true)
             .subscribe((speciesSites) => {
                 this.speciesSite = speciesSites['features'][0];
+                this.onSelectedStageChange();
             });
     }
 
@@ -265,7 +267,10 @@ export class SpeciesSiteObservationFormComponent
             });
         }
 
-        if (this.selectedStep === 0 || this.observationForm.value.stages_step_id === 0) {
+        if (
+            this.selectedStep === 0 ||
+            this.observationForm.value.stages_step_id === 0
+        ) {
             this.observationForm.get('stages_step_id').setValue(null);
         }
 
@@ -273,37 +278,45 @@ export class SpeciesSiteObservationFormComponent
     }
 
     postSpeciesSiteObservation(): Observable<any> {
-        const httpOptions = {
-            headers: new HttpHeaders({
-                Accept: 'application/json',
-            }),
-        };
+        const formData: FormData = new FormData();
+        const formValues = this.observationForm.value;
+        ['stages_step_id', 'id_species_site_observation'].forEach((key) => {
+            if (formValues[key]) {
+                formData.append(key, formValues[key]);
+            }
+        });
+
+        const files = this.photos;
+        files.forEach((file) => {
+            formData.append('file', file, file.name);
+        });
+
+        formData.append('json_data', JSON.stringify(this.jsonData));
 
         const visitDate = NgbDate.from(
             this.observationForm.controls.date.value
         );
-
-        const formData = this.observationForm.value;
-        formData.json_data = JSON.stringify(this.jsonData);
-        formData.date = new Date(
-            visitDate.year,
-            visitDate.month - 1,
-            visitDate.day + 1
-        )
-            .toISOString()
-            .match(/\d{4}-\d{2}-\d{2}/)[0];
+        formData.append(
+            'date',
+            new Date(visitDate.year, visitDate.month - 1, visitDate.day + 1)
+                .toISOString()
+                .match(/\d{4}-\d{2}-\d{2}/)[0]
+        );
 
         if (this.data.obsUpdateData) {
+            const id_media_to_delete = this.data.obsUpdateData.photos
+                .filter((p) => p.checked)
+                .map((p) => p.id_media);
+            formData.append('delete_media', JSON.stringify(id_media_to_delete));
+
             return this.http.patch<any>(
                 `${this.URL}/areas/observations/`,
-                formData,
-                httpOptions
+                formData
             );
         } else {
             return this.http.post<any>(
                 `${this.URL}/areas/species_sites/${this.species_site_id}/observations`,
-                formData,
-                httpOptions
+                formData
             );
         }
     }

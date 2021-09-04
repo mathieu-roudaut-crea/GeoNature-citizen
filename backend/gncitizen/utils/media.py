@@ -61,7 +61,10 @@ def save_upload_files(
     files = []
     try:
         i = 0
+        print('caaaapaasssse')
         for file in request_file.getlist("file"):
+            print('file')
+            print(file)
             if isinstance(file, FileStorage):
                 i = i + 1
                 filename = file.filename

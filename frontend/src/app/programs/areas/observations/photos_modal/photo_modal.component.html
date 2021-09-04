@@ -1,0 +1,26 @@
+<div class="modal-header">
+    <h4 class="modal-title">PHOTOS</h4>
+    <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="closeModal()"
+    >
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="modal-body photos-container">
+    <div *ngFor="let photo of photos;" class="img-holder">
+        <img [src]="apiEndpoint + photo.url" alt="step photo" />
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button
+        class="btn btn-default btn-outline-primary rounded-0 m-1"
+        (click)="closeModal()"
+    >
+        Fermer
+    </button>
+</div>

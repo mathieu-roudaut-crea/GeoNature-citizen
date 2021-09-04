@@ -58,7 +58,7 @@
                     [obsUpdateData]="observation.properties"
                 >
                     <i
-                        class="fa fa-edit text-primary see-more-link"
+                        class="fa fa-edit see-more-link"
                         placement="left"
                         ngbTooltip="Editer"
                         btn-open
@@ -77,7 +77,14 @@
                         placement="left"
                     ></i>
                 </div>
-
+                <div *ngIf="observation.properties.photos && observation.properties.photos.length">
+                    <i
+                        (click)="showPhotos(observation.properties.photos)"
+                        class="fa fa-camera see-more-link"
+                        placement="left"
+                        ngbTooltip="Voir les photos"
+                    ></i>
+                </div>
             </td>
         </tr>
         </tbody>

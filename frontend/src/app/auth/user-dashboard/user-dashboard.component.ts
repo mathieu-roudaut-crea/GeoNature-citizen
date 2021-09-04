@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError, forkJoin } from 'rxjs';
-import { tap, catchError, first } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AppConfig } from '../../../conf/app.config';
 import { AuthService } from './../auth.service';
