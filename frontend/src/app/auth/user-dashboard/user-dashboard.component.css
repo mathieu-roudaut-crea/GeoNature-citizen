@@ -158,6 +158,9 @@ form > button {
     width: fit-content;
     display: block;
 }
+.form-group .input-group {
+    flex-wrap: nowrap;
+}
 
 .checkbox-label {
     margin-left: 5px;
