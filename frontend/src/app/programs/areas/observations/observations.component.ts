@@ -20,6 +20,7 @@ import { SpeciesSitesObsListComponent } from './list/list.component';
 import { ProgramBaseComponent } from '../../base/program-base.component';
 import { AuthService } from '../../../auth/auth.service';
 import { Program } from '../../programs.models';
+import {UserService} from "../../../auth/user-dashboard/user.service.service";
 
 @Component({
     selector: 'app-species-sites-obs',
@@ -49,6 +50,7 @@ export class SpeciesSitesObsComponent
         private programService: GncProgramsService,
         public flowService: AreaModalFlowService,
         public areaService: AreaService,
+        private userService: UserService,
         authService: AuthService
     ) {
         super(authService);
@@ -109,5 +111,9 @@ export class SpeciesSitesObsComponent
             .subscribe((observations) => {
                 this.observations = observations;
             });
+    }
+
+    onExportAreas() {
+        this.userService.exportAreas();
     }
 }

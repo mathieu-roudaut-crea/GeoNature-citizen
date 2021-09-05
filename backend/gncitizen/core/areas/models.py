@@ -71,6 +71,8 @@ class SpeciesSiteModel(TimestampMixinModel, ObserverMixinModel, db.Model):
     geom = db.Column(Geometry("POINT", 4326))
     uuid_sinp = db.Column(UUID(as_uuid=True), nullable=False, unique=True)
     cd_nom = db.Column(db.Integer, db.ForeignKey(Taxref.cd_nom), nullable=False)
+    species = relationship("Taxref")
+
     json_data = db.Column(JSONB, nullable=True)
 
     def __repr__(self):

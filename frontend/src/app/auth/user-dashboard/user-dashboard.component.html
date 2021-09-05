@@ -222,6 +222,7 @@
                     >
                 </button>
                 <button
+                    *ngIf="myobs && myobs.count"
                     class="btn-big col-lg-3 col-md-5 col-sm-12 export"
                     (click)="onExportObservations()"
                 >
@@ -234,6 +235,7 @@
                     >
                 </button>
                 <button
+                    *ngIf="mysites && mysites.count"
                     class="btn-big col-lg-3 col-md-5 col-sm-12 export"
                     (click)="onExportSites()"
                 >
@@ -242,6 +244,30 @@
                     <ng-container
                         i18n="Export personnal sites btn@@exportPersonnalSitesBtn"
                     >Exporter mes sites
+                    </ng-container
+                    >
+                </button>
+                <button
+                    *ngIf="myAreas && myAreas.count"
+                    class="btn-big col-lg-3 col-md-5 col-sm-12 export"
+                    (click)="onExportAreas()"
+                >
+                    <i class="fa fa-download"></i
+                    >
+                    <ng-container>
+                        Exporter mes zones
+                    </ng-container
+                    >
+                </button>
+                <button
+                    *ngIf="adminAreas && adminAreas.count"
+                    class="btn-big col-lg-3 col-md-5 col-sm-12 export"
+                    (click)="onExportAreas(true)"
+                >
+                    <i class="fa fa-download"></i
+                    >
+                    <ng-container>
+                        Exporter toutes les zones
                     </ng-container
                     >
                 </button>

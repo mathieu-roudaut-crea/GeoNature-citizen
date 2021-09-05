@@ -1,13 +1,16 @@
 import uuid
+import xlwt
+import shapely
+import io
 
-from flask import Blueprint, request, current_app, json
+from flask import Blueprint, request, current_app, json, make_response
 from geojson import FeatureCollection
 from server import db
 from sqlalchemy.orm import aliased
 
-import shapely
 from shapely.geometry import asShape, Point
-from geoalchemy2.shape import from_shape
+from geoalchemy2.shape import from_shape, to_shape
+
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from utils_flask_sqla_geo.utilsgeometry import circle_from_point
@@ -494,8 +497,10 @@ def get_admin_observations():
 
             photos = (
                 MediaModel.query
-                    .join(MediaOnSpeciesSiteObservationModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
-                    .filter(MediaOnSpeciesSiteObservationModel.id_data_source == observation.id_species_site_observation)
+                    .join(MediaOnSpeciesSiteObservationModel,
+                          MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
+                    .filter(
+                    MediaOnSpeciesSiteObservationModel.id_data_source == observation.id_species_site_observation)
                     .all()
             )
 
@@ -668,8 +673,10 @@ def get_observations_by_program(id):
 
             photos = (
                 MediaModel.query
-                    .join(MediaOnSpeciesSiteObservationModel, MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
-                    .filter(MediaOnSpeciesSiteObservationModel.id_data_source == observation.id_species_site_observation)
+                    .join(MediaOnSpeciesSiteObservationModel,
+                          MediaOnSpeciesSiteObservationModel.id_media == MediaModel.id_media)
+                    .filter(
+                    MediaOnSpeciesSiteObservationModel.id_data_source == observation.id_species_site_observation)
                     .all()
             )
 
@@ -895,7 +902,6 @@ def update_observation():
                 "[update_observation] ObsTax ERROR ON FILE SAVING", str(e)
             )
             # raise GeonatureApiError(e)
-
 
         db.session.commit()
         return ("observation updated successfully"), 200
@@ -1283,3 +1289,196 @@ def get_observation(pk):
         return {"features": features}, 200
     except Exception as e:
         return {"message": str(e)}, 400
+
+
+@areas_api.route("/export/<int:user_id>", methods=["GET"])
+@jwt_required()
+def export_areas_xls(user_id):
+    current_user_email = get_jwt_identity()
+
+    try:
+        selected_user = UserModel.query.get(user_id)
+        if current_user_email != selected_user.email:
+            return ("unauthorized"), 403
+
+        filter_by_user = True
+        if request.args.get('all-data') and request.args.get('all-data') == 'true' and selected_user.admin:
+            filter_by_user = False
+
+        title_style = xlwt.easyxf("font: bold on")
+        date_style = xlwt.easyxf(num_format_str="D/M/YY")
+        wb = xlwt.Workbook()
+        # SITES SHEET
+        ws = wb.add_sheet("Zones")
+
+        areas_query = AreaModel.query
+
+        if filter_by_user:
+            areas_query = areas_query.filter_by(id_role=user_id)
+
+        areas = (
+            areas_query
+                .order_by(AreaModel.timestamp_create.desc())
+                .all()
+        )
+
+        fields = (
+            {"col_name": "ID", "getter": lambda area: area.id_area},
+            {"col_name": "Programme", "getter": lambda area: area.program.title},
+            {"col_name": "Créateur", "getter": lambda area: area.obs_txt + ' (' + str(area.id_role) + ')'},
+            {"col_name": "Nom", "getter": lambda area: area.name},
+            {"col_name": "Coord. x", "getter": lambda area: str(area.coordinates[0])},
+            {"col_name": "Coord. y", "getter": lambda area: str(area.coordinates[1])},
+            {
+                "col_name": "Date création",
+                "getter": lambda area: area.timestamp_create,
+                "style": date_style,
+            },
+        )
+
+        json_keys = list(set([key for area in areas for key in area.json_data.keys()]))
+        row, col = 0, 0
+        for field in fields:
+            ws.write(row, col, field["col_name"], title_style)
+            col += 1
+        for key in json_keys:
+            if key == "remark":
+                key = "Remarque"
+            if key == "altitude":
+                key = "Altitude"
+            ws.write(row, col, key, title_style)
+            col += 1
+        row, col = 1, 0
+
+        for area in areas:
+            area.coordinates = to_shape(area.geom).centroid.coords[0]
+            for col, field in enumerate(fields):
+                args = []
+                if field.get("style"):
+                    args.append(field.get("style"))
+                ws.write(row, col, field["getter"](area), *args)
+            row += 1
+
+        # SPECIES SITES SHEET
+        ws = wb.add_sheet("Individus")
+
+        species_sites_query = SpeciesSiteModel.query
+
+        if filter_by_user:
+            species_sites_query = species_sites_query.filter_by(id_role=user_id)
+
+        species_sites = (
+            species_sites_query
+                .order_by(SpeciesSiteModel.timestamp_create.desc())
+                .all()
+        )
+
+        basic_fields = (
+            {"col_name": "ID", "getter": lambda s: s.id_species_site},
+            {"col_name": "Observateur", "getter": lambda s: s.obs_txt + ' (' + str(s.id_role) + ')'},
+            {"col_name": "Nom", "getter": lambda s: s.name},
+            {"col_name": "Zone", "getter": lambda s: s.area.name if s.area else ''},
+            {"col_name": "Espèce",
+             "getter": lambda s: (s.species.nom_vern + " (" + s.species.nom_complet + ")") if s.species else ''},
+        )
+
+        json_keys = list(set([key for species_site in species_sites for key in species_site.json_data.keys()]))
+        row, col = 0, 0
+        for field in basic_fields:
+            ws.write(row, col, field["col_name"], title_style)
+            col += 1
+        for key in json_keys:
+            if key == "remark":
+                key = "Remarque"
+            if key == "altitude":
+                key = "Altitude"
+            if key == "circumference":
+                key = "Circonférence"
+            if key == "state":
+                key = "Etat"
+            ws.write(row, col, key, title_style)
+            col += 1
+        row, col = 1, 0
+
+        for species_site in species_sites:
+            for field in basic_fields:
+                args = []
+                if field.get("style"):
+                    args.append(field.get("style"))
+                ws.write(row, col, field["getter"](species_site), *args)
+                col += 1
+            for key in json_keys:
+                if key == "remark":
+                    key = "Remarque"
+                ws.write(row, col, species_site.json_data.get(key))
+                col += 1
+            row += 1
+            col = 0
+
+        # OBSERVATIONS SHEET
+        ws = wb.add_sheet("Observations")
+
+        observations_query = SpeciesSiteObservationModel.query
+
+        if filter_by_user:
+            observations_query = observations_query.filter_by(id_role=user_id)
+
+        observations = (
+            observations_query
+                .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
+                .all()
+        )
+
+        basic_fields = (
+            {"col_name": "ID", "getter": lambda s: s.id_species_site_observation},
+            {"col_name": "Date obs", "getter": lambda s: s.date, "style": date_style},
+            {"col_name": "Date saisie", "getter": lambda s: s.timestamp_create, "style": date_style},
+            {"col_name": "Observateur", "getter": lambda s: s.obs_txt + ' (' + str(s.id_role) + ')'},
+            {"col_name": "Zone",
+             "getter": lambda s: (s.species_site.area.name if s.species_site.area else '') if s.species_site else ''},
+            {"col_name": "Individu", "getter": lambda s: s.species_site.name if s.species_site else ''},
+            {"col_name": "Espèce",
+             "getter": lambda s: (
+                 (s.species_site.species.nom_vern + " (" + s.species_site.species.nom_complet + ")")
+                 if s.species_site.species
+                 else ''
+             ) if s.species_site else ''},
+            {"col_name": "Etape", "getter": lambda s: s.stages_step.name if s.stages_step else ''},
+        )
+        json_keys = list(set([key for observation in observations for key in observation.json_data.keys()]))
+        row, col = 0, 0
+        for field in basic_fields:
+            ws.write(row, col, field["col_name"], title_style)
+            col += 1
+        for key in json_keys:
+            if key == "remark":
+                key = "Remarque"
+            ws.write(row, col, key, title_style)
+            col += 1
+        row, col = 1, 0
+
+        for observation in observations:
+            for field in basic_fields:
+                args = []
+                if field.get("style"):
+                    args.append(field.get("style"))
+                ws.write(row, col, field["getter"](observation), *args)
+                col += 1
+            for key in json_keys:
+                ws.write(row, col, observation.json_data.get(key))
+                col += 1
+            row += 1
+            col = 0
+
+        # In memory save and return xls file
+        xls_file = io.BytesIO()
+        wb.save(xls_file)
+        output = make_response(xls_file.getvalue())
+        output.headers["Content-Disposition"] = (
+                "attachment; filename=" + "export_areas.xls"
+        )
+        output.headers["Content-type"] = "application/xls"
+        return output
+    except Exception as e:
+        current_app.logger.warning("Error: %s", str(e))
+        return {"error_message": str(e)}, 400

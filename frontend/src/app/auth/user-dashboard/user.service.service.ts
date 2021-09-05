@@ -185,4 +185,17 @@ export class UserService {
     exportSites(userId: number) {
         this.downloadFile(`/sites/export/${userId}`, 'gnc_export_sites.xls');
     }
+
+    exportAreas(userId?: number, allData = false) {
+        if (!userId) {
+            if (!this.role_id) {
+                return;
+            }
+            userId = this.role_id;
+        }
+        this.downloadFile(
+            `/areas/export/${userId}${allData ? '?all-data=true' : ''}`,
+            'gnc_export_areas.xls'
+        );
+    }
 }

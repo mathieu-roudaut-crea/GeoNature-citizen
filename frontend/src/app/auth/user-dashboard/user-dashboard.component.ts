@@ -439,6 +439,10 @@ export class UserDashboardComponent implements OnInit {
         this.userService.exportSites(this.role_id);
     }
 
+    onExportAreas(allData = false) {
+        this.userService.exportAreas(this.role_id, allData);
+    }
+
     onEditInfos(content): void {
         this.userService.getPersonalInfo().subscribe((data) => {
             this.personalInfo = data;

@@ -9,5 +9,19 @@
             >
             </app-species-sites-obs-list>
         </div>
+        <div class="export-container col-12">
+            <button
+                *ngIf="observations && observations.count"
+                class="btn-big col-lg-3 col-md-5 col-sm-12 export"
+                (click)="onExportAreas()"
+            >
+                <i class="fa fa-download"></i
+                >
+                <ng-container>
+                    Exporter mes observations
+                </ng-container
+                >
+            </button>
+        </div>
     </div>
 </div>
