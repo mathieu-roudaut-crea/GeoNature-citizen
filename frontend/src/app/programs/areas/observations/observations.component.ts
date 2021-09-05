@@ -11,8 +11,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { FeatureCollection } from 'geojson';
-
 import { GncProgramsService } from '../../../api/gnc-programs.service';
 import { AreaModalFlowService } from '../modalflow/modalflow.service';
 import { AreaService } from '../areas.service';
@@ -20,7 +18,7 @@ import { SpeciesSitesObsListComponent } from './list/list.component';
 import { ProgramBaseComponent } from '../../base/program-base.component';
 import { AuthService } from '../../../auth/auth.service';
 import { Program } from '../../programs.models';
-import {UserService} from "../../../auth/user-dashboard/user.service.service";
+import { UserService } from '../../../auth/user-dashboard/user.service.service';
 
 @Component({
     selector: 'app-species-sites-obs',
@@ -37,7 +35,7 @@ export class SpeciesSitesObsComponent
     implements OnInit
 {
     title = 'Observations';
-    @Input('observations') observations: FeatureCollection;
+    @Input('observations') observations;
     @Input('userDashboard') userDashboard = false;
     @Output() refreshListEvent = new EventEmitter<string>();
     @ViewChild(SpeciesSitesObsListComponent, { static: true })
