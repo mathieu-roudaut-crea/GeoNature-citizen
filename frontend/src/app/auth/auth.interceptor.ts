@@ -54,6 +54,11 @@ export class AuthInterceptor implements HttpInterceptor {
             this.refreshing = true;
             this.token$.next(null);
 
+            if (!this.auth.hasRefreshToken()) {
+                localStorage.clear();
+                return next.handle(request);
+            }
+
             return this.auth.performTokenRefresh().pipe(
                 mergeMap((data: TokenRefresh) => {
                     if (data && !!data.access_token) {

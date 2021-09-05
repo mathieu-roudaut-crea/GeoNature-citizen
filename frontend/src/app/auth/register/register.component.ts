@@ -35,13 +35,6 @@ export class RegisterComponent {
     relaysList: Array<Relay>;
     userAvatar: string | ArrayBuffer;
     genderType = '0';
-    categoriesEnum = Object.freeze({
-        individual: 'Particulier',
-        school: 'Etablissement scolaire',
-        professional: 'Professionnel de la nature',
-        education: 'Organisme d’éducation à l’environnement',
-        other: 'Autre',
-    });
     @ViewChild('registerForm', { static: false }) registerForm;
 
     constructor(

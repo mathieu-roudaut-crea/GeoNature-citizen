@@ -118,7 +118,7 @@
                             [(ngModel)]="user.category"
                             #category="ngModel"
                         >
-                            <option *ngFor="let category of categoriesEnum | keyvalue" [value]="category.key">{{category.value}}</option>
+                            <option *ngFor="let category of AppConfig.categoriesEnum | keyvalue" [value]="category.key">{{category.value}}</option>
                         </select>
                     </div>
                 </div>

@@ -159,6 +159,11 @@ form > button {
     display: block;
 }
 
+.checkbox-label {
+    margin-left: 5px;
+}
+
+
 app-modalflow {
     position: relative;
     display: contents;

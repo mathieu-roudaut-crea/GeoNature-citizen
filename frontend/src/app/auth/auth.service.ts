@@ -139,7 +139,7 @@ export class AuthService {
         return localStorage.getItem('access_token');
     }
 
-    private hasRefreshToken(): boolean {
+    public hasRefreshToken(): boolean {
         return !!localStorage.getItem('refresh_token');
     }
 

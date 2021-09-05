@@ -39,6 +39,8 @@ export class UserDashboardComponent implements OnInit {
     programs_badges: any = [];
     recognition_badges: any = [];
     AppConfig = AppConfig;
+    genderType = '0';
+    selectedCategory: string;
 
     observations: any;
     myobs: any;
@@ -88,6 +90,13 @@ export class UserDashboardComponent implements OnInit {
         this.areaService.speciesSiteObsEdited.subscribe(() => {
             this.refreshAdminObservationsList();
         });
+    }
+
+    onChangeCategory(): void {
+        this.selectedCategory = this.userForm.value.category;
+        if (this.selectedCategory === 'individual') {
+            this.userForm.get('organism').setValue(null);
+        }
     }
 
     verifyUser() {
@@ -462,6 +471,16 @@ export class UserDashboardComponent implements OnInit {
             userForm.avatar = this.userAvatar;
             userForm.extention = this.extentionFile;
         }
+
+        if (userForm.linked_relay_id === 0) {
+            userForm.linked_relay_id = null;
+        }
+
+        userForm.want_newsletter = userForm.want_newsletter ? 1 : 0;
+        userForm.want_observation_contact = userForm.want_observation_contact
+            ? 1
+            : 0;
+
         this.userService.updatePersonalData(userForm).subscribe((user: any) => {
             localStorage.setItem('userAvatar', user.features.avatar);
             this.modalRef.close();
@@ -486,6 +505,9 @@ export class UserDashboardComponent implements OnInit {
     }
 
     initForm() {
+        const dbGender = this.personalInfo.features.gender;
+        this.selectedCategory = this.personalInfo.features.category;
+        this.genderType = dbGender === 'm' ? '0' : dbGender === 'f' ? '1' : '2';
         this.userForm = this.formBuilder.group(
             {
                 username: [
@@ -503,10 +525,22 @@ export class UserDashboardComponent implements OnInit {
                         ),
                     ],
                 ],
-                name: [this.personalInfo.features.name, Validators.required],
-                surname: [
-                    this.personalInfo.features.surname,
-                    Validators.required,
+                category: [this.personalInfo.features.category],
+                organism: [this.personalInfo.features.organism],
+                function: [this.personalInfo.features.function],
+                country: [this.personalInfo.features.country],
+                postal_code: [this.personalInfo.features.postal_code],
+                birth_year: [this.personalInfo.features.birth_year],
+                gender: [dbGender],
+                comments: [this.personalInfo.features.comments],
+                linked_relay_id: [
+                    this.personalInfo.features.linked_relay_id
+                        ? this.personalInfo.features.linked_relay_id
+                        : 0,
+                ],
+                want_newsletter: [this.personalInfo.features.want_newsletter],
+                want_observation_contact: [
+                    this.personalInfo.features.want_observation_contact,
                 ],
                 newPassword: [null],
                 confirmPassword: [null],
@@ -558,6 +592,17 @@ export class UserDashboardComponent implements OnInit {
             this.getData();
             this.idSiteToDelete = null;
         });
+    }
+
+    onChangeGenreType(event): void {
+        let value = '';
+        this.genderType = event.target.value;
+        if (this.genderType === '0') {
+            value = 'm';
+        } else if (this.genderType === '1') {
+            value = 'f';
+        }
+        this.userForm.get('gender').setValue(value);
     }
 
     ngOnDestroy(): void {
