@@ -492,9 +492,7 @@ export class UserDashboardComponent implements OnInit {
     onUploadAvatar($event) {
         if ($event) {
             if ($event.target.files && $event.target.files[0]) {
-                const reader = new FileReader();
                 const file = $event.target.files[0];
-
                 const img = document.createElement('img');
                 img.onload = (event) => {
                     if (!event['path'] || !event['path'].length) {
