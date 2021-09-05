@@ -491,6 +491,7 @@ def get_or_patch_user(user):
                     )
                 )
                 filename = "avatar_" + user.username + "." + extention
+                request_data["avatar"] = filename
                 avatar_path = os.path.join(str(MEDIA_DIR), str(user.as_secured_dict(True)["avatar"]))
                 if os.path.exists(avatar_path):
                     os.remove(avatar_path)
@@ -526,17 +527,16 @@ def get_or_patch_user(user):
                     })
 
                     if user.want_newsletter:
-                        response = client.lists.add_list_member(
+                        client.lists.add_list_member(
                             current_app.config.get("MAILCHIMP_LIST_ID", ""),
                             {"email_address": user.email, "status": "subscribed"}
                         )
                     else:
-                        response = client.lists.delete_list_member(
+                        client.lists.delete_list_member(
                             current_app.config.get("MAILCHIMP_LIST_ID", ""),
                             hashlib.md5(user.email.encode('utf-8')).hexdigest()
                         )
 
-                    print(response)
                 except ApiClientError as error:
                     print("Mailchimp Error: {}".format(error.text))
 
