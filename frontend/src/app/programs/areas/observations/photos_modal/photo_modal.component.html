@@ -10,9 +10,14 @@
     </button>
 </div>
 
-<div class="modal-body photos-container">
-    <div *ngFor="let photo of photos;" class="img-holder">
-        <img [src]="apiEndpoint + photo.url" alt="step photo" />
+<div class="modal-body ">
+    <div>
+        <input id="big-size" type="checkbox" [(ngModel)]="bigSize" /><label for="big-size">&nbsp;Afficher les photos en grand</label>
+    </div>
+    <div class="photos-container">
+        <div *ngFor="let photo of photos;" class="img-holder">
+            <img [src]="apiEndpoint + photo.url" alt="step photo" [class]="bigSize ? 'big-size' : ''" (click)="openPhoto(apiEndpoint + photo.url)" />
+        </div>
     </div>
 </div>
 

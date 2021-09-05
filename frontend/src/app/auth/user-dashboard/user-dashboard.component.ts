@@ -126,7 +126,9 @@ export class UserDashboardComponent implements OnInit {
                             this.userAvatar =
                                 this.appConfig.API_ENDPOINT +
                                 '/media/' +
-                                user['features']['avatar'];
+                                user['features']['avatar'] +
+                                '?' +
+                                user['features']['timestamp_update'];
                         // FIXME: source backend conf
                         this.getData();
                         this.flowService
@@ -492,14 +494,43 @@ export class UserDashboardComponent implements OnInit {
             if ($event.target.files && $event.target.files[0]) {
                 const reader = new FileReader();
                 const file = $event.target.files[0];
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    this.userAvatar = reader.result;
-                    this.newAvatar = reader.result;
-                    this.extentionFile = $event.target.files[0].type
-                        .split('/')
-                        .pop();
+
+                const img = document.createElement('img');
+                img.onload = (event) => {
+                    if (!event['path'] || !event['path'].length) {
+                        return;
+                    }
+                    const newImage = event['path'][0];
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    let resizeTimeNumber = 1;
+                    const maxHeightRatio =
+                        newImage.height / AppConfig.imageUpload.maxHeight;
+                    if (maxHeightRatio > 1) {
+                        resizeTimeNumber = maxHeightRatio;
+                    }
+                    const maxWidthRatio =
+                        newImage.width / AppConfig.imageUpload.maxWidth;
+                    if (maxWidthRatio > 1 && maxWidthRatio > maxHeightRatio) {
+                        resizeTimeNumber = maxWidthRatio;
+                    }
+
+                    canvas.width = newImage.width / resizeTimeNumber;
+                    canvas.height = newImage.height / resizeTimeNumber;
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const resizedImage = canvas.toDataURL(
+                        'image/jpeg',
+                        AppConfig.imageUpload.quality
+                    );
+
+                    this.userAvatar = resizedImage;
+                    this.newAvatar = resizedImage;
+                    this.extentionFile = 'jpeg';
                 };
+                img.src = window.URL.createObjectURL(file);
             }
         }
     }

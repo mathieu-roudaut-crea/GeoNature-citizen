@@ -886,8 +886,17 @@ def update_observation():
             raise GeonatureApiError(e)
 
         try:
+            files = request.files
+            if update_data.get("file[0]"):
+                max_length = len(update_data.keys())
+                files = []
+                for index in range(max_length):
+                    if update_data.get("file[" + str(index) + "]", None) is None:
+                        break
+                    files.append(update_data.get("file[" + str(index) + "]"))
+
             file = save_upload_files(
-                request.files,
+                files,
                 "species_site_obs",
                 "0",
                 update_data.get("id_species_site_observation"),

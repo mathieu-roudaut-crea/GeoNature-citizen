@@ -155,8 +155,41 @@ export class SpeciesSiteObservationFormComponent
         this.advancedMode = !this.advancedMode;
         this.updatePartialLayout();
     }
-    addImage(event) {
-        this.photos.push(event.file);
+    addImage($event) {
+        const img = document.createElement('img');
+        img.onload = (event) => {
+            if (!event['path'] || !event['path'].length) {
+                return;
+            }
+            const newImage = event['path'][0];
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            let resizeTimeNumber = 1;
+            const maxHeightRatio =
+                newImage.height / AppConfig.imageUpload.maxHeight;
+            if (maxHeightRatio > 1) {
+                resizeTimeNumber = maxHeightRatio;
+            }
+            const maxWidthRatio =
+                newImage.width / AppConfig.imageUpload.maxWidth;
+            if (maxWidthRatio > 1 && maxWidthRatio > maxHeightRatio) {
+                resizeTimeNumber = maxWidthRatio;
+            }
+
+            canvas.width = newImage.width / resizeTimeNumber;
+            canvas.height = newImage.height / resizeTimeNumber;
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const resizedImage = canvas.toDataURL(
+                'image/jpeg',
+                AppConfig.imageUpload.quality
+            );
+
+            this.photos.push(resizedImage);
+        };
+        img.src = window.URL.createObjectURL($event.file);
     }
     deleteImage(event) {
         for (let i = 0; i < this.photos.length; i++) {
@@ -286,10 +319,11 @@ export class SpeciesSiteObservationFormComponent
             }
         });
 
-        const files = this.photos;
-        files.forEach((file) => {
-            formData.append('file', file, file.name);
-        });
+        let index = 0;
+        for (const photoData of this.photos) {
+            formData.append('file[' + index + ']', photoData);
+            index++;
+        }
 
         formData.append('json_data', JSON.stringify(this.jsonData));
 

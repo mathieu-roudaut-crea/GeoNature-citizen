@@ -15,6 +15,7 @@ import { AppConfig } from '../../../../../conf/app.config';
 export class PhotosModalComponent {
     @Input('photos') photos;
     apiEndpoint = '';
+    bigSize = false;
 
     constructor(private modalService: ModalsTopbarService) {
         this.apiEndpoint = AppConfig.API_ENDPOINT;
@@ -22,5 +23,9 @@ export class PhotosModalComponent {
 
     closeModal() {
         this.modalService.close();
+    }
+
+    openPhoto(url) {
+        window.open(url);
     }
 }

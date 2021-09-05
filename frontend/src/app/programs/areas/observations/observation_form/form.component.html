@@ -110,19 +110,21 @@
                     <label i18n="Existing Photos@@existingPhotos">
                         Photos existantes (cocher pour supprimer)
                     </label><br />
-                    <span *ngFor="let p of data.obsUpdateData.photos" class="mr-4">
-                        <input
-                            type="checkbox"
-                            name=""
-                            [(ngModel)]="p.checked"
-                            [ngModelOptions]="{ standalone: true }"
-                            class="mr-1"
-                        />
-                        <img
-                            src="{{ apiEndpoint }}{{ p.url }}"
-                            height="50"
-                        />
-                    </span>
+                    <div class="d-flex flex-wrap align-items-center ">
+                        <div *ngFor="let p of data.obsUpdateData.photos" class="mx-2 my-1">
+                            <input
+                                type="checkbox"
+                                name=""
+                                [(ngModel)]="p.checked"
+                                [ngModelOptions]="{ standalone: true }"
+                                class="mr-1"
+                            />
+                            <img
+                                src="{{ apiEndpoint }}{{ p.url }}"
+                                height="50"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <image-upload

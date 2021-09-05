@@ -11,7 +11,7 @@ export const AppConfig = {
         DISPLAY_SIDEBAR: true,
         DISPLAY_STATS: true,
         DISPLAY_BADGES: true,
-        NEW_OBS_FORM_MODAL_VERSION: true
+        NEW_OBS_FORM_MODAL_VERSION: true,
     },
     META: {
       keywords: 'biodiversite enquetes participatif observations',
@@ -77,4 +77,9 @@ export const AppConfig = {
         education: 'Organisme d’éducation à l’environnement',
         other: 'Autre',
     }),
+    imageUpload: {
+        maxHeight: 1440,
+        maxWidth: 1440,
+        quality: 0.9,
+    },
 }

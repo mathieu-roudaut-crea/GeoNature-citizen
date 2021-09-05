@@ -534,11 +534,6 @@ export class ObsFormComponent implements AfterViewInit {
     }
 
     onBeforeUpload(event) {
-        if (event.file.size > AppConfig.PHOTO_SIZE_LIMIT) {
-            alert("L'image doit faire moins de 2Mo");
-            event.abort = true;
-        }
-
         return event;
     }
 

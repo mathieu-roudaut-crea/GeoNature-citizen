@@ -491,17 +491,9 @@ def get_or_patch_user(user):
                     )
                 )
                 filename = "avatar_" + user.username + "." + extention
-                request_data["avatar"] = filename
-                if os.path.exists(
-                    os.path.join(
-                        str(MEDIA_DIR), str(user.as_secured_dict(True)["avatar"])
-                    )
-                ):
-                    os.remove(
-                        os.path.join(
-                            str(MEDIA_DIR), str(user.as_secured_dict(True)["avatar"])
-                        )
-                    )
+                avatar_path = os.path.join(str(MEDIA_DIR), str(user.as_secured_dict(True)["avatar"]))
+                if os.path.exists(avatar_path):
+                    os.remove(avatar_path)
                 try:
                     handler = open(os.path.join(str(MEDIA_DIR), str(filename)), "wb+")
                     handler.write(imgdata)
