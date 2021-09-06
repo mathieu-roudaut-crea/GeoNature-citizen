@@ -14,7 +14,7 @@
                     Veuillez sélectionner un stade
                 </option>
                 <option
-                    *ngFor="let s of speciesSite.properties.stages.features"
+                    *ngFor="let s of stagesFeatures"
                     [value]="s.properties.id_species_stage"
                 >
                     {{

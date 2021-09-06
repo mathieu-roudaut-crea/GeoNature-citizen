@@ -72,6 +72,7 @@ export class SpeciesSiteObservationFormComponent
     formInputObject: object;
 
     photos: any[] = [];
+    stagesFeatures: any[] = [];
     apiEndpoint = '';
 
     constructor(
@@ -120,6 +121,10 @@ export class SpeciesSiteObservationFormComponent
             .getSpeciesSiteDetails(this.species_site_id, true, true)
             .subscribe((speciesSites) => {
                 this.speciesSite = speciesSites['features'][0];
+                this.stagesFeatures =
+                    this.speciesSite.properties.stages.features.filter(
+                        (stage) => stage.properties.active
+                    );
                 this.onSelectedStageChange();
             });
     }
