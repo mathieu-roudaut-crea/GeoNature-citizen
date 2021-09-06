@@ -221,7 +221,13 @@
                 <tbody>
                 <tr *ngFor="let species_site of area.properties.species_sites.features" class="d-flex">
                     <td class="col-4">{{ species_site.properties.name }}</td>
-                    <td class="col-4">{{ species_site.properties.cd_nom }}</td>
+                    <td class="col-4">
+                        {{
+                        species_site.properties.species ?
+                            species_site.properties.species.nom_vern :
+                            ''
+                        }}
+                    </td>
                     <td class="col-4">
                         <a
                             [routerLink]="[
@@ -239,7 +245,8 @@
             </table>
         </div>
     </div>
-    <div *ngIf="module === 'species_sites' && speciesSite?.properties.observations && speciesSite.properties.observations.count > 0">
+    <div
+        *ngIf="module === 'species_sites' && speciesSite?.properties.observations && speciesSite.properties.observations.count > 0">
         <div class="row">
             <h2 class="mt-4 mb-4">Observations</h2>
         </div>

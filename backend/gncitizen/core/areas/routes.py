@@ -46,11 +46,11 @@ def prepare_list(data, with_geom=True, maximum_count=0):
     for element in data:
         formatted = format_entity(element, with_geom)
         features.append(formatted)
-    data = FeatureCollection(features)
-    data["count"] = len(data)
+    features_data = FeatureCollection(features)
+    features_data["count"] = len(data)
     if maximum_count != 0:
-        data["maximum_count"] = maximum_count
-    return data
+        features_data["maximum_count"] = maximum_count
+    return features_data
 
 
 """Used attributes in observation features"""
