@@ -51,8 +51,8 @@
                             ></i>
                         </span>
                     </h5>
-                    <p>
-                        ajoutée par <span>{{ speciesSite.properties.obs_txt }}</span>
+                    <p *ngIf="speciesSite.properties.species">
+                        {{ speciesSite.properties.species.nom_vern }}
                     </p>
                     <p>
                         le
