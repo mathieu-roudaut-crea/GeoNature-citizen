@@ -163,10 +163,16 @@ export class SpeciesSiteObservationFormComponent
     addImage($event) {
         const img = document.createElement('img');
         img.onload = (event) => {
-            if (!event['path'] || !event['path'].length) {
+            let newImage = null;
+            if (event.target) {
+                newImage = event.target;
+            } else if (!event['path'] || !event['path'].length) {
+                newImage = event['path'][0];
+            }
+            if (!newImage) {
+                console.error('No image found on this navigator');
                 return;
             }
-            const newImage = event['path'][0];
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
