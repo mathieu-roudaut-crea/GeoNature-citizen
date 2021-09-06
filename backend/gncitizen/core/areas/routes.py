@@ -1207,8 +1207,16 @@ def post_observation(species_site_id):
 
         new_observation = SpeciesSiteObservationModel(
             id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"],
-            json_data=request_data["json_data"]
         )
+
+        try:
+            json_data = request_data.get("json_data")
+            if json_data is not None:
+                new_observation.json_data = json.loads(json_data)
+        except Exception as e:
+            current_app.logger.warning("[post_areas] json_data ", e)
+            raise GeonatureApiError(e)
+
 
         id_role = get_id_role_if_exists()
         if id_role is not None:
@@ -1230,8 +1238,17 @@ def post_observation(species_site_id):
 
         # Enregistrement de la photo et correspondance Obs Photo
         try:
+            files = request.files
+            if request_data.get("file[0]"):
+                max_length = len(request_data.keys())
+                files = []
+                for index in range(max_length):
+                    if request_data.get("file[" + str(index) + "]", None) is None:
+                        break
+                    files.append(request_data.get("file[" + str(index) + "]"))
+
             file = save_upload_files(
-                request.files,
+                files,
                 "species_site_obs",
                 result.species_site.cd_nom,
                 result.id_species_site_observation,
