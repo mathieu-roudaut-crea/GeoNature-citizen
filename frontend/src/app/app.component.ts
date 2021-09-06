@@ -37,7 +37,7 @@ export class AppComponent implements OnInit {
             }
         });
 
-        if (window.parent) {
+        if (window.parent && window.parent.postMessage) {
             const username = localStorage.getItem('username');
             let options = {
                 type: 'notLoggedIn',
