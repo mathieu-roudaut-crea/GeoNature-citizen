@@ -5,6 +5,7 @@ import smtplib
 import base64
 import requests
 import hashlib
+import datetime
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -491,7 +492,7 @@ def get_or_patch_user(user):
                     )
                 )
                 filename = "avatar_" + user.username + "." + extention
-                request_data["avatar"] = filename
+                request_data["avatar"] = filename + "?" + datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
                 avatar_path = os.path.join(str(MEDIA_DIR), str(user.as_secured_dict(True)["avatar"]))
                 if os.path.exists(avatar_path):
                     os.remove(avatar_path)

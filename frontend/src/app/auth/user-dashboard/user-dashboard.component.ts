@@ -126,9 +126,7 @@ export class UserDashboardComponent implements OnInit {
                             this.userAvatar =
                                 this.appConfig.API_ENDPOINT +
                                 '/media/' +
-                                user['features']['avatar'] +
-                                '?' +
-                                user['features']['timestamp_update'];
+                                user['features']['avatar'];
                         // FIXME: source backend conf
                         this.getData();
                         this.flowService
