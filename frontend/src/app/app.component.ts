@@ -37,19 +37,20 @@ export class AppComponent implements OnInit {
             }
         });
 
-        const username = localStorage.getItem('username');
-        let options = {
-            type: 'notLoggedIn',
-            username: null,
-        };
-        if (username) {
-            options = {
-                username: username,
-                type: 'loggedIn',
+        if (window.parent) {
+            const username = localStorage.getItem('username');
+            let options = {
+                type: 'notLoggedIn',
+                username: null,
             };
+            if (username) {
+                options = {
+                    username: username,
+                    type: 'loggedIn',
+                };
+            }
+            window.parent.postMessage(options, '*');
         }
-
-        window.parent.postMessage(options, '*');
 
         window.addEventListener('message', receiveMessage.bind(this), false);
 
