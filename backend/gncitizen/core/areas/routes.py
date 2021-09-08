@@ -842,16 +842,17 @@ def update_observation():
         update_data = request.form
 
         observation = SpeciesSiteObservationModel.query.filter_by(
-            id_species_site_observation=update_data.get("id_species_site_observation"))
+            id_species_site_observation=update_data.get("id_species_site_observation", 0)
+        )
         if current_user.email != UserModel.query.get(observation.first().id_role).email and current_user.admin != 1:
             return ("unauthorized"), 403
 
         update_observation = {}
-        update_observation["date"] = update_data["date"]
-        update_observation["id_stages_step"] = update_data["stages_step_id"]
+        update_observation["date"] = update_data.get("date", None)
+        update_observation["id_stages_step"] = update_data.get("stages_step_id", None)
 
         try:
-            json_data = update_data.get("json_data")
+            json_data = update_data.get("json_data", None)
             if json_data is not None:
                 update_observation["json_data"] = json.loads(json_data)
                 print(update_observation["json_data"])
@@ -863,7 +864,7 @@ def update_observation():
 
         try:
             # Delete selected existing media
-            id_media_to_delete = json.loads(update_data.get("delete_media"))
+            id_media_to_delete = json.loads(update_data.get("delete_media"), [])
             if len(id_media_to_delete):
                 db.session.query(MediaOnSpeciesSiteObservationModel).filter(
                     MediaOnSpeciesSiteObservationModel.id_media.in_(tuple(id_media_to_delete)),
@@ -879,7 +880,7 @@ def update_observation():
 
         try:
             files = request.files
-            if update_data.get("photos[0]"):
+            if update_data.get("photos[0]", None) is not None:
                 max_length = len(update_data.keys())
                 files = []
                 for index in range(max_length):
@@ -891,7 +892,7 @@ def update_observation():
                 files,
                 "species_site_obs",
                 "0",
-                update_data.get("id_species_site_observation"),
+                update_data.get("id_species_site_observation", 0),
                 MediaOnSpeciesSiteObservationModel,
             )
             current_app.logger.debug(
@@ -1198,7 +1199,7 @@ def post_observation(species_site_id):
         request_data = request.form
 
         new_observation = SpeciesSiteObservationModel(
-            id_species_site=species_site_id, date=request_data["date"], id_stages_step=request_data["stages_step_id"],
+            id_species_site=species_site_id, date=request_data.get("date", None), id_stages_step=request_data.get("stages_step_id", None),
         )
 
         try:
@@ -1231,7 +1232,7 @@ def post_observation(species_site_id):
         # Enregistrement de la photo et correspondance Obs Photo
         try:
             files = request.files
-            if request_data.get("photos[0]"):
+            if request_data.get("photos[0]", None) is not None:
                 max_length = len(request_data.keys())
                 files = []
                 for index in range(max_length):
