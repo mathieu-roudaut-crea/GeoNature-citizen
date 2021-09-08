@@ -365,8 +365,8 @@ def get_admin_areas():
             areas_query = (
                 AreaModel.query
                     .join(creator, AreaModel.id_role == creator.id_user)
-                    .join(relay, relay.id_user == creator.linked_relay_id)
-                    .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
+                    .outerjoin(relay, relay.id_user == creator.linked_relay_id)
+                    .filter(or_(relay.id_user == current_user_id, AreaModel.id_role == current_user_id))
             )
 
         areas = areas_query.order_by(AreaModel.timestamp_create.desc()).all()
@@ -413,7 +413,7 @@ def get_admin_species_sites():
             species_sites_query = (
                 species_sites_query
                     .join(creator, SpeciesSiteModel.id_role == creator.id_user)
-                    .join(relay, relay.id_user == creator.linked_relay_id)
+                    .outerjoin(relay, relay.id_user == creator.linked_relay_id)
                     .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
@@ -464,7 +464,7 @@ def get_admin_observations():
             relay = aliased(UserModel)
             observations_query = (observations_query
                     .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
-                    .join(relay, relay.id_user == creator.linked_relay_id)
+                    .outerjoin(relay, relay.id_user == creator.linked_relay_id)
                     .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
@@ -544,7 +544,7 @@ def get_admin_observers():
             relay = aliased(UserModel)
             observers_query = (
                 observers_query
-                    .join(relay, relay.id_user == UserModel.linked_relay_id)
+                    .outerjoin(relay, relay.id_user == UserModel.linked_relay_id)
                     .filter(relay.id_user == user_id)
             )
 
@@ -1316,12 +1316,16 @@ def export_areas_xls(user_id):
     current_user_email = get_jwt_identity()
 
     try:
-        selected_user = UserModel.query.get(user_id)
-        if current_user_email != selected_user.email:
+        current_user = UserModel.query.get(user_id)
+        if current_user_email != current_user.email:
             return ("unauthorized"), 403
 
         filter_by_user = True
-        if request.args.get('all-data') and request.args.get('all-data') == 'true' and selected_user.admin:
+        if (
+            request.args.get('all-data')
+            and request.args.get('all-data') == 'true'
+            and (current_user.admin == 1 or current_user.is_relay == 1)
+        ):
             filter_by_user = False
 
         title_style = xlwt.easyxf("font: bold on")
@@ -1334,6 +1338,15 @@ def export_areas_xls(user_id):
 
         if filter_by_user:
             areas_query = areas_query.filter_by(id_role=user_id)
+        elif current_user.admin != 1:
+            creator = aliased(UserModel)
+            relay = aliased(UserModel)
+            areas_query = (
+                areas_query
+                    .join(creator, AreaModel.id_role == creator.id_user)
+                    .outerjoin(relay, relay.id_user == creator.linked_relay_id)
+                    .filter(or_(relay.id_user == current_user.id_user, AreaModel.id_role == current_user.id_user))
+            )
 
         areas = (
             areas_query
@@ -1385,6 +1398,15 @@ def export_areas_xls(user_id):
 
         if filter_by_user:
             species_sites_query = species_sites_query.filter_by(id_role=user_id)
+        elif current_user.admin != 1:
+            creator = aliased(UserModel)
+            relay = aliased(UserModel)
+            species_sites_query = (
+                species_sites_query
+                    .join(creator, SpeciesSiteModel.id_role == creator.id_user)
+                    .outerjoin(relay, relay.id_user == creator.linked_relay_id)
+                    .filter(or_(relay.id_user == current_user.id_user, SpeciesSiteModel.id_role == current_user.id_user))
+            )
 
         species_sites = (
             species_sites_query
@@ -1441,6 +1463,18 @@ def export_areas_xls(user_id):
 
         if filter_by_user:
             observations_query = observations_query.filter_by(id_role=user_id)
+        elif current_user.admin != 1:
+            creator = aliased(UserModel)
+            relay = aliased(UserModel)
+            observations_query = (
+                observations_query
+                    .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
+                    .outerjoin(relay, relay.id_user == creator.linked_relay_id)
+                    .filter(or_(
+                        relay.id_user == current_user.id_user,
+                        SpeciesSiteObservationModel.id_role == current_user.id_user
+                    ))
+            )
 
         observations = (
             observations_query
