@@ -332,7 +332,7 @@ export class SpeciesSiteObservationFormComponent
 
         let index = 0;
         for (const photoData of this.photos) {
-            formData.append('file[' + index + ']', photoData);
+            formData.append('photos[' + index + ']', photoData);
             index++;
         }
 

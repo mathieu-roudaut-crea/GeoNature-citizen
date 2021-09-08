@@ -879,13 +879,13 @@ def update_observation():
 
         try:
             files = request.files
-            if update_data.get("file[0]"):
+            if update_data.get("photos[0]"):
                 max_length = len(update_data.keys())
                 files = []
                 for index in range(max_length):
-                    if update_data.get("file[" + str(index) + "]", None) is None:
+                    if update_data.get("photos[" + str(index) + "]", None) is None:
                         break
-                    files.append(update_data.get("file[" + str(index) + "]"))
+                    files.append(update_data.get("photos[" + str(index) + "]"))
 
             file = save_upload_files(
                 files,
@@ -1231,13 +1231,13 @@ def post_observation(species_site_id):
         # Enregistrement de la photo et correspondance Obs Photo
         try:
             files = request.files
-            if request_data.get("file[0]"):
+            if request_data.get("photos[0]"):
                 max_length = len(request_data.keys())
                 files = []
                 for index in range(max_length):
-                    if request_data.get("file[" + str(index) + "]", None) is None:
+                    if request_data.get("photos[" + str(index) + "]", None) is None:
                         break
-                    files.append(request_data.get("file[" + str(index) + "]"))
+                    files.append(request_data.get("photos[" + str(index) + "]"))
 
             file = save_upload_files(
                 files,
