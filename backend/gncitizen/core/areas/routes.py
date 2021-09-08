@@ -229,7 +229,7 @@ def get_areas_by_program(id):
             else:
                 return prepare_list([])
 
-        areas = areas_query.all()
+        areas = areas_query.order_by(func.lower(AreaModel.name)).all()
         return prepare_list(areas)
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -259,7 +259,7 @@ def get_user_areas():
         user_id = get_id_role_if_exists()
         areas = (AreaModel.query
                  .filter_by(id_role=user_id)
-                 .order_by(AreaModel.timestamp_create.desc())
+                 .order_by(func.lower(AreaModel.name))
                  .all())
         return prepare_list(areas)
     except Exception as e:
@@ -291,7 +291,7 @@ def get_user_species_sites():
         species_sites = (SpeciesSiteModel.query
                          .filter_by(id_role=user_id)
                          .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                         .order_by(AreaModel.timestamp_create.desc())
+                         .order_by(func.lower(SpeciesSiteModel.name))
                          .all())
         return prepare_list(species_sites)
     except Exception as e:
@@ -369,7 +369,7 @@ def get_admin_areas():
                     .filter(or_(relay.id_user == current_user_id, AreaModel.id_role == current_user_id))
             )
 
-        areas = areas_query.order_by(AreaModel.timestamp_create.desc()).all()
+        areas = areas_query.order_by(func.lower(AreaModel.name)).all()
 
         return prepare_list(areas)
     except Exception as e:
@@ -417,7 +417,7 @@ def get_admin_species_sites():
                     .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
-        species_sites = species_sites_query.order_by(SpeciesSiteModel.timestamp_create.desc()).all()
+        species_sites = species_sites_query.order_by(func.lower(SpeciesSiteModel.name)).all()
 
         return prepare_list(species_sites)
     except Exception as e:
@@ -589,7 +589,7 @@ def get_species_sites_by_program(id):
             else:
                 return prepare_list([])
 
-        species_sites_query = species_sites_query.order_by(SpeciesSiteModel.timestamp_create.desc())
+        species_sites_query = species_sites_query.order_by(func.lower(SpeciesSiteModel.name))
 
         species_sites = species_sites_query.all()
 
@@ -1350,7 +1350,7 @@ def export_areas_xls(user_id):
 
         areas = (
             areas_query
-                .order_by(AreaModel.timestamp_create.desc())
+                .order_by(func.lower(AreaModel.name))
                 .all()
         )
 
@@ -1410,7 +1410,7 @@ def export_areas_xls(user_id):
 
         species_sites = (
             species_sites_query
-                .order_by(SpeciesSiteModel.timestamp_create.desc())
+                .order_by(func.lower(SpeciesSiteModel.name))
                 .all()
         )
 
