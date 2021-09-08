@@ -21,7 +21,7 @@
                 />
                 <div class="infos">
                     <h5>
-                        <span class="name">{{ speciesSite.properties.name }}</span>
+                        <div class="name">{{ speciesSite.properties.name }}</div>
                         <span *ngIf="speciesSite.properties.id_role === userService.role_id" class="pull-right">
                             <app-areamodalflow
                                 #modalFlowRef

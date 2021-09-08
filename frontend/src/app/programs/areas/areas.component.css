@@ -4,6 +4,11 @@
     --router-outlet-offset: 0px;
 }
 
+@media (max-width: 992px) {
+    .app-no-topbar .observations {
+        height: auto;
+    }
+}
 .observations {
     margin: 0px;
     min-height: inherit;

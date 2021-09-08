@@ -25,7 +25,6 @@
     cursor: pointer;
 }
 
-
 #list .espece img {
     object-fit: cover;
     min-width: 80px !important;
@@ -53,7 +52,18 @@
     flex-direction: column;
     justify-content: center;
     padding-left: 1em;
-    width: 100%;
+    max-width: calc(33vw - 140px);
+    flex: 1;
+}
+
+#list .espece .infos > p, #list .espece .infos .name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#list .espece .infos .name {
+    flex: 1;
 }
 
 #list .espece .infos h5 {
@@ -61,38 +71,27 @@
     margin-bottom: 0;
     font-size: 16px;
 }
+
 #list .espece .infos h5 i {
-    margin-left: 5px;
+    margin-right: 5px;
 }
 
-#list .espece .infos > p, #list .espece .infos .name {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 240px;
-}
-
-#list .espece .infos .name {
-    max-width: 200px;
-    flex: 1;
-}
-
-#list .espece .infos p {
+#list .espece div p,
+#list .espece div span {
     font-style: italic;
     color: var(--primary);
     margin-bottom: 0;
     line-height: 1.3;
     font-size: 14px;
-    max-width: 240px;
 }
 
-#list .espece .add-species-site-observation {
+#list .espece .add-species-site {
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 0 1em;
 }
-#list .espece .add-species-site-observation > div {
+#list .espece .add-species-site > div {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -102,7 +101,7 @@
     box-shadow: 1px 3px 15px -5px rgba(0, 0, 0, 0.50);
     font-size: 24px;
 }
-#list .espece .add-species-site-observation > div:hover {
+#list .espece .add-species-site > div:hover {
     box-shadow: 1px 3px 15px -5px rgba(0, 0, 0, 1);
     background-color: #eeeeee;
 }
@@ -171,9 +170,14 @@
 
 @media screen and (max-width: 992px) {
     #list {
-        max-height: 40vh;
-        height: inherit;
+        height: 40vh;
+        min-height: 300px;
     }
+
+    #list .espece .infos {
+        max-width: calc(100vw - 140px);
+    }
+
     .toggle {
         display: none;
     }

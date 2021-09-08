@@ -21,7 +21,7 @@
                 />
                 <div class="infos">
                     <h5 [title]="area.properties.name">
-                        {{ area.properties.name }}
+                        <div class="name">{{ area.properties.name }}</div>
                         <span *ngIf="area.properties.id_role === userService.role_id" class="pull-right">
                             &nbsp;
                             <app-areamodalflow
@@ -37,7 +37,6 @@
                                     btn-open
                                 ></i>
                             </app-areamodalflow>
-                            &nbsp;
                             <i
                                 class="fa fa-trash text-danger"
                                 placement="bottom"

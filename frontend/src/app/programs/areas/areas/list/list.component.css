@@ -52,20 +52,28 @@
     flex-direction: column;
     justify-content: center;
     padding-left: 1em;
-    width: 100%;
+    max-width: calc(33vw - 140px);
+    flex: 1;
 }
 
-#list .espece .infos > p, #list .espece .infos > h5 {
+#list .espece .infos > p, #list .espece .infos .name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 213px;
 }
 
+#list .espece .infos .name {
+    flex: 1;
+}
 
-#list .espece div h5 {
+#list .espece .infos h5 {
+    display: flex;
+    margin-bottom: 0;
     font-size: 16px;
-    margin-bottom: 0px;
+}
+
+#list .espece .infos h5 i {
+    margin-right: 5px;
 }
 
 #list .espece div p,
@@ -162,9 +170,14 @@
 
 @media screen and (max-width: 992px) {
     #list {
-        max-height: 40vh;
-        height: inherit;
+        height: 40vh;
+        min-height: 300px;
     }
+
+    #list .espece .infos {
+        max-width: calc(100vw - 140px);
+    }
+
     .toggle {
         display: none;
     }
