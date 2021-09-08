@@ -19,7 +19,7 @@
                             : 'assets/no_photo_light.png'
                     }}"
                 />
-                <div class="infos">
+                <div [class]="(userDashboard ? 'dashboard-list' : '') + ' infos'">
                     <h5>
                         <div class="name">{{ speciesSite.properties.name }}</div>
                         <span *ngIf="speciesSite.properties.id_role === userService.role_id" class="pull-right">

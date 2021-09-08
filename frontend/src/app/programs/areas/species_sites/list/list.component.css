@@ -52,8 +52,12 @@
     flex-direction: column;
     justify-content: center;
     padding-left: 1em;
-    max-width: calc(33vw - 140px);
+    max-width: calc(33vw - 201px);
     flex: 1;
+}
+
+#list .espece .infos.dashboard-list {
+    max-width: calc(33vw - 140px);
 }
 
 #list .espece .infos > p, #list .espece .infos .name {
@@ -85,13 +89,13 @@
     font-size: 14px;
 }
 
-#list .espece .add-species-site {
+#list .espece .add-species-site-observation {
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 0 1em;
 }
-#list .espece .add-species-site > div {
+#list .espece .add-species-site-observation > div {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -101,7 +105,7 @@
     box-shadow: 1px 3px 15px -5px rgba(0, 0, 0, 0.50);
     font-size: 24px;
 }
-#list .espece .add-species-site > div:hover {
+#list .espece .add-species-site-observation > div:hover {
     box-shadow: 1px 3px 15px -5px rgba(0, 0, 0, 1);
     background-color: #eeeeee;
 }
@@ -173,9 +177,11 @@
         height: 40vh;
         min-height: 300px;
     }
-
     #list .espece .infos {
-        max-width: calc(100vw - 140px);
+        max-width: calc(100vw - 211px);
+    }
+    #list .espece .infos.dashboard-list {
+        max-width: calc(100vw - 149px);
     }
 
     .toggle {
