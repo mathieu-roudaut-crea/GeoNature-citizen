@@ -1505,7 +1505,7 @@ def export_areas_xls(user_id):
             col += 1
         for key in json_keys:
             if key == "remark":
-                key = "Remarque"
+                key = "Impression"
             ws.write(row, col, key, title_style)
             col += 1
         row, col = 1, 0
@@ -1550,6 +1550,8 @@ def export_areas_xls(user_id):
                 {"col_name": "ID", "getter": lambda s: s.id_user},
                 {"col_name": "Pseudo", "getter": lambda s: s.username},
                 {"col_name": "Email", "getter": lambda s: s.email},
+                {"col_name": "Organisme", "getter": lambda s: s.organism},
+                {"col_name": "Catégorie", "getter": lambda s: s.category},
                 {"col_name": "Date d'inscription", "getter": lambda s: s.timestamp_create, "style": date_style},
             )
             row, col = 0, 0
