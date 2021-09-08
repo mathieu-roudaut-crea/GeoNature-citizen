@@ -41,14 +41,16 @@ export class SpeciesSitesObsListComponent implements OnChanges {
             if (this.observationsCollection['maximum_count']) {
                 this.collectionSize =
                     this.observationsCollection['maximum_count'];
-                this.observations = this.observationsCollection['features'];
+                this.updateVisibleObservations(
+                    this.observationsCollection['features']
+                );
             } else {
                 this.collectionSize = this.observationsCollection['count'];
-                this.observations = this.observationsCollection[
-                    'features'
-                ].slice(
-                    (this.page - 1) * this.pageSize,
-                    (this.page - 1) * this.pageSize + this.pageSize
+                this.updateVisibleObservations(
+                    this.observationsCollection['features'].slice(
+                        (this.page - 1) * this.pageSize,
+                        (this.page - 1) * this.pageSize + this.pageSize
+                    )
                 );
             }
         } else {
@@ -64,11 +66,22 @@ export class SpeciesSitesObsListComponent implements OnChanges {
                 '{"page": ' + this.page + ', "pageSize": ' + this.pageSize + '}'
             );
         } else {
-            this.observations = this.observationsCollection['features'].slice(
-                (this.page - 1) * this.pageSize,
-                (this.page - 1) * this.pageSize + this.pageSize
+            this.updateVisibleObservations(
+                this.observationsCollection['features'].slice(
+                    (this.page - 1) * this.pageSize,
+                    (this.page - 1) * this.pageSize + this.pageSize
+                )
             );
         }
+    }
+
+    updateVisibleObservations(visibleObservations) {
+        this.observations = visibleObservations.filter(
+            (observation) =>
+                observation &&
+                observation.properties &&
+                observation.properties.species_site
+        );
     }
 
     showPhotos(photos) {
