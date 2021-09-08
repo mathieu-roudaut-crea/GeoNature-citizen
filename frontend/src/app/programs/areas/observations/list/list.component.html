@@ -63,7 +63,7 @@
                 </span>
             </td>
             <td>
-                <div *ngIf="admin">
+                <div *ngIf="admin || userService.role_id === observation.properties.id_role">
                     <app-areamodalflow
                         [obsUpdateData]="observation.properties"
                     >

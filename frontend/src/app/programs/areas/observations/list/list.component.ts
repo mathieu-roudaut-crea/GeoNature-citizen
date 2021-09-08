@@ -15,6 +15,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
 import { AuthService } from '../../../../auth/auth.service';
 import { PhotosModalComponent } from '../photos_modal/photos_modal.component';
+import { UserService } from '../../../../auth/user-dashboard/user.service.service';
 
 @Component({
     selector: 'app-species-sites-obs-list',
@@ -34,7 +35,10 @@ export class SpeciesSitesObsListComponent implements OnChanges {
     pageSize = 10;
     collectionSize = 0;
 
-    constructor(private modalService: ModalsTopbarService) {}
+    constructor(
+        private modalService: ModalsTopbarService,
+        private userService: UserService
+    ) {}
 
     ngOnChanges() {
         if (this.observationsCollection) {
