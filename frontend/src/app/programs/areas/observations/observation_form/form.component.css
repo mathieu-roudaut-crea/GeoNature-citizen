@@ -51,6 +51,10 @@
     margin: 10px 0;
 }
 
+.step-radio-container input {
+    min-width: 14px;
+}
+
 .step-radio-container label {
     margin: 0 5px;
 }

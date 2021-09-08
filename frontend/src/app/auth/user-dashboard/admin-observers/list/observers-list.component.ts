@@ -17,6 +17,7 @@ export class ObserversListComponent implements OnChanges {
     @Input('observers') observersCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('program_id') program_id: number;
+    @Input('admin') admin = false;
     observers: Feature[] = [];
     taxa: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;

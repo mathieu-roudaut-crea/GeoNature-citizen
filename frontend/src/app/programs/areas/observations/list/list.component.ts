@@ -24,6 +24,7 @@ import { PhotosModalComponent } from '../photos_modal/photos_modal.component';
 export class SpeciesSitesObsListComponent implements OnChanges {
     @Input('observations') observationsCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Input('admin') admin = false;
     @Input('program_id') program_id: number;
     @Output() refreshListEvent = new EventEmitter<string>();
     observations: Feature[] = [];

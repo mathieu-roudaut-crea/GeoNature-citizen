@@ -55,6 +55,28 @@
     width: 100%;
 }
 
+#list .espece .infos > p, #list .espece .infos > h5 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 213px;
+}
+
+
+#list .espece div h5 {
+    font-size: 16px;
+    margin-bottom: 0px;
+}
+
+#list .espece div p,
+#list .espece div span {
+    font-style: italic;
+    color: var(--primary);
+    margin-bottom: 0px;
+    line-height: 1.3;
+    font-size: 14px;
+}
+
 #list .espece .add-species-site {
     display: flex;
     flex-direction: column;
@@ -74,18 +96,6 @@
 #list .espece .add-species-site > div:hover {
     box-shadow: 1px 3px 15px -5px rgba(0, 0, 0, 1);
     background-color: #eeeeee;
-}
-
-#list .espece div h5 {
-    font-size: 16px;
-    margin-bottom: 0px;
-}
-
-#list .espece div p,
-#list .espece div span {
-    font-style: italic;
-    color: var(--primary);
-    margin-bottom: 0px;
 }
 
 .toolbar {

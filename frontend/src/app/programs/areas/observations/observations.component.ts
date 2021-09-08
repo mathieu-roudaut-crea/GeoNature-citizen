@@ -36,6 +36,7 @@ export class SpeciesSitesObsComponent
 {
     title = 'Observations';
     @Input('observations') observations;
+    @Input('admin') admin = false;
     @Input('userDashboard') userDashboard = false;
     @Output() refreshListEvent = new EventEmitter<string>();
     @ViewChild(SpeciesSitesObsListComponent, { static: true })

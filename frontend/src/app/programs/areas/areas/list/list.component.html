@@ -20,7 +20,7 @@
                     }}"
                 />
                 <div class="infos">
-                    <h5>
+                    <h5 [title]="area.properties.name">
                         {{ area.properties.name }}
                         <span *ngIf="area.properties.id_role === userService.role_id" class="pull-right">
                             &nbsp;
@@ -52,7 +52,7 @@
                             ></i>
                         </span>
                     </h5>
-                    <p>
+                    <p [title]="area.properties.obs_txt">
                         ajoutée par <span>{{ area.properties.obs_txt }}</span>
                     </p>
                     <p>
@@ -63,7 +63,7 @@
                         }}</span>
                     </p>
                 </div>
-                <div class="add-species-site">
+                <div class="add-species-site" *ngIf="!userDashboard">
                     <div title="Ajouter un individu" (click)="onAddSpeciesSiteClick(area.properties.id_area)">
                         +
                     </div>

@@ -15,6 +15,7 @@ export class AdminObserversComponent {
     title = 'Observations';
     @Input('observers') observers: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Input('admin') admin = false;
     @ViewChild(ObserversListComponent, { static: true })
     observersList: ObserversListComponent;
 }

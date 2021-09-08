@@ -3,28 +3,29 @@ import xlwt
 import shapely
 import io
 
-from flask import Blueprint, request, current_app, json, make_response
-from geojson import FeatureCollection
-from server import db
-from sqlalchemy.orm import aliased
-
-from shapely.geometry import asShape, Point
-from geoalchemy2.shape import from_shape, to_shape
-
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
-from utils_flask_sqla_geo.utilsgeometry import circle_from_point
-
 from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, \
     MediaOnSpeciesSiteObservationModel, MediaOnStagesStepsModel
+
+from server import db
+
+from flask import Blueprint, request, current_app, json, make_response
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+from sqlalchemy import func, or_
+from sqlalchemy.orm import aliased
+from shapely.geometry import asShape, Point
+from geoalchemy2.shape import from_shape, to_shape
+from geojson import FeatureCollection
+from utils_flask_sqla_geo.utilsgeometry import circle_from_point
+
+from gncitizen.core.users.models import UserModel
+from gncitizen.core.commons.models import ProgramsModel, MediaModel
 from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.jwt import get_id_role_if_exists
 from gncitizen.utils.media import save_upload_files
 from gncitizen.utils.sqlalchemy import get_geojson_feature, json_resp
 from gncitizen.utils.taxonomy import get_specie_from_cd_nom, mkTaxonRepository
 from gncitizen.utils.geo import get_municipality_id_from_wkb
-from gncitizen.core.users.models import UserModel
-from gncitizen.core.commons.models import ProgramsModel, MediaModel
 
 areas_api = Blueprint("areas", __name__)
 
@@ -351,21 +352,21 @@ def get_admin_areas():
         description: List of all areas
     """
     try:
-        user_id = get_id_role_if_exists()
-        user = UserModel.query.get(user_id)
-        if user.admin != 1 and user.is_relay != 1:
+        current_user_id = get_id_role_if_exists()
+        current_user = UserModel.query.get(current_user_id)
+        if current_user.admin != 1 and current_user.is_relay != 1:
             return prepare_list([])
 
         areas_query = AreaModel.query
 
-        if user.admin != 1:
+        if current_user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
             areas_query = (
                 AreaModel.query
                     .join(creator, AreaModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
-                    .filter(relay.id_user == user_id)
+                    .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
         areas = areas_query.order_by(AreaModel.timestamp_create.desc()).all()
@@ -396,8 +397,8 @@ def get_admin_species_sites():
         description: List of all species sites
     """
     try:
-        user_id = get_id_role_if_exists()
-        user = UserModel.query.get(user_id)
+        current_user_id = get_id_role_if_exists()
+        user = UserModel.query.get(current_user_id)
         if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
@@ -413,7 +414,7 @@ def get_admin_species_sites():
                 species_sites_query
                     .join(creator, SpeciesSiteModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
-                    .filter(relay.id_user == user_id)
+                    .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
         species_sites = species_sites_query.order_by(SpeciesSiteModel.timestamp_create.desc()).all()
@@ -451,29 +452,20 @@ def get_admin_observations():
         else:
             page_size = int(request.args.get('page-size'))
 
-        user_id = get_id_role_if_exists()
-        user = UserModel.query.get(user_id)
+        current_user_id = get_id_role_if_exists()
+        user = UserModel.query.get(current_user_id)
         if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        if user.admin == 1:
-            observations_query = (
-                SpeciesSiteObservationModel.query
-                    .join(SpeciesSiteModel,
-                          SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
-                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-            )
-        else:
+        observations_query = SpeciesSiteObservationModel.query
+
+        if user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
-            observations_query = (
-                SpeciesSiteObservationModel.query
-                    .join(SpeciesSiteModel,
-                          SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
-                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+            observations_query = (observations_query
                     .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
                     .join(relay, relay.id_user == creator.linked_relay_id)
-                    .filter(relay.id_user == user_id)
+                    .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
         observations_count = observations_query.count()

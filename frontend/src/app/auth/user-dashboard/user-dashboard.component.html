@@ -110,7 +110,7 @@
                             Leurs observations
                         </div>
                     </div>
-                    <admin-observers *ngIf="selectedAreasTab === 'observers'" [observers]="adminObservers" [userDashboard]="true">
+                    <admin-observers *ngIf="selectedAreasTab === 'observers'" [observers]="adminObservers" [userDashboard]="true" [admin]="admin">
                     </admin-observers>
                     <app-areas *ngIf="selectedAreasTab === 'areas'" [areas]="adminAreas" [userDashboard]="true">
                     </app-areas>
@@ -120,6 +120,7 @@
                         *ngIf="selectedAreasTab === 'observations'"
                         [observations]="adminSpeciesSitesObs"
                         [userDashboard]="true"
+                        [admin]="admin"
                         (refreshListEvent)="refreshAdminObservationsList($event)"
                     >
                     </app-species-sites-obs>
@@ -255,7 +256,7 @@
                     <i class="fa fa-download"></i
                     >
                     <ng-container>
-                        Exporter mes zones
+                        Exporter mes données d'observation
                     </ng-container
                     >
                 </button>
@@ -267,7 +268,7 @@
                     <i class="fa fa-download"></i
                     >
                     <ng-container>
-                        Exporter toutes les zones
+                        Exporter toutes les données d'observation
                     </ng-container
                     >
                 </button>

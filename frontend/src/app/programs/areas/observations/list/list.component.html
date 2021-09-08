@@ -7,8 +7,9 @@
             <th scope="col">Zone</th>
             <th scope="col">Observateur</th>
             <th scope="col">Individu</th>
+            <th scope="col">Espèce</th>
             <th scope="col">Etape</th>
-            <th scope="col">Observation</th>
+            <th scope="col">Impression</th>
             <th scope="col">Actions</th>
         </tr>
         </thead>
@@ -44,6 +45,14 @@
                 </span>
             </td>
             <td>
+                <span
+                    *ngIf="observation.properties.species_site.species"
+                    [ngbTooltip]="observation.properties.species_site.species.nom_vern + ', ' + observation.properties.species_site.species.nom_complet"
+                >
+                    {{ observation.properties.species_site.species.nom_vern }}
+                </span>
+            </td>
+            <td>
                 <span [ngbTooltip]="observation.properties.stages_step?.name">
                     {{ observation.properties.stages_step?.name }}
                 </span>
@@ -54,16 +63,18 @@
                 </span>
             </td>
             <td>
-                <app-areamodalflow
-                    [obsUpdateData]="observation.properties"
-                >
-                    <i
-                        class="fa fa-edit see-more-link"
-                        placement="left"
-                        ngbTooltip="Editer"
-                        btn-open
-                    ></i>
-                </app-areamodalflow>
+                <div *ngIf="admin">
+                    <app-areamodalflow
+                        [obsUpdateData]="observation.properties"
+                    >
+                        <i
+                            class="fa fa-edit see-more-link"
+                            placement="left"
+                            ngbTooltip="Editer"
+                            btn-open
+                        ></i>
+                    </app-areamodalflow>
+                </div>
                 <div>
                     <i
                         [routerLink]="[

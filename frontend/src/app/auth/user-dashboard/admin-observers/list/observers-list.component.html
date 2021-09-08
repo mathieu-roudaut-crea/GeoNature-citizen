@@ -8,7 +8,7 @@
             <th scope="col">Catégorie</th>
             <th scope="col">Organisme</th>
             <th scope="col">Relai</th>
-            <th scope="col">Actions</th>
+            <th scope="col" *ngIf="admin">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -43,7 +43,7 @@
                     {{ observer.properties.linked_relay ? observer.properties.linked_relay.organism : '' }}
                 </span>
             </td>
-            <td>
+            <td *ngIf="admin">
                 <i
                     class="fa fa-edit text-primary"
                     placement="bottom"

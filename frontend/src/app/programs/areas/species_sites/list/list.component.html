@@ -21,9 +21,8 @@
                 />
                 <div class="infos">
                     <h5>
-                        {{ speciesSite.properties.name }}
+                        <span class="name">{{ speciesSite.properties.name }}</span>
                         <span *ngIf="speciesSite.properties.id_role === userService.role_id" class="pull-right">
-                            &nbsp;
                             <app-areamodalflow
                                 #modalFlowRef
                                 [coords]="speciesSite.properties.coords"
@@ -36,7 +35,6 @@
                                     btn-open
                                 ></i>
                             </app-areamodalflow>
-                            &nbsp;
                             <i
                                 class="fa fa-trash text-danger"
                                 placement="bottom"
@@ -51,19 +49,25 @@
                             ></i>
                         </span>
                     </h5>
-                    <p *ngIf="speciesSite.properties.species">
+                    <p *ngIf="speciesSite.properties.species"
+                       [title]="speciesSite.properties.species.nom_vern + ', ' + speciesSite.properties.species.nom_complet">
                         {{ speciesSite.properties.species.nom_vern }}
+                    </p>
+                    <p [title]="speciesSite.properties.obs_txt" *ngIf="userDashboard">
+                        ajoutée par <span>{{ speciesSite.properties.obs_txt }}</span>
                     </p>
                     <p>
                         le
-                        <span>{{
-                            speciesSite.properties.timestamp_create.substring(0, 10)
-                                | date: 'longDate'
-                        }}</span>
+                        <span>
+                            {{
+                            speciesSite.properties.timestamp_create.substring(0, 10) | date: 'longDate'
+                            }}
+                        </span>
                     </p>
                 </div>
-                <div class="add-species-site-observation">
-                    <div title="Ajouter une observation" (click)="onAddSpeciesSiteObservationClick(speciesSite.properties.id_species_site)">
+                <div *ngIf="!userDashboard" class="add-species-site-observation">
+                    <div title="Ajouter une observation"
+                         (click)="onAddSpeciesSiteObservationClick(speciesSite.properties.id_species_site)">
                         +
                     </div>
                 </div>
@@ -78,7 +82,7 @@
                     style="cursor: pointer"
                     title="Voir les détails sur cet individu"
                 >
-                    <img src="assets/binoculars.png" />
+                    <img src="assets/binoculars.png"/>
                 </div>
             </div>
         </div>
