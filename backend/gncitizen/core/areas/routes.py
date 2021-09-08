@@ -1523,6 +1523,51 @@ def export_areas_xls(user_id):
             row += 1
             col = 0
 
+        # OBSERVERS SHEET
+        if not filter_by_user:
+            ws = wb.add_sheet("Observateurs")
+
+            observers_query = UserModel.query
+
+            if current_user.admin != 1:
+                relay = aliased(UserModel)
+                observers_query = (
+                    observers_query
+                        .outerjoin(relay, relay.id_user == UserModel.linked_relay_id)
+                        .filter(or_(
+                            relay.id_user == current_user.id_user,
+                            UserModel.id_user == current_user.id_user
+                        ))
+                )
+
+            observers = (
+                observers_query
+                    .order_by(UserModel.timestamp_create.desc())
+                    .all()
+            )
+
+            basic_fields = (
+                {"col_name": "ID", "getter": lambda s: s.id_user},
+                {"col_name": "Pseudo", "getter": lambda s: s.username},
+                {"col_name": "Email", "getter": lambda s: s.email},
+                {"col_name": "Date d'inscription", "getter": lambda s: s.timestamp_create, "style": date_style},
+            )
+            row, col = 0, 0
+            for field in basic_fields:
+                ws.write(row, col, field["col_name"], title_style)
+                col += 1
+            row, col = 1, 0
+
+            for observers in observers:
+                for field in basic_fields:
+                    args = []
+                    if field.get("style"):
+                        args.append(field.get("style"))
+                    ws.write(row, col, field["getter"](observers), *args)
+                    col += 1
+                row += 1
+                col = 0
+
         # In memory save and return xls file
         xls_file = io.BytesIO()
         wb.save(xls_file)
