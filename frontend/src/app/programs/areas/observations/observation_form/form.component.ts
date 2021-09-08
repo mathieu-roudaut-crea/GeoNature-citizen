@@ -246,9 +246,15 @@ export class SpeciesSiteObservationFormComponent
     stageAlreadyAddedThisYear() {
         const selectedStepOrder = this.getCurrentStepOrder();
         const observations = this.speciesSite.properties.observations;
-        let sameStageThisYear = false;
-        let dateOfOtherStageStep = null;
+        const formDate = new Date(
+            this.observationForm.value.date.year,
+            this.observationForm.value.date.month - 1,
+            this.observationForm.value.date.day
+        );
 
+        let sameStageThisYear = false;
+        let dateOfOlderStageStep = null;
+        let dateOfLatestFirstStep = null;
         observations.features.forEach((observation) => {
             if (
                 !sameStageThisYear &&
@@ -257,35 +263,56 @@ export class SpeciesSiteObservationFormComponent
                     this.observationForm.value.date.year + ''
                 ) &&
                 this.observationForm.value.id_species_site_observation !=
-                    observation.properties.id_species_site_observation &&
-                ((selectedStepOrder === 1 &&
-                    observation.properties.stages_step.order > 1) ||
-                    (selectedStepOrder > 1 &&
-                        observation.properties.stages_step.order === 1))
+                    observation.properties.id_species_site_observation
             ) {
-                sameStageThisYear = true;
-                dateOfOtherStageStep = observation.properties.date;
+                const dateParts = observation.properties.date.split('-');
+                const currentObsDate = new Date(
+                    dateParts[0],
+                    dateParts[1] - 1,
+                    dateParts[2]
+                );
+                if (
+                    selectedStepOrder === 1 &&
+                    observation.properties.stages_step.order > 1
+                ) {
+                    const dateParts = observation.properties.date.split('-');
+                    const currentObsDate = new Date(
+                        dateParts[0],
+                        dateParts[1] - 1,
+                        dateParts[2]
+                    );
+                    if (
+                        !sameStageThisYear ||
+                        currentObsDate <= dateOfOlderStageStep
+                    ) {
+                        dateOfOlderStageStep = currentObsDate;
+                    }
+                    sameStageThisYear = true;
+                }
+                if (selectedStepOrder > 1) {
+                    if (
+                        observation.properties.stages_step.order === 1 &&
+                        (!sameStageThisYear ||
+                            currentObsDate >= dateOfLatestFirstStep)
+                    ) {
+                        dateOfLatestFirstStep = currentObsDate;
+                    }
+                    sameStageThisYear = true;
+                }
             }
         });
 
-        if (sameStageThisYear && dateOfOtherStageStep) {
-            const dateParts = dateOfOtherStageStep.split('-');
-            const existingStepDate = new Date(
-                dateParts[0],
-                dateParts[1] - 1,
-                dateParts[2]
-            );
-            const formDate = new Date(
-                this.observationForm.value.date.year,
-                this.observationForm.value.date.month - 1,
-                this.observationForm.value.date.day
-            );
-
+        if (
+            sameStageThisYear &&
+            (dateOfOlderStageStep || dateOfLatestFirstStep)
+        ) {
             if (
                 // a later step was already added. Selected step (order 1) have to be before existing step date
-                (selectedStepOrder === 1 && existingStepDate > formDate) ||
+                (selectedStepOrder === 1 && dateOfOlderStageStep > formDate) ||
                 //first step have been added, selected step (not the first based on order) have to be after this first existing step
-                (selectedStepOrder > 1 && existingStepDate < formDate)
+                (selectedStepOrder > 1 &&
+                    dateOfLatestFirstStep &&
+                    dateOfLatestFirstStep < formDate)
             ) {
                 return false;
             }
