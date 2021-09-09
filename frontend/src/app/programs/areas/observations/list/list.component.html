@@ -8,6 +8,7 @@
             <th scope="col">Observateur</th>
             <th scope="col">Individu</th>
             <th scope="col">Espèce</th>
+            <th scope="col">Stade</th>
             <th scope="col">Etape</th>
             <th scope="col">Impression</th>
             <th scope="col">Actions</th>
@@ -53,6 +54,11 @@
                 </span>
             </td>
             <td>
+                <span *ngIf="observation.properties.stages_step?.species_stage" [ngbTooltip]="observation.properties.stages_step.species_stage.name">
+                    {{ observation.properties.stages_step.species_stage.name }}
+                </span>
+            </td>
+            <td>
                 <span [ngbTooltip]="observation.properties.stages_step?.name">
                     {{ observation.properties.stages_step?.name }}
                 </span>
@@ -68,12 +74,22 @@
                         [obsUpdateData]="observation.properties"
                     >
                         <i
-                            class="fa fa-edit see-more-link"
+                            class="fa fa-edit cursor-pointer"
                             placement="left"
                             ngbTooltip="Editer"
                             btn-open
                         ></i>
                     </app-areamodalflow>
+                </div>
+                <div>
+                    <i
+                        class="fa fa-trash text-danger cursor-pointer"
+                        placement="left"
+                        ngbTooltip="Supprimer"
+                        (click)="onDeleteObservationModalOpen(observation.properties.id_species_site_observation)"
+                        *ngIf="observation.properties.id_role === userService.role_id || admin"
+                        owner-actions
+                    ></i>
                 </div>
                 <div>
                     <i
@@ -84,14 +100,14 @@
                             observation.properties.id_species_site_observation
                         ]"
                         ngbTooltip="Voir les détails sur cette observation"
-                        class="fa fa-eye see-more-link"
+                        class="fa fa-eye cursor-pointer"
                         placement="left"
                     ></i>
                 </div>
                 <div *ngIf="observation.properties.photos && observation.properties.photos.length">
                     <i
                         (click)="showPhotos(observation.properties.photos)"
-                        class="fa fa-camera see-more-link"
+                        class="fa fa-camera cursor-pointer"
                         placement="left"
                         ngbTooltip="Voir les photos"
                     ></i>
@@ -116,3 +132,28 @@
         </select>
     </div>
 </div>
+
+
+<ng-template #deleteObservationModal let-modal>
+    <div class="modal-delete-header">
+        <h5 class="modal-delete-title"><i class="fa fa-trash"></i></h5>
+    </div>
+    <div class="modal-delete-body">
+        Êtes-vous sûr de vouloir supprimer cette observation et toutes les informations qui y sont rattachées ?
+        <br/>
+        La suppression sera définitive
+    </div>
+    <div class="modal-delete-footer">
+        <button
+            type="button"
+            class="cancel-btn"
+            style="margin-right: 15px"
+            (click)="deletionModalRef.close()"
+        >
+            ANNULER
+        </button>
+        <button type="button" class="green-btn" (click)="onDeleteObservation()">
+            OUI
+        </button>
+    </div>
+</ng-template>

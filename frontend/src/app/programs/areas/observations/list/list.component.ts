@@ -6,6 +6,7 @@ import {
     Output,
     Inject,
     LOCALE_ID,
+    ViewChild,
 } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
@@ -16,6 +17,7 @@ import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service
 import { AuthService } from '../../../../auth/auth.service';
 import { PhotosModalComponent } from '../photos_modal/photos_modal.component';
 import { UserService } from '../../../../auth/user-dashboard/user.service.service';
+import { AreaService } from '../../areas.service';
 
 @Component({
     selector: 'app-species-sites-obs-list',
@@ -28,15 +30,22 @@ export class SpeciesSitesObsListComponent implements OnChanges {
     @Input('admin') admin = false;
     @Input('program_id') program_id: number;
     @Output() refreshListEvent = new EventEmitter<string>();
+
+    @ViewChild('deleteObservationModal', { static: true })
+    deleteObservationModal;
+
     observations: Feature[] = [];
     taxa: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
     page = 1;
     pageSize = 10;
     collectionSize = 0;
+    deletionModalRef;
+    selectedObservationId = 0;
 
     constructor(
         private modalService: ModalsTopbarService,
+        private areaService: AreaService,
         private userService: UserService
     ) {}
 
@@ -86,6 +95,27 @@ export class SpeciesSitesObsListComponent implements OnChanges {
                 observation.properties &&
                 observation.properties.species_site
         );
+    }
+
+    onDeleteObservationModalOpen(selectedObservationId: number) {
+        this.selectedObservationId = selectedObservationId;
+        this.deletionModalRef = this.modalService.open(
+            this.deleteObservationModal,
+            {
+                windowClass: 'delete-modal',
+                centered: true,
+            }
+        );
+    }
+
+    onDeleteObservation() {
+        this.areaService
+            .deleteObservation(this.selectedObservationId)
+            .subscribe(() => {
+                this.areaService.speciesSiteObsDeleted.emit();
+                this.selectedObservationId = null;
+                this.deletionModalRef.close();
+            });
     }
 
     showPhotos(photos) {

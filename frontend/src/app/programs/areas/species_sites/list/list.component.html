@@ -39,12 +39,8 @@
                                 class="fa fa-trash text-danger"
                                 placement="bottom"
                                 ngbTooltip="Supprimer"
-                                (click)="
-                                    areaService.deleteSpeciesSite.emit(
-                                        speciesSite.properties.id_species_site
-                                    )
-                                "
-                                *ngIf="speciesSite.properties.creator_can_delete"
+                                (click)="onDeleteSpeciesSiteModalOpen(speciesSite.properties.id_species_site)"
+                                *ngIf="speciesSite.properties.creator_can_delete || admin"
                                 owner-actions
                             ></i>
                         </span>
@@ -88,3 +84,28 @@
         </div>
     </span>
 </div>
+
+
+<ng-template #deleteSpeciesSiteModal let-modal>
+    <div class="modal-delete-header">
+        <h5 class="modal-delete-title"><i class="fa fa-trash"></i></h5>
+    </div>
+    <div class="modal-delete-body">
+        Êtes-vous sûr de vouloir supprimer cet individu et toutes les informations qui y sont rattachées ?
+        <br/>
+        La suppression sera définitive
+    </div>
+    <div class="modal-delete-footer">
+        <button
+            type="button"
+            class="cancel-btn"
+            style="margin-right: 15px"
+            (click)="deletionModalRef.close()"
+        >
+            ANNULER
+        </button>
+        <button type="button" class="green-btn" (click)="onDeleteSpeciesSite()">
+            OUI
+        </button>
+    </div>
+</ng-template>

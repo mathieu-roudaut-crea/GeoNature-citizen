@@ -90,17 +90,21 @@ export class SpeciesSitesObsComponent
 
             this.verifyProgramPrivacyAndUser();
 
-            this.areaService.speciesSiteObsEdited.subscribe(() => {
-                if (this.previousPageData) {
-                    this.loadData(this.previousPageData);
-                } else {
-                    this.loadData();
-                }
-            });
+            this.areaService.speciesSiteObsEdited.subscribe(
+                this.loadData.bind(this)
+            );
+            this.areaService.speciesSiteObsDeleted.subscribe(
+                this.loadData.bind(this)
+            );
         });
     }
 
-    loadData(pageData = { page: 0, pageSize: 0 }) {
+    loadData(pageData = null) {
+        if (!pageData) {
+            pageData = this.previousPageData
+                ? this.previousPageData
+                : { page: 0, pageSize: 0 };
+        }
         this.programService
             .getProgramSpeciesSitesObservations(
                 this.program_id,

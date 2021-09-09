@@ -36,6 +36,7 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
     title = 'Areas';
     @Input('areas') areas: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Input('admin') admin = false;
     @ViewChild(AreasMapComponent, { static: true }) areasMap: AreasMapComponent;
     @ViewChild(AreasListComponent, { static: true })
     areasList: AreasListComponent;
@@ -59,12 +60,6 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
-        this.areaService.newAreaCreated.subscribe(() => {
-            this.loadData();
-        });
-        this.areaService.areaEdited.subscribe(() => {
-            this.loadData();
-        });
     }
 
     ngOnInit() {
@@ -86,9 +81,13 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
 
             this.loadData();
         });
+        this.areaService.newAreaCreated.subscribe(this.loadData.bind(this));
+        this.areaService.areaEdited.subscribe(this.loadData.bind(this));
+        this.areaService.areaDeleted.subscribe(this.loadData.bind(this));
     }
 
     loadData() {
+        console.log('load datass!!!!');
         this.programService
             .getProgramAreas(this.program_id)
             .subscribe((areas) => {

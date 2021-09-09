@@ -41,15 +41,13 @@ export class AreaDetailComponent
             this.program_id = params['program_id'];
         });
         this.module = 'areas';
-        this.areaService.newSpeciesSiteCreated.subscribe(
-            function (newSpeciesSiteFeature) {
-                this.programService
-                    .getAreaDetails(this.area_id)
-                    .subscribe((areas) => {
-                        this.area = areas['features'][0];
-                    });
-            }.bind(this)
-        );
+        this.areaService.newSpeciesSiteCreated.subscribe(() => {
+            this.programService
+                .getAreaDetails(this.area_id)
+                .subscribe((areas) => {
+                    this.area = areas['features'][0];
+                });
+        });
     }
 
     ngAfterViewInit() {

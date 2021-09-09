@@ -81,15 +81,16 @@ export class UserDashboardComponent implements OnInit {
     ngOnInit(): void {
         this.verifyUser();
 
-        this.areaService.areaEdited.subscribe(() => {
-            this.getData();
-        });
-        this.areaService.speciesSiteEdited.subscribe(() => {
-            this.getData();
-        });
-        this.areaService.speciesSiteObsEdited.subscribe(() => {
-            this.refreshAdminObservationsList();
-        });
+        this.areaService.areaEdited.subscribe(this.getData.bind(this));
+        this.areaService.areaDeleted.subscribe(this.getData.bind(this));
+        this.areaService.speciesSiteEdited.subscribe(this.getData.bind(this));
+        this.areaService.speciesSiteDeleted.subscribe(this.getData.bind(this));
+        this.areaService.speciesSiteObsEdited.subscribe(
+            this.refreshAdminObservationsList.bind(this)
+        );
+        this.areaService.speciesSiteObsDeleted.subscribe(
+            this.refreshAdminObservationsList.bind(this)
+        );
     }
 
     onChangeCategory(): void {
