@@ -1,6 +1,6 @@
 .app-no-topbar .observations {
     height: calc(100vh - 55px);
-    --list-obs-offset: 0px;
+    --list-obs-offset: 90px;
     --router-outlet-offset: 0px;
 }
 
@@ -9,6 +9,11 @@
         height: auto;
     }
 }
+
+#mapList {
+    height: 100%;
+}
+
 .observations {
     margin: 0px;
     min-height: inherit;
