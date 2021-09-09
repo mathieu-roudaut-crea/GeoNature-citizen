@@ -21,6 +21,7 @@ export class AreaModalFlowComponent {
     @Input('modalversion') modalversion = true;
     @ViewChild('content', { static: true }) content: ElementRef;
     @Input('updateData') updateData;
+    @Input('admin') admin;
     @Input('speciesSiteUpdateData') speciesSiteUpdateData;
     @Input('obsUpdateData') obsUpdateData;
     @Input('program_id') program_id;
@@ -39,6 +40,7 @@ export class AreaModalFlowComponent {
             updateData: this.updateData,
             speciesSiteUpdateData: this.speciesSiteUpdateData,
             obsUpdateData: this.obsUpdateData,
+            admin: this.admin,
         });
         if (this.modalversion) {
             const modalRef = this.flowService.open(this.content);

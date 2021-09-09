@@ -36,6 +36,7 @@ export class SpeciesSiteObservationFormComponent
     @Input() species_site_id: number;
     @Input('data') data;
 
+    validationStates = AppConfig.validationStates;
     today = new Date();
     observationForm = new FormGroup({
         date: new FormControl(
@@ -47,6 +48,7 @@ export class SpeciesSiteObservationFormComponent
             [Validators.required, ngbDateMaxIsToday()]
         ),
         json_data: new FormControl(''),
+        state: new FormControl(''),
         species_stage_id: new FormControl(0),
         stages_step_id: new FormControl(0),
         id_species_site_observation: new FormControl(),
@@ -104,6 +106,7 @@ export class SpeciesSiteObservationFormComponent
             name: obsUpdateData.name,
             area_id: obsUpdateData.area_id,
             id_stages_step: obsUpdateData.id_stages_step,
+            state: obsUpdateData.state,
             date: this.dateParser.parse(obsUpdateData.date),
             id_species_site_observation:
                 obsUpdateData.id_species_site_observation,
@@ -359,7 +362,7 @@ export class SpeciesSiteObservationFormComponent
     postSpeciesSiteObservation(): Observable<any> {
         const formData: FormData = new FormData();
         const formValues = this.observationForm.value;
-        ['stages_step_id', 'id_species_site_observation'].forEach((key) => {
+        ['stages_step_id', 'id_species_site_observation', 'state'].forEach((key) => {
             if (formValues[key]) {
                 formData.append(key, formValues[key]);
             }

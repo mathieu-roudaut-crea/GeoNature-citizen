@@ -81,6 +81,18 @@
                         Veuillez sélectionner une étape
                     </div>
                 </div>
+                <div>
+                    <label>
+                        Etape de validation
+                    </label>
+                    <select class="form-control rounded-0"
+                            formControlName="state"
+                    >
+                        <option *ngFor="let state of validationStates" [ngValue]="state.key">
+                            {{ state.label }}
+                        </option>
+                    </select>
+                </div>
 
 
                 <json-schema-form

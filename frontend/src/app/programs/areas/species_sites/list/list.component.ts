@@ -24,6 +24,7 @@ import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service
 export class SpeciesSitesListComponent implements OnChanges {
     @Input('speciesSites') speciesSitesCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Input('admin') admin = false;
     @Input('program_id') program_id: number;
     @Input('displayForm') display_form: boolean;
     @Output('speciesSiteSelect') speciesSiteSelect: EventEmitter<Feature> =

@@ -97,6 +97,16 @@ export class SpeciesSitesObsListComponent implements OnChanges {
         );
     }
 
+    getStateInfo(stateKey) {
+        let stateToReturn = {};
+        AppConfig.validationStates.forEach((state) => {
+            if (state.key === stateKey) {
+                stateToReturn = state;
+            }
+        });
+        return stateToReturn;
+    }
+
     onDeleteObservationModalOpen(selectedObservationId: number) {
         this.selectedObservationId = selectedObservationId;
         this.deletionModalRef = this.modalService.open(

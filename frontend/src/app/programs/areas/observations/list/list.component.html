@@ -69,9 +69,18 @@
                 </span>
             </td>
             <td>
+                <div *ngIf="admin && observation.properties.state">
+                    <i
+                        class="fa fa-flag"
+                        placement="left"
+                        [ngbTooltip]="getStateInfo(observation.properties.state).label"
+                        [ngStyle]="{'color': getStateInfo(observation.properties.state).color}"
+                    ></i>
+                </div>
                 <div *ngIf="admin || userService.role_id === observation.properties.id_role">
                     <app-areamodalflow
                         [obsUpdateData]="observation.properties"
+                        [admin]="admin"
                     >
                         <i
                             class="fa fa-edit cursor-pointer"

@@ -39,6 +39,7 @@ export class SpeciesSitesComponent
     title = 'SpeciesSites';
     @Input('speciesSites') speciesSites: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Input('admin') admin = false;
     @ViewChild(SpeciesSitesMapComponent, { static: true })
     speciesSitesMap: SpeciesSitesMapComponent;
     @ViewChild(SpeciesSitesListComponent, { static: true })

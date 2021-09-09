@@ -1277,6 +1277,7 @@ def update_observation():
         update_observation = {}
         update_observation["date"] = update_data.get("date", None)
         update_observation["id_stages_step"] = update_data.get("stages_step_id", None)
+        update_observation["state"] = update_data.get("state", None)
 
         try:
             json_data = update_data.get("json_data", None)

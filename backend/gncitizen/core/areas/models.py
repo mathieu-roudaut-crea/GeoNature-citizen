@@ -156,6 +156,7 @@ class SpeciesSiteObservationModel(ObserverMixinModel, TimestampMixinModel, db.Mo
     __table_args__ = {"schema": "gnc_areas"}
     id_species_site_observation = db.Column(db.Integer, primary_key=True, unique=True)
     uuid_sinp = db.Column(UUID(as_uuid=True), nullable=False, unique=True)
+    state = db.Column(db.String(150))
     date = db.Column(db.Date, nullable=False)
     json_data = db.Column(JSONB, nullable=True)
     id_species_site = db.Column(

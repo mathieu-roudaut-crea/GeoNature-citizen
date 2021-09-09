@@ -114,7 +114,7 @@
                     </admin-observers>
                     <app-areas *ngIf="selectedAreasTab === 'areas'" [areas]="adminAreas" [userDashboard]="true" [admin]="admin">
                     </app-areas>
-                    <app-species-sites *ngIf="selectedAreasTab === 'species_sites'" [speciesSites]="adminSpeciesSites" [userDashboard]="true">
+                    <app-species-sites *ngIf="selectedAreasTab === 'species_sites'" [speciesSites]="adminSpeciesSites" [userDashboard]="true" [admin]="admin">
                     </app-species-sites>
                     <app-species-sites-obs
                         *ngIf="selectedAreasTab === 'observations'"
