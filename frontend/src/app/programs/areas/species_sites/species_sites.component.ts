@@ -65,12 +65,11 @@ export class SpeciesSitesComponent
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
-        this.areaService.newSpeciesSiteCreated.subscribe(() => {
-            this.loadData();
-        });
-        this.areaService.speciesSiteEdited.subscribe(() => {
-            this.loadData();
-        });
+        this.areaService.newSpeciesSiteCreated.subscribe(
+            this.loadData.bind(this)
+        );
+        this.areaService.speciesSiteEdited.subscribe(this.loadData.bind(this));
+        this.areaService.speciesSiteDeleted.subscribe(this.loadData.bind(this));
     }
 
     ngOnInit() {

@@ -40,7 +40,9 @@ export class AreaModalFlowService extends ModalFlowService {
             !init_data.obsUpdateData &&
             !init_data.species_site_id
         ) {
-            items.push(new FlowItem(SpeciesSiteStepComponent));
+            items.push(
+                new FlowItem(SpeciesSiteStepComponent, { service: this })
+            );
         }
 
         if (!init_data.updateData && !init_data.speciesSiteUpdateData) {

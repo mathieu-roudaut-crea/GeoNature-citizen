@@ -1,6 +1,6 @@
 .app-no-topbar .observations {
     height: calc(100vh - 55px);
-    --list-obs-offset: 0px;
+    --list-obs-offset: 90x;
     --router-outlet-offset: 0px;
 }
 
@@ -17,6 +17,9 @@
     position: relative;
 }
 
+#mapList {
+    height: 100%;
+}
 
 #newObsDiv {
     background: #eee;

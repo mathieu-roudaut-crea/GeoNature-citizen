@@ -36,17 +36,16 @@ export class SpeciesSiteStepComponent implements IFlowComponent {
             function (result) {
                 if (result.features) {
                     // SpeciesSite created
-                    const species_site_id =
-                        result.features[0].properties.id_species_site;
                     this.areaService.newSpeciesSiteCreated.emit(
                         result.features[0]
                     );
-                    this.data.next({
-                        ...this.data,
-                        species_site_id: species_site_id,
-                    });
-                    if (this.closeAfterSending) {
-                        this.closeModal();
+
+                    // this.data.next({
+                    //     area_id: this.data.area_id,
+                    // });
+                    this.closeModal();
+                    if (!this.closeAfterSending) {
+                        this.data.service.addAreaSpeciesSite(this.data.area_id);
                     }
                 } else {
                     // SpeciesSite edited
