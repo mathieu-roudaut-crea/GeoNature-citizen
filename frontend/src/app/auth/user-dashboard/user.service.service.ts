@@ -23,6 +23,7 @@ export class UserService {
             .then((user) => {
                 if (user && user['features'] && user['features']['id_role']) {
                     this.role_id = user['features']['id_role'];
+                    this.admin = user['features']['admin'];
                 }
             });
     }

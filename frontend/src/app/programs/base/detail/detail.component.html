@@ -27,6 +27,20 @@
                         Zone #{{
                         area_id
                         }}
+                        <app-areamodalflow
+                            *ngIf="area && userService && (area?.properties.id_role === userService.role_id || userService.admin)"
+                            #modalFlowRef
+                            [coords]="area.properties.coords"
+                            [updateData]="area.properties"
+                            [program_id]="area.properties.id_program"
+                        >
+                            <i
+                                class="fa fa-edit text-primary cursor-pointer"
+                                placement="bottom"
+                                ngbTooltip="Editer"
+                                btn-open
+                            ></i>
+                        </app-areamodalflow>
                     </h5>
                     <h6 class="card-subtitle mb-2 text-muted">
                         Ajoutée le
@@ -174,7 +188,7 @@
         <div class="row">
             <div
                 *ngFor="let photo of photos"
-                class="col-md-4 photo"
+                class="col-md-4 cursor-pointer"
                 (click)="showPhoto(photo)"
             >
                 <div class="card mb-4 box-shadow">
