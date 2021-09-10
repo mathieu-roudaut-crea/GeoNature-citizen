@@ -82,4 +82,10 @@ export const AppConfig = {
         maxWidth: 1440,
         quality: 0.9,
     },
+    validationStates: [
+        { key: 'valid', label: 'Valide', color: 'green' },
+        { key: 'to_verify', label: 'A vérifier', color: 'orange' },
+        { key: 'corrected', label: 'Corrigé', color: 'green' },
+        { key: 'error', label: 'En erreur', color: 'red' },
+    ],
 }

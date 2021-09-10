@@ -23,7 +23,7 @@ def confirm_user_email(newuser, with_confirm_link = True, language = ""):
 
     msg["Subject"] = current_app.config["CONFIRM_EMAIL"]["SUBJECT"]
 
-    language = language.upper();
+    language = language.upper()
     if current_app.config["CONFIRM_EMAIL"].get("SUBJECT_" + language, None):
         msg["Subject"] = current_app.config["CONFIRM_EMAIL"]["SUBJECT_" + language]
 
