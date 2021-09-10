@@ -4,27 +4,24 @@ import {
     Input,
     EventEmitter,
     Output,
-    Inject,
-    LOCALE_ID,
     ViewChild,
+    OnInit,
 } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
 import { AppConfig } from '../../../../../conf/app.config';
-import { Router } from '@angular/router';
-import { Meta, Title } from '@angular/platform-browser';
 import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
-import { AuthService } from '../../../../auth/auth.service';
 import { PhotosModalComponent } from '../photos_modal/photos_modal.component';
 import { UserService } from '../../../../auth/user-dashboard/user.service.service';
 import { AreaService } from '../../areas.service';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 @Component({
     selector: 'app-species-sites-obs-list',
     templateUrl: './list.component.html',
     styleUrls: ['./list.component.css'],
 })
-export class SpeciesSitesObsListComponent implements OnChanges {
+export class SpeciesSitesObsListComponent implements OnChanges, OnInit {
     @Input('observations') observationsCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('admin') admin = false;
@@ -35,19 +32,30 @@ export class SpeciesSitesObsListComponent implements OnChanges {
     deleteObservationModal;
 
     observations: Feature[] = [];
-    taxa: any[] = [];
+    programs: any[] = [];
+
     apiEndpoint = AppConfig.API_ENDPOINT;
     page = 1;
     pageSize = 10;
     collectionSize = 0;
     deletionModalRef;
     selectedObservationId = 0;
+    selectedProgram = null;
+    selectedMunicipality = null;
+    selectedTaxon = null;
 
     constructor(
         private modalService: ModalsTopbarService,
         private areaService: AreaService,
+        private programService: GncProgramsService,
         private userService: UserService
     ) {}
+
+    ngOnInit() {
+        this.programService
+            .getAllPrograms()
+            .subscribe((programs) => (this.programs = programs));
+    }
 
     ngOnChanges() {
         if (this.observationsCollection) {
@@ -74,9 +82,19 @@ export class SpeciesSitesObsListComponent implements OnChanges {
     }
 
     refreshList() {
-        if (this.observationsCollection['maximum_count']) {
+        if (this.observationsCollection['maximum_count'] !== 'undefined') {
+            const programId = this.selectedProgram
+                ? this.selectedProgram.id_program
+                : 0;
+
             this.refreshListEvent.emit(
-                '{"page": ' + this.page + ', "pageSize": ' + this.pageSize + '}'
+                '{"page": ' +
+                    this.page +
+                    ', "pageSize": ' +
+                    this.pageSize +
+                    ', "id_program": ' +
+                    programId +
+                    '}'
             );
         } else {
             this.updateVisibleObservations(
@@ -135,5 +153,9 @@ export class SpeciesSitesObsListComponent implements OnChanges {
             centered: true,
         });
         modalRef.componentInstance.photos = photos;
+    }
+
+    onFilterChange(): void {
+        this.refreshList();
     }
 }

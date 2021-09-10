@@ -1,3 +1,20 @@
+<div class="list-filters">
+    <div class="toolbar row">
+        <select
+            id="program"
+            name="program"
+            class="form-control rounded-0 col-sm-12"
+            [(ngModel)]="selectedProgram"
+            (ngModelChange)="onFilterChange()"
+            *ngIf="userDashboard"
+        >
+            <option [ngValue]="null">Tous programmes</option>
+            <option *ngFor="let program of programs" [ngValue]="program">
+                {{ program?.title || '?' }}
+            </option>
+        </select>
+    </div>
+</div>
 <div id="list">
     <table class="table table-striped">
         <thead>

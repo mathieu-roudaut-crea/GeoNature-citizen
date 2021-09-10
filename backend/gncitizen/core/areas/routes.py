@@ -438,6 +438,11 @@ def get_admin_observations():
         else:
             page = int(request.args.get('page')) - 1
 
+        if not request.args.get('id_program'):
+            id_program = 0
+        else:
+            id_program = int(request.args.get('id_program'))
+
         if not request.args.get('page-size'):
             page_size = 1000
         else:
@@ -448,7 +453,9 @@ def get_admin_observations():
         if user.admin != 1 and user.is_relay != 1:
             return prepare_list([])
 
-        observations_query = SpeciesSiteObservationModel.query
+        observations_query = (SpeciesSiteObservationModel.query
+                .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+        )
 
         if user.admin != 1:
             creator = aliased(UserModel)
@@ -457,6 +464,12 @@ def get_admin_observations():
                     .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
                     .outerjoin(relay, relay.id_user == creator.linked_relay_id)
                     .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
+            )
+
+        if id_program > 0:
+            observations_query = (observations_query
+                .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                .filter(AreaModel.id_program == id_program)
             )
 
         observations_count = observations_query.count()

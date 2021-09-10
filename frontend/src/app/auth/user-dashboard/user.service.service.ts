@@ -115,11 +115,13 @@ export class UserService {
         );
     }
 
-    getAdminSpeciesSitesObs(page = 0, pageSize = 0) {
-        let parameters = '';
+    getAdminSpeciesSitesObs(page = 0, pageSize = 0, id_program = 0) {
+        let parameters = '?';
         if (page > 0 && pageSize > 0) {
-            parameters += `?page=${page}&page-size=${pageSize}`;
+            parameters += `page=${page}&page-size=${pageSize}&`;
         }
+        parameters += `id_program=${id_program}&`;
+
         return this.http.get<Object>(
             `${AppConfig.API_ENDPOINT}/areas/observations/admin${parameters}`
         );

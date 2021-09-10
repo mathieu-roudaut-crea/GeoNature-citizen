@@ -328,7 +328,7 @@ export class UserDashboardComponent implements OnInit {
     }
 
     refreshAdminObservationsList(event = null) {
-        let data = { page: 0, pageSize: 0 };
+        let data = { page: 0, pageSize: 0, id_program: 0 };
         if (event) {
             try {
                 data = JSON.parse(event);
@@ -341,7 +341,8 @@ export class UserDashboardComponent implements OnInit {
         }
         const adminSpeciesSitesObs = this.userService.getAdminSpeciesSitesObs(
             data.page,
-            data.pageSize
+            data.pageSize,
+            data.id_program
         );
         adminSpeciesSitesObs.subscribe((data) => {
             this.adminSpeciesSitesObs = data;

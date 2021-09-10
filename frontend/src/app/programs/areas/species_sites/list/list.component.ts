@@ -6,6 +6,7 @@ import {
     Output,
     ViewChild,
     ElementRef,
+    OnInit,
 } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
@@ -15,13 +16,14 @@ import { AreaService } from '../../areas.service';
 import { AppConfig } from '../../../../../conf/app.config';
 import { Point } from 'leaflet';
 import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 @Component({
     selector: 'app-species-sites-list',
     templateUrl: './list.component.html',
     styleUrls: ['./list.component.css'],
 })
-export class SpeciesSitesListComponent implements OnChanges {
+export class SpeciesSitesListComponent implements OnChanges, OnInit {
     @Input('speciesSites') speciesSitesCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('admin') admin = false;
@@ -35,6 +37,7 @@ export class SpeciesSitesListComponent implements OnChanges {
     municipalities: string[] = [];
     speciesSites = [];
     taxa: any[] = [];
+    programs: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
     deletionModalRef;
     selectedSpeciesSiteId = 0;
@@ -46,8 +49,15 @@ export class SpeciesSitesListComponent implements OnChanges {
         public flowService: AreaModalFlowService,
         private userService: UserService,
         private areaService: AreaService,
+        private programService: GncProgramsService,
         private modalService: ModalsTopbarService
     ) {}
+
+    ngOnInit() {
+        this.programService
+            .getAllPrograms()
+            .subscribe((programs) => (this.programs = programs));
+    }
 
     ngOnChanges() {
         if (this.speciesSitesCollection) {
@@ -105,18 +115,15 @@ export class SpeciesSitesListComponent implements OnChanges {
     onFilterChange(): void {
         this.speciesSites = this.speciesSitesCollection['features'].filter(
             (speciesSite) => {
-                let sameTaxon = true;
-                let sameProgram = true;
-                if (this.selectedTaxon) {
-                    sameTaxon =
-                        speciesSite.properties.cd_nom ==
-                        this.selectedTaxon.cd_nom;
-                }
-                if (this.selectedProgram) {
-                    sameProgram =
-                        speciesSite.properties.area.program_id ==
-                        this.selectedProgram.program_id;
-                }
+                const sameTaxon =
+                    !this.selectedTaxon ||
+                    speciesSite.properties.cd_nom === this.selectedTaxon.cd_nom;
+
+                const sameProgram =
+                    !this.selectedProgram ||
+                    speciesSite.properties.area.id_program ===
+                        this.selectedProgram.id_program;
+
                 return sameTaxon && sameProgram;
             }
         );

@@ -23,7 +23,7 @@
             >
                 <option [ngValue]="null" i18n="All municipalities select option@@allMunicipalitiesSelectOption">Tous programmes</option>
                 <option *ngFor="let program of programs" [ngValue]="program">
-                    {{ program?.name || '?' }}
+                    {{ program?.title || '?' }}
                 </option>
             </select>
         </div>

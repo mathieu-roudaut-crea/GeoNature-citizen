@@ -5,8 +5,8 @@ import {
     EventEmitter,
     Output,
     ViewChild,
-    OnInit,
     ElementRef,
+    OnInit,
 } from '@angular/core';
 
 import { FeatureCollection, Feature } from 'geojson';
@@ -16,13 +16,14 @@ import { AreaService } from '../../areas.service';
 import { AppConfig } from '../../../../../conf/app.config';
 import * as L from 'leaflet';
 import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 @Component({
     selector: 'app-areas-list',
     templateUrl: './list.component.html',
     styleUrls: ['./list.component.css'],
 })
-export class AreasListComponent implements OnChanges {
+export class AreasListComponent implements OnChanges, OnInit {
     @Input('areas') areasCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('admin') admin = false;
@@ -35,6 +36,7 @@ export class AreasListComponent implements OnChanges {
     municipalities: string[] = [];
     areas = [];
     taxa: any[] = [];
+    programs: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
     deletionModalRef;
     selectedAreaId = 0;
@@ -45,9 +47,16 @@ export class AreasListComponent implements OnChanges {
     constructor(
         public flowService: AreaModalFlowService,
         private userService: UserService,
+        private programService: GncProgramsService,
         private modalService: ModalsTopbarService,
         private areaService: AreaService
     ) {}
+
+    ngOnInit() {
+        this.programService
+            .getAllPrograms()
+            .subscribe((programs) => (this.programs = programs));
+    }
 
     onDeleteAreaModalOpen(selectedAreaId: number) {
         this.selectedAreaId = selectedAreaId;
@@ -100,18 +109,16 @@ export class AreasListComponent implements OnChanges {
     }
 
     onFilterChange(): void {
-        this.areas = this.areasCollection['features'].filter((obs) => {
-            let sameMunicipality = true;
-            let sameProgram = true;
-            if (this.selectedMunicipality) {
-                sameMunicipality =
-                    obs.properties.municipality_data.area_code ==
+        this.areas = this.areasCollection['features'].filter((area) => {
+            const sameMunicipality =
+                !this.selectedMunicipality ||
+                area.properties.municipality_data.area_code ===
                     this.selectedMunicipality.area_code;
-            }
-            if (this.selectedProgram) {
-                sameProgram =
-                    obs.properties.cd_nom == this.selectedProgram.program_id;
-            }
+
+            const sameProgram =
+                !this.selectedProgram ||
+                area.properties.id_program === this.selectedProgram.id_program;
+
             return sameMunicipality && sameProgram;
         });
     }
