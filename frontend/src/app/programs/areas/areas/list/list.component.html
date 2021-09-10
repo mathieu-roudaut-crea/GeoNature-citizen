@@ -1,6 +1,32 @@
 <div id="mapList">
     <ng-content select="[obs-form]" *ngIf="display_form"></ng-content>
     <span [class.d-none]="display_form">
+        <div class="toolbar">
+            <select
+                id="municipality"
+                name="municipality"
+                [class]="'form-control rounded-0 col-sm-12' + (userDashboard ? ' col-lg-6' : '')"
+                [(ngModel)]="selectedMunicipality"
+                (ngModelChange)="onFilterChange()"
+            >
+                <option [ngValue]="null" i18n="All municipalities select option@@allMunicipalitiesSelectOption">Toutes communes</option>
+                <option *ngFor="let t of municipalities" [ngValue]="t">{{ t?.area_name || '?' }}</option>
+            </select>
+            <select
+                id="program"
+                name="program"
+                type="text"
+                class="form-control rounded-0 col-lg-6 col-sm-12"
+                [(ngModel)]="selectedProgram"
+                (ngModelChange)="onFilterChange()"
+                *ngIf="userDashboard"
+            >
+                <option [ngValue]="null" i18n="All municipalities select option@@allMunicipalitiesSelectOption">Tous programmes</option>
+                <option *ngFor="let program of programs" [ngValue]="program">
+                    {{ program?.name || '?' }}
+                </option>
+            </select>
+        </div>
         <div class="col-lg-12 mx-4 mt-2 mb-4">
             <strong><span *ngIf="userDashboard">Mes </span>Zones </strong>
             <span class="badge badge-pill badge-info">{{ areas?.length }}</span>

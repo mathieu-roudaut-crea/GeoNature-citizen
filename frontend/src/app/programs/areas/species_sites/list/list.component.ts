@@ -38,6 +38,9 @@ export class SpeciesSitesListComponent implements OnChanges {
     apiEndpoint = AppConfig.API_ENDPOINT;
     deletionModalRef;
     selectedSpeciesSiteId = 0;
+    selectedProgram = null;
+    selectedTaxon = null;
+    appConfig = AppConfig;
 
     constructor(
         public flowService: AreaModalFlowService,
@@ -57,6 +60,16 @@ export class SpeciesSitesListComponent implements OnChanges {
                 );
                 speciesSite.properties.coords = coords;
             });
+
+            this.taxa = this.speciesSitesCollection.features
+                .map((features) => features.properties.species)
+                .filter((species) => species && species.cd_nom)
+                .filter(
+                    (species, index, array) =>
+                        array
+                            .map((spec) => spec.cd_nom)
+                            .indexOf(species.cd_nom) === index
+                );
         }
     }
 
@@ -87,5 +100,25 @@ export class SpeciesSitesListComponent implements OnChanges {
 
     onSpeciesSiteClick(e): void {
         this.speciesSiteSelect.emit(e);
+    }
+
+    onFilterChange(): void {
+        this.speciesSites = this.speciesSitesCollection['features'].filter(
+            (speciesSite) => {
+                let sameTaxon = true;
+                let sameProgram = true;
+                if (this.selectedTaxon) {
+                    sameTaxon =
+                        speciesSite.properties.cd_nom ==
+                        this.selectedTaxon.cd_nom;
+                }
+                if (this.selectedProgram) {
+                    sameProgram =
+                        speciesSite.properties.area.program_id ==
+                        this.selectedProgram.program_id;
+                }
+                return sameTaxon && sameProgram;
+            }
+        );
     }
 }

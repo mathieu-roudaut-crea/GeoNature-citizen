@@ -39,6 +39,7 @@ class AreaModel(TimestampMixinModel, ObserverMixinModel, db.Model):
     name = db.Column(db.String(250))
     geom = db.Column(Geometry("POLYGON"))
     municipality = db.Column(db.Integer, db.ForeignKey(LAreas.id_area), nullable=True)
+    municipality_data = relationship("LAreas")
     json_data = db.Column(JSONB, nullable=True)
 
     def __repr__(self):

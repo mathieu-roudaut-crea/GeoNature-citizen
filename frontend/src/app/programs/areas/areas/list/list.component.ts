@@ -39,6 +39,9 @@ export class AreasListComponent implements OnChanges {
     deletionModalRef;
     selectedAreaId = 0;
 
+    selectedProgram = null;
+    selectedMunicipality = null;
+
     constructor(
         public flowService: AreaModalFlowService,
         private userService: UserService,
@@ -75,12 +78,16 @@ export class AreasListComponent implements OnChanges {
             });
 
             this.municipalities = this.areasCollection.features
-                .map((features) => features.properties)
-                .map((property) => property.municipality)
-                .filter((municipality) =>
-                    municipality != null ? <string>municipality : ''
+                .map((area) => area.properties.municipality_data)
+                .filter(
+                    (municipality) => municipality && municipality.area_name
                 )
-                .filter((v, i, a) => a.indexOf(v) === i);
+                .filter(
+                    (municipality, index, array) =>
+                        array
+                            .map((city) => city.area_name)
+                            .indexOf(municipality.area_name) === index
+                );
         }
     }
 
@@ -90,5 +97,22 @@ export class AreasListComponent implements OnChanges {
 
     onAreaClick(e): void {
         this.areaSelect.emit(e);
+    }
+
+    onFilterChange(): void {
+        this.areas = this.areasCollection['features'].filter((obs) => {
+            let sameMunicipality = true;
+            let sameProgram = true;
+            if (this.selectedMunicipality) {
+                sameMunicipality =
+                    obs.properties.municipality_data.area_code ==
+                    this.selectedMunicipality.area_code;
+            }
+            if (this.selectedProgram) {
+                sameProgram =
+                    obs.properties.cd_nom == this.selectedProgram.program_id;
+            }
+            return sameMunicipality && sameProgram;
+        });
     }
 }
