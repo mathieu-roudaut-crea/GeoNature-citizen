@@ -15,7 +15,6 @@ export class RegisterUser {
     want_newsletter: boolean;
     is_relay: boolean;
     linked_relay_id?: number = 0;
-    want_observation_contact: boolean;
 
     birth_year: number;
     gender: string;

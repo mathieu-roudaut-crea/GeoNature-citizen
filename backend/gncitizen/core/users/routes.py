@@ -90,8 +90,6 @@ def registration():
               type: int
             category:
               type: string
-            want_observation_contact:
-              type: boolean
             email:
               type: string
             password:

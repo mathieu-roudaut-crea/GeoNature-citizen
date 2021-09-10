@@ -62,7 +62,6 @@ class UserModel(TimestampMixinModel, db.Model):
     birth_year = db.Column(db.Integer)
     gender = db.Column(db.String(100))
     comments = db.Column(db.Text)
-    want_observation_contact = db.Column(db.Boolean, default=False)
 
     def save_to_db(self):
         db.session.add(self)
@@ -101,7 +100,6 @@ class UserModel(TimestampMixinModel, db.Model):
             "gender": self.gender,
             "comments": self.comments,
             "category": self.category,
-            "want_observation_contact": self.want_observation_contact,
         }
 
     @staticmethod
