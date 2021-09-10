@@ -27,6 +27,7 @@ export class UserDashboardComponent implements OnInit {
     @ViewChild('siteDeleteModal', { static: true }) siteDeleteModal;
     modalRef: NgbModalRef;
     modalRefDel: NgbModalRef;
+
     username = 'not defined';
     role_id: number;
     isLoggedIn = false;
@@ -54,6 +55,7 @@ export class UserDashboardComponent implements OnInit {
     adminSpeciesSitesObs: any;
     adminObservers: any;
 
+    loading = false;
     rows: any = [];
     obsToExport: any = [];
     userForm: FormGroup;
@@ -183,6 +185,8 @@ export class UserDashboardComponent implements OnInit {
     }
 
     getData() {
+        this.loading = true;
+
         this.getAdminData();
 
         const data = [];
@@ -215,66 +219,9 @@ export class UserDashboardComponent implements OnInit {
             data.push(badgeCategories);
         }
         forkJoin(data).subscribe((data: any) => {
-            if (data.length > 1) {
-                this.myobs = data[0];
-                this.mysites = data[1];
-                this.myAreas = data[2];
+            this.loading = false;
 
-                if (!this.myobs.count) {
-                    if (this.mysites.count) {
-                        this.tab = 'sites';
-                    } else if (this.myAreas.count) {
-                        this.tab = 'areas';
-                    }
-                }
-
-                this.tab = 'admin';
-
-                this.mySpeciesSites = data[3];
-                this.mySpeciesSitesObs = data[4];
-                if (AppConfig['REWARDS']) {
-                    this.badges = data[5];
-                    localStorage.setItem('badges', JSON.stringify(this.badges));
-                    console.log('badges', this.badges);
-                    if (this.badges.length > 0) {
-                        this.badges.forEach((badge) => {
-                            if (
-                                badge.type == 'all_attendance' ||
-                                badge.type == 'seniority'
-                            )
-                                this.main_badges.push(badge);
-                            if (badge.type == 'program_attendance')
-                                this.programs_badges.push(badge);
-                            if (badge.type == 'recognition')
-                                this.recognition_badges.push(badge);
-                        });
-                    }
-                }
-                this.observations = this.myobs.features;
-                this.observations.forEach((obs) => {
-                    const coords: Point = new Point(
-                        obs.geometry.coordinates[0],
-                        obs.geometry.coordinates[1]
-                    );
-                    obs.properties.coords = coords; // for use in user obs component
-                    this.rowData(obs, coords);
-                    this.obsExport(obs);
-                });
-                this.mysites.features.forEach((site) => {
-                    const coords: Point = new Point(
-                        site.geometry.coordinates[0],
-                        site.geometry.coordinates[1]
-                    );
-                    site.properties.coords = coords;
-                });
-                this.myAreas.features.forEach((area) => {
-                    const coords: Point = new Point(
-                        area.geometry.coordinates[0],
-                        area.geometry.coordinates[1]
-                    );
-                    area.properties.coords = coords;
-                });
-            } else {
+            if (data.length <= 1) {
                 this.observations = data[0].features;
                 this.observations.forEach((obs) => {
                     const coords: Point = new Point(
@@ -285,7 +232,67 @@ export class UserDashboardComponent implements OnInit {
                     this.rowData(obs, coords);
                     this.obsExport(obs);
                 });
+                return;
             }
+
+            this.myobs = data[0];
+            this.mysites = data[1];
+            this.myAreas = data[2];
+
+            if (!this.myobs.count) {
+                if (this.mysites.count) {
+                    this.tab = 'sites';
+                } else if (this.myAreas.count) {
+                    this.tab = 'areas';
+                }
+            }
+
+            this.tab = 'admin';
+
+            this.mySpeciesSites = data[3];
+            this.mySpeciesSitesObs = data[4];
+            if (AppConfig['REWARDS']) {
+                this.badges = data[5];
+                localStorage.setItem('badges', JSON.stringify(this.badges));
+                console.log('badges', this.badges);
+                if (this.badges.length > 0) {
+                    this.badges.forEach((badge) => {
+                        if (
+                            badge.type == 'all_attendance' ||
+                            badge.type == 'seniority'
+                        )
+                            this.main_badges.push(badge);
+                        if (badge.type == 'program_attendance')
+                            this.programs_badges.push(badge);
+                        if (badge.type == 'recognition')
+                            this.recognition_badges.push(badge);
+                    });
+                }
+            }
+            this.observations = this.myobs.features;
+            this.observations.forEach((obs) => {
+                const coords: Point = new Point(
+                    obs.geometry.coordinates[0],
+                    obs.geometry.coordinates[1]
+                );
+                obs.properties.coords = coords; // for use in user obs component
+                this.rowData(obs, coords);
+                this.obsExport(obs);
+            });
+            this.mysites.features.forEach((site) => {
+                const coords: Point = new Point(
+                    site.geometry.coordinates[0],
+                    site.geometry.coordinates[1]
+                );
+                site.properties.coords = coords;
+            });
+            this.myAreas.features.forEach((area) => {
+                const coords: Point = new Point(
+                    area.geometry.coordinates[0],
+                    area.geometry.coordinates[1]
+                );
+                area.properties.coords = coords;
+            });
         });
     }
 
@@ -455,7 +462,9 @@ export class UserDashboardComponent implements OnInit {
     }
 
     onEditInfos(content): void {
+        this.loading = true;
         this.userService.getPersonalInfo().subscribe((data) => {
+            this.loading = false;
             this.personalInfo = data;
             this.initForm();
             this.modalRef = this.modalService.open(content, {
@@ -483,7 +492,9 @@ export class UserDashboardComponent implements OnInit {
             ? 1
             : 0;
 
+        this.loading = true;
         this.userService.updatePersonalData(userForm).subscribe((user: any) => {
+            this.loading = false;
             localStorage.setItem('userAvatar', user.features.avatar);
             this.modalRef.close();
         });

@@ -15,12 +15,15 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
     @ViewChild(SpeciesSiteObservationFormComponent, { static: true })
     form: SpeciesSiteObservationFormComponent;
     program_id: number;
+    loading = false;
 
     constructor(private router: Router, private areaService: AreaService) {}
 
     committedAndShowObs() {
+        this.loading = true;
         this.form.onFormSubmit().subscribe(
             function (result) {
+                this.loading = false;
                 if (result) {
                     if (result.features) {
                         this.areaService.newSpeciesSiteObsCreated.emit(
@@ -39,8 +42,10 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
     }
 
     committed() {
+        this.loading = true;
         this.form.onFormSubmit().subscribe(
             function (result) {
+                this.loading = false;
                 if (result) {
                     if (result.features) {
                         console.debug('committed action > data:', this.data);

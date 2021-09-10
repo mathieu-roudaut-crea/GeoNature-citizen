@@ -87,7 +87,9 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
     }
 
     loadData() {
-        console.log('load datass!!!!');
+        if (!this.program_id) {
+            return;
+        }
         this.programService
             .getProgramAreas(this.program_id)
             .subscribe((areas) => {

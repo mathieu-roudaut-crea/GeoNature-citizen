@@ -15,7 +15,7 @@
     <app-species-site-obs-form [data]="data" [species_site_id]="data.species_site_id"></app-species-site-obs-form>
 </div>
 
-<div class="modal-footer" *ngIf="form.readyToDisplay">
+<div class="modal-footer" *ngIf="form.readyToDisplay && !loading">
     <button
         type="submit"
         [disabled]="!form.observationForm.valid"
@@ -32,4 +32,17 @@
     >
         Valider l'observation
     </button>
+</div>
+
+<div *ngIf="loading">
+    <div id="form-loading">
+        <div class="loading-text">
+            <h4 i18n="loading app message@@loadingAppMessage">Chargement en cours...</h4>
+        </div>
+        <div id="spinner">
+            <div class="loader-1"></div>
+            <div class="loader-2"></div>
+            <div class="loader-3"></div>
+        </div>
+    </div>
 </div>

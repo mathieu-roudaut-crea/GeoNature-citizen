@@ -94,6 +94,9 @@ export class SpeciesSitesComponent
     }
 
     loadData() {
+        if (!this.program_id) {
+            return;
+        }
         this.programService
             .getProgramSpeciesSites(this.program_id)
             .subscribe((speciesSites) => {

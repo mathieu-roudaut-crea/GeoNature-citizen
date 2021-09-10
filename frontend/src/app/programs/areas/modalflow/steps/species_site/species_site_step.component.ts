@@ -14,6 +14,7 @@ export class SpeciesSiteStepComponent implements IFlowComponent {
     @ViewChild(SpeciesSiteFormComponent, { static: true })
     form: SpeciesSiteFormComponent;
     closeAfterSending = false;
+    loading = false;
 
     constructor(public areaService: AreaService) {}
 
@@ -28,12 +29,16 @@ export class SpeciesSiteStepComponent implements IFlowComponent {
     }
 
     sendForm() {
-        const resp = this.form.onFormSubmit();
+        this.loading = true;
+
         console.debug('committed action > data:', this.data);
+
+        const resp = this.form.onFormSubmit();
         // Wait for resolution of http promise "resp"
         // to get new created species_site's id and pass it to next step as extra_data
         resp.then(
             function (result) {
+                this.loading = false;
                 if (result.features) {
                     // SpeciesSite created
                     this.areaService.newSpeciesSiteCreated.emit(

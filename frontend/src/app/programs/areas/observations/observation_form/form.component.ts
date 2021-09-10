@@ -362,11 +362,13 @@ export class SpeciesSiteObservationFormComponent
     postSpeciesSiteObservation(): Observable<any> {
         const formData: FormData = new FormData();
         const formValues = this.observationForm.value;
-        ['stages_step_id', 'id_species_site_observation', 'state'].forEach((key) => {
-            if (formValues[key]) {
-                formData.append(key, formValues[key]);
+        ['stages_step_id', 'id_species_site_observation', 'state'].forEach(
+            (key) => {
+                if (formValues[key]) {
+                    formData.append(key, formValues[key]);
+                }
             }
-        });
+        );
 
         let index = 0;
         for (const photoData of this.photos) {
