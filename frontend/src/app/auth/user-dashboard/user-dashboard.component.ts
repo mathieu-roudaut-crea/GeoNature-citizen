@@ -87,6 +87,7 @@ export class UserDashboardComponent implements OnInit {
         this.areaService.areaDeleted.subscribe(this.getData.bind(this));
         this.areaService.speciesSiteEdited.subscribe(this.getData.bind(this));
         this.areaService.speciesSiteDeleted.subscribe(this.getData.bind(this));
+        this.userService.userEdited.subscribe(this.getData.bind(this));
         this.areaService.speciesSiteObsEdited.subscribe(
             this.refreshAdminObservationsList.bind(this)
         );

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AppConfig } from '../../../conf/app.config';
 import { catchError } from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { Relay } from '../models';
     providedIn: 'root',
 })
 export class UserService {
+    @Output() userEdited = new EventEmitter();
     role_id: number;
     admin = false;
 

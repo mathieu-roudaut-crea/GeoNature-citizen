@@ -151,23 +151,74 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="form-row">
-                    <div class="col-sm-12">
-                        <div class="form-group">
+            </div>
+            <div class="form-row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label
+                            for="organism"
+                        >Organisme</label
+                        >
+                        <div class="input-group">
                             <input
-                                type="checkbox"
-                                id="is_relay"
-                                formControlName="is_relay"
-                                name="is_relay"
+                                type="text"
+                                class="form-control rounded-0"
+                                formControlName="organism"
+                                id="organism"
+                                placeholder="Entrez l'organisme"
                             />
-                            <label
-                                for="is_relay"
-                                class="checkbox-label"
-                            >
-                                Cet utilisateur est un relais
-                            </label>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="category">Catégorie</label>
+                        <div class="input-group">
+                            <select
+                                id="category"
+                                name="category"
+                                class="form-control rounded-0"
+                                formControlName="category"
+                            >
+                                <option *ngFor="let category of appConfig.categoriesEnum | keyvalue" [value]="category.key">
+                                    {{category.value}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="category">Zones associées</label>
+                        <div class="input-group">
+                            <select formControlName="areas_access" multiple>
+                                <option *ngFor="let area of areas.features" [value]="area.properties.id_area">
+                                    {{ area.properties.name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <input
+                            type="checkbox"
+                            id="is_relay"
+                            formControlName="is_relay"
+                            name="is_relay"
+                        />
+                        <label
+                            for="is_relay"
+                            class="checkbox-label"
+                        >
+                            Cet utilisateur est un relais
+                        </label>
                     </div>
                 </div>
             </div>

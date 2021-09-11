@@ -4,7 +4,7 @@ import shapely
 import io
 
 from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, \
-    MediaOnSpeciesSiteObservationModel, MediaOnStagesStepsModel
+    MediaOnSpeciesSiteObservationModel, MediaOnStagesStepsModel, AreasAccessModel
 
 from server import db
 
@@ -586,7 +586,10 @@ def get_areas_by_program(id):
         if program.is_private:
             user_id = get_id_role_if_exists()
             if user_id:
-                areas_query = areas_query.filter_by(id_role=user_id)
+                areas_query = (areas_query
+                               .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                               .filter(or_(AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+                )
             else:
                 return prepare_list([])
 

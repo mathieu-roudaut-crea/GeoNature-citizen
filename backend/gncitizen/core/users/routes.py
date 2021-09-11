@@ -30,6 +30,7 @@ from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.env import MEDIA_DIR
 from gncitizen.utils.sqlalchemy import json_resp
 from gncitizen.core.observations.models import ObservationModel
+from gncitizen.core.areas.models import AreasAccessModel
 from gncitizen.utils.jwt import admin_required
 from .models import UserModel, RevokedTokenModel
 
@@ -475,6 +476,10 @@ def get_or_patch_user(user):
                 .filter(ObservationModel.id_role == user.id_user)
                 .one()[0]
             }
+            result['areas_access'] = []
+            areas_access = AreasAccessModel.query.filter(AreasAccessModel.id_user == user.id_user).all()
+            for area_access in areas_access:
+                result['areas_access'].append(area_access.id_area)
 
             return ({"message": "Vos données personelles", "features": result}, 200)
 
@@ -482,6 +487,13 @@ def get_or_patch_user(user):
             is_admin = user.admin or False
             current_app.logger.debug("[logged_user] Update current user personnal data")
             request_data = dict(request.get_json())
+            if "areas_access" in request_data:
+                AreasAccessModel.query.filter(AreasAccessModel.id_user == user.id_user).delete()
+                for area_id in request_data["areas_access"]:
+                    new_area_access = AreasAccessModel(id_user=user.id_user, id_area=area_id)
+                    db.session.add(new_area_access)
+                db.session.commit()
+
             if "extention" in request_data and "avatar" in request_data:
                 extention = request_data["extention"]
                 imgdata = base64.b64decode(

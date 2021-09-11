@@ -14,6 +14,7 @@ import { ObserversListComponent } from './list/observers-list.component';
 export class AdminObserversComponent {
     title = 'Observations';
     @Input('observers') observers: FeatureCollection;
+    @Input('areas') areas: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('admin') admin = false;
     @ViewChild(ObserversListComponent, { static: true })

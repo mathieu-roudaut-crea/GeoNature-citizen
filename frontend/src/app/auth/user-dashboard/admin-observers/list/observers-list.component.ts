@@ -15,12 +15,13 @@ import { CustomFormValidator } from '../../customFormValidator';
 })
 export class ObserversListComponent implements OnChanges {
     @Input('observers') observersCollection: FeatureCollection;
+    @Input('areas') areas: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('program_id') program_id: number;
     @Input('admin') admin = false;
     observers: Feature[] = [];
     taxa: any[] = [];
-    apiEndpoint = AppConfig.API_ENDPOINT;
+    appConfig = AppConfig;
     page = 1;
     pageSize = 10;
     collectionSize = 0;
@@ -37,10 +38,7 @@ export class ObserversListComponent implements OnChanges {
     ) {}
 
     initForm() {
-        console.log(
-            'this.personalInfo.features.is_relay',
-            this.personalInfo.features.is_relay
-        );
+        console.log('this.p', this.personalInfo.features);
         this.userForm = this.formBuilder.group({
             username: [
                 {
@@ -49,6 +47,9 @@ export class ObserversListComponent implements OnChanges {
                 },
             ],
             is_relay: [this.personalInfo.features.is_relay],
+            organism: [this.personalInfo.features.organism],
+            category: [this.personalInfo.features.category],
+            areas_access: [this.personalInfo.features.areas_access],
             email: [
                 this.personalInfo.features.email,
                 [
@@ -67,6 +68,7 @@ export class ObserversListComponent implements OnChanges {
         this.userService
             .updateUserData(this.editedUserId, userForm)
             .subscribe((user: any) => {
+                this.userService.userEdited.emit();
                 this.modalRef.close();
             });
     }
