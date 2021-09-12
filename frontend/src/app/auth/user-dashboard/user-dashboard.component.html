@@ -98,25 +98,25 @@
                 <div *ngIf="(admin || isRelay) && tab === 'admin'">
                     <div class="row areas-tabs">
                         <div
-                            (click)="selectedAreasTab='observers'"
+                            (click)="selectAreasTab('observers')"
                             [ngClass]="selectedAreasTab === 'observers' ? 'selected' : ''"
                         >
                             Mes observateurs
                         </div>
                         <div
-                            (click)="selectedAreasTab='areas'"
+                            (click)="selectAreasTab('areas')"
                             [ngClass]="selectedAreasTab === 'areas' ? 'selected' : ''"
                         >
                             Leurs zones
                         </div>
                         <div
-                            (click)="selectedAreasTab='species_sites'"
+                            (click)="selectAreasTab('species_sites')"
                             [ngClass]="selectedAreasTab === 'species_sites' ? 'selected' : ''"
                         >
                             Leurs individus
                         </div>
                         <div
-                            (click)="selectedAreasTab='observations'"
+                            (click)="selectAreasTab('observations')"
                             [ngClass]="selectedAreasTab === 'observations' ? 'selected' : ''"
                         >
                             Leurs observations

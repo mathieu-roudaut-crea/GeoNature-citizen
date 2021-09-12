@@ -83,6 +83,9 @@ export class UserDashboardComponent implements OnInit {
     ngOnInit(): void {
         this.verifyUser();
 
+        const tab = localStorage.getItem('selectedAreasTab');
+        this.selectedAreasTab = tab ? tab : 'areas';
+
         this.areaService.areaEdited.subscribe(this.getData.bind(this));
         this.areaService.areaDeleted.subscribe(this.getData.bind(this));
         this.areaService.speciesSiteEdited.subscribe(this.getData.bind(this));
@@ -652,6 +655,11 @@ export class UserDashboardComponent implements OnInit {
             value = 'f';
         }
         this.userForm.get('gender').setValue(value);
+    }
+
+    selectAreasTab(tab) {
+        this.selectedAreasTab = tab;
+        localStorage.setItem('selectedAreasTab', tab);
     }
 
     ngOnDestroy(): void {
