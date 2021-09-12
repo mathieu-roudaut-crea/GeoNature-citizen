@@ -65,13 +65,7 @@ export class AreasMapComponent extends BaseMapComponent implements OnInit {
     selector: 'popup',
     template: `
         <ng-container>
-            <img
-                [src]="
-                    data.photo
-                        ? appConfig.API_ENDPOINT + data.photo.url
-                        : 'assets/no_photo_light.png'
-                "
-            />
+            <span></span>
             <p>
                 <b>{{ data.name }}</b
                 ><br />
