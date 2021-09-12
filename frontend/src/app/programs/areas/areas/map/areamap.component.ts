@@ -9,9 +9,11 @@ import {
     ViewEncapsulation,
     Inject,
     LOCALE_ID,
+    OnInit,
 } from '@angular/core';
-import { BaseMapComponent } from './map.component';
+import { BaseMapComponent, conf } from './map.component';
 import { MapService } from '../../../base/map/map.service';
+import { AreaService } from '../../areas.service';
 
 @Component({
     selector: 'app-areas-map',
@@ -26,16 +28,32 @@ import { MapService } from '../../../base/map/map.service';
     styleUrls: ['../../../base/map/map.component.css'],
     encapsulation: ViewEncapsulation.None,
 })
-export class AreasMapComponent extends BaseMapComponent {
+export class AreasMapComponent extends BaseMapComponent implements OnInit {
     feature_id_key = 'id_area';
 
     constructor(
         @Inject(LOCALE_ID) readonly localeId: string,
+        private areaService: AreaService,
         resolver: ComponentFactoryResolver,
         injector: Injector,
         mapService: MapService
     ) {
         super(resolver, injector, mapService);
+    }
+
+    ngOnInit() {
+        this.areaService.newSpeciesSiteCreated.subscribe((speciesSite) => {
+            this.observationMap.addLayer(
+                L.geoJSON(speciesSite, {
+                    pointToLayer: (_feature, latlng): L.Marker => {
+                        const marker: L.Marker<any> = L.marker(latlng, {
+                            icon: conf.OBS_MARKER_ICON(),
+                        });
+                        return marker;
+                    },
+                })
+            );
+        });
     }
 
     getPopupComponentFactory(): any {

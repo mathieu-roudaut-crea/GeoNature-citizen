@@ -768,7 +768,18 @@ def get_area(pk):
                 .order_by(SpeciesSiteModel.timestamp_update.desc())
                 .all()
         )
+
+        for species_site in species_sites['features']:
+            last_observation = (SpeciesSiteObservationModel.query
+                                .filter_by(id_species_site=species_site['properties']['id_species_site'])
+                                .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
+                                .first()
+            )
+            if last_observation is not None:
+                species_site["properties"]["last_observation"] = last_observation.as_dict(True)
+
         formatted_area["properties"]["species_sites"] = species_sites
+
         return {"features": [formatted_area]}, 200
     except Exception as e:
         return {"error_message": str(e)}, 400

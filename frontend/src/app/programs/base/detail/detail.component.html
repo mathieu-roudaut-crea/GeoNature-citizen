@@ -1,12 +1,12 @@
 <div class="container">
-    <div class="row">
-        <div *ngIf="location; else backToProgram" (click)="location.back()" id="back_link">< Retour</div>
-        <ng-template #backToProgram>
-            <a [routerLink]="['/programs', program_id, module]" id="back_link">< Retour au programme</a>
-        </ng-template>
-    </div>
-    <div class="row">
-        <h1 class="mt-3 title">
+    <div class="row mt-4">
+        <div>
+            <div *ngIf="location; else backToProgram" (click)="location.back()" class="back-link">Retour</div>
+            <ng-template #backToProgram>
+                <a [routerLink]="['/programs', program_id, module]" class="back-link">Retour au programme</a>
+            </ng-template>
+        </div>
+        <h1 class="title text-center">
             {{
             module === 'areas' ? area?.properties.name :
                 module === 'species_sites' ?
@@ -18,6 +18,44 @@
                             : obs?.properties.taxref?.nom_vern
             }}
         </h1>
+        <div>
+            <app-areamodalflow
+                #modalFlowRef
+                *ngIf="obs && userService && (obs?.properties.id_role === userService.role_id || userService.admin)"
+                [obsUpdateData]="obs.properties"
+            >
+                <i
+                    class="fa fa-edit text-primary"
+                    placement="bottom"
+                    ngbTooltip="Editer"
+                    btn-open
+                ></i>
+            </app-areamodalflow>
+            <app-areamodalflow
+                #modalFlowRef
+                *ngIf="speciesSite && userService && (speciesSite?.properties.id_role === userService.role_id || userService.admin)"
+                [coords]="speciesSite.properties.coords"
+                [speciesSiteUpdateData]="speciesSite.properties"
+            >
+                <i
+                    class="fa fa-edit text-primary"
+                    placement="bottom"
+                    ngbTooltip="Editer"
+                    btn-open
+                ></i>
+            </app-areamodalflow>
+            <app-areamodalflow
+                *ngIf="area && userService && (area?.properties.id_role === userService.role_id || userService.admin)"
+                #modalFlowRef
+                [coords]="area.properties.coords"
+                [updateData]="area.properties"
+                [program_id]="area.properties.id_program"
+            >
+                <div class="edit-link" btn-open>
+                    Editer
+                </div>
+            </app-areamodalflow>
+        </div>
     </div>
     <div class="row mb-4">
         <div class="col-md-4 pt-4 card box-shadow">
@@ -27,20 +65,6 @@
                         Zone #{{
                         area_id
                         }}
-                        <app-areamodalflow
-                            *ngIf="area && userService && (area?.properties.id_role === userService.role_id || userService.admin)"
-                            #modalFlowRef
-                            [coords]="area.properties.coords"
-                            [updateData]="area.properties"
-                            [program_id]="area.properties.id_program"
-                        >
-                            <i
-                                class="fa fa-edit text-primary cursor-pointer"
-                                placement="bottom"
-                                ngbTooltip="Editer"
-                                btn-open
-                            ></i>
-                        </app-areamodalflow>
                     </h5>
                     <h6 class="card-subtitle mb-2 text-muted">
                         Ajoutée le
@@ -177,7 +201,7 @@
             </ng-container>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-8 pr-0">
             <div id="map" class="col-lg-12"></div>
         </div>
     </div>
@@ -232,17 +256,32 @@
         </div>
         <div class="row bg-light">
             <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Espèce</th>
+                    <th scope="col">Dernière obs</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
                 <tbody>
-                <tr *ngFor="let species_site of area.properties.species_sites.features" class="d-flex">
-                    <td class="col-4">{{ species_site.properties.name }}</td>
-                    <td class="col-4">
+                <tr *ngFor="let species_site of area.properties.species_sites.features">
+                    <td>{{ species_site.properties.name }}</td>
+                    <td>
                         {{
                         species_site.properties.species ?
                             species_site.properties.species.nom_vern :
                             ''
                         }}
                     </td>
-                    <td class="col-4">
+                    <td>
+                        {{
+                        species_site.properties.last_observation?.stages_step ?
+                            species_site.properties.last_observation.stages_step.name :
+                            ''
+                        }}
+                    </td>
+                    <td>
                         <a
                             [routerLink]="[
                                 '/programs',
@@ -251,7 +290,7 @@
                                 species_site.properties.id_species_site
                             ]"
                         >
-                            Voir le détail
+                            <i class="fa fa-chevron-right mx-3 my-1"></i>
                         </a>
                     </td>
                 </tr>
@@ -266,11 +305,28 @@
         </div>
         <div class="row bg-light">
             <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Date obs</th>
+                    <th scope="col">Dernier stade</th>
+                    <th scope="col">Dernière étape</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
                 <tbody>
-                <tr *ngFor="let observation of speciesSite.properties.observations.features" class="d-flex">
-                    <td class="col-4">{{ observation.properties.obs_txt }}</td>
-                    <td class="col-4">{{ observation.properties.date }}</td>
-                    <td class="col-4">
+                <tr *ngFor="let observation of speciesSite.properties.observations.features">
+                    <td>{{ observation.properties.date }}</td>
+                    <td>
+                        {{
+                        observation.properties.stages_step?.species_stage ?
+                            observation.properties.stages_step.species_stage.name :
+                            ''
+                        }}
+                    </td>
+                    <td>
+                        {{ observation.properties.stages_step ? observation.properties.stages_step.name : '' }}
+                    </td>
+                    <td>
                         <a
                             [routerLink]="[
                                 '/programs',
@@ -279,7 +335,7 @@
                                 observation.properties.id_species_site_observation
                             ]"
                         >
-                            Voir le détail
+                            <i class="fa fa-chevron-right mx-3 my-1"></i>
                         </a>
                     </td>
                 </tr>

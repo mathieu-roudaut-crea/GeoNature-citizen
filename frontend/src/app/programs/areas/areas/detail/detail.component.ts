@@ -76,6 +76,10 @@ export class AreaDetailComponent
 
             // prepare data
             if (this.area.properties) {
+                console.log(
+                    'this.area.properties',
+                    this.area.properties.species_sites
+                );
                 const areaCenter = L.geoJSON(this.area).getBounds().getCenter();
                 this.area.properties.coords = new L.Point(
                     areaCenter.lng,
