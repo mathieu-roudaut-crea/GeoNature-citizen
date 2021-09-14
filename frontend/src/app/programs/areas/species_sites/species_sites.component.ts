@@ -83,14 +83,16 @@ export class SpeciesSitesComponent
                 (p) => p.id_program == this.program_id
             );
 
-            this.verifyProgramPrivacyAndUser();
-
             this.programService
                 .getProgram(this.program_id)
                 .subscribe((program) => (this.programFeature = program));
 
             this.loadData();
         });
+    }
+
+    ngAfterViewInit() {
+        this.verifyProgramPrivacyAndUser();
     }
 
     loadData() {

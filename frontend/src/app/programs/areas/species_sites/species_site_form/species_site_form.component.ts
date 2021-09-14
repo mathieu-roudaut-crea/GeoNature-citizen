@@ -74,7 +74,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     speciesSiteForm = new FormGroup({
         name: new FormControl('', Validators.required),
         geometry: new FormControl('', Validators.required),
-        cd_nom: new FormControl(),
+        cd_nom: new FormControl('', Validators.required),
         id_area: new FormControl(),
         id_species_site: new FormControl(),
     });

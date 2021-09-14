@@ -21,7 +21,7 @@
                 (ngModelChange)="onFilterChange()"
                 *ngIf="userDashboard"
             >
-                <option [ngValue]="null" i18n="All municipalities select option@@allMunicipalitiesSelectOption">Tous programmes</option>
+                <option [ngValue]="null">Tous programmes</option>
                 <option *ngFor="let program of programs" [ngValue]="program">
                     {{ program?.title || '?' }}
                 </option>

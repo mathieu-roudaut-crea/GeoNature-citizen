@@ -88,8 +88,6 @@ export class SpeciesSitesObsComponent
                 (p) => p.id_program == this.program_id
             );
 
-            this.verifyProgramPrivacyAndUser();
-
             this.areaService.speciesSiteObsEdited.subscribe(
                 this.loadData.bind(this)
             );
@@ -97,6 +95,10 @@ export class SpeciesSitesObsComponent
                 this.loadData.bind(this)
             );
         });
+    }
+
+    ngAfterViewInit() {
+        this.verifyProgramPrivacyAndUser();
     }
 
     loadData(pageData = null) {

@@ -73,8 +73,6 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
                 (p) => p.id_program == this.program_id
             );
 
-            this.verifyProgramPrivacyAndUser();
-
             this.programService
                 .getProgram(this.program_id)
                 .subscribe((program) => (this.programFeature = program));
@@ -84,6 +82,10 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
         this.areaService.newAreaCreated.subscribe(this.loadData.bind(this));
         this.areaService.areaEdited.subscribe(this.loadData.bind(this));
         this.areaService.areaDeleted.subscribe(this.loadData.bind(this));
+    }
+
+    ngAfterViewInit() {
+        this.verifyProgramPrivacyAndUser();
     }
 
     loadData() {

@@ -1671,14 +1671,22 @@ def export_areas_xls(user_id):
                     .all()
             )
 
-            basic_fields = (
+            basic_fields = [
                 {"col_name": "ID", "getter": lambda s: s.id_user},
                 {"col_name": "Pseudo", "getter": lambda s: s.username},
                 {"col_name": "Email", "getter": lambda s: s.email},
                 {"col_name": "Organisme", "getter": lambda s: s.organism},
+                {"col_name": "Profession", "getter": lambda s: s.function},
                 {"col_name": "Catégorie", "getter": lambda s: s.category},
                 {"col_name": "Date d'inscription", "getter": lambda s: s.timestamp_create, "style": date_style},
-            )
+            ]
+
+            if current_user.admin:
+                basic_fields.append({"col_name": "Pays", "getter": lambda s: s.country})
+                basic_fields.append({"col_name": "Code postal", "getter": lambda s: s.postal_code})
+                basic_fields.append({"col_name": "Année de naissance", "getter": lambda s: s.birth_year})
+                basic_fields.append({"col_name": "Genre", "getter": lambda s: ('Femme' if (s.gender == 'f') else ('Homme' if (s.gender == 'm') else s.gender))})
+
             row, col = 0, 0
             for field in basic_fields:
                 ws.write(row, col, field["col_name"], title_style)
