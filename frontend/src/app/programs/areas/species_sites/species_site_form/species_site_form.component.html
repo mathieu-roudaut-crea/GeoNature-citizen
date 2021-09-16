@@ -27,6 +27,10 @@
                 >
                     <select formControlName="cd_nom" class="form-control rounded-0">
                         <option
+                            [value]="null"
+                        >
+                        </option>
+                        <option
                             *ngFor="let s of surveySpecies$ | async"
                             [value]="s.taxref.cd_nom"
                         >
