@@ -193,11 +193,11 @@
             <div class="form-row">
                 <div class="col-sm-12">
                     <div class="form-group">
-                        <label for="category">Zones associées</label>
+                        <label for="category">Zones associées ?</label>
                         <div class="input-group">
-                            <select formControlName="areas_access" multiple>
-                                <option *ngFor="let area of areas.features" [value]="area.properties.id_area">
-                                    {{ area.properties.name }}
+                            <select formControlName="areas_access" style="width: 100%;height: 100px;" multiple>
+                                <option *ngFor="let area of areasList" [value]="area.id_area">
+                                    {{ area.name }}
                                 </option>
                             </select>
                         </div>

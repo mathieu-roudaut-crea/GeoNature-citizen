@@ -30,6 +30,7 @@ export class ObserversListComponent implements OnChanges {
     personalInfo;
     userForm;
     editedUserId = 0;
+    areasList = [];
 
     constructor(
         private userService: UserService,
@@ -38,7 +39,6 @@ export class ObserversListComponent implements OnChanges {
     ) {}
 
     initForm() {
-        console.log('this.p', this.personalInfo.features);
         this.userForm = this.formBuilder.group({
             username: [
                 {
@@ -77,6 +77,13 @@ export class ObserversListComponent implements OnChanges {
         this.editedUserId = id;
         this.userService.getUserInfo(id).subscribe((data) => {
             this.personalInfo = data;
+
+            if (this.areas && this.areas.features) {
+                this.areasList = this.areas.features
+                    .map((area) => area.properties)
+                    .filter((area) => area.id_role !== this.personalInfo.features.id_role);
+            }
+
             this.initForm();
             this.modalRef = this.modalService.open(modal, {
                 size: 'lg',
