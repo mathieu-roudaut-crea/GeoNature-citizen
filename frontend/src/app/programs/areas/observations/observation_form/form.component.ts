@@ -262,6 +262,9 @@ export class SpeciesSiteObservationFormComponent
             if (
                 !sameStageThisYear &&
                 observation.properties.stages_step &&
+                !isNaN(this.selectedStage) &&
+                observation.properties.stages_step.id_species_stage ==
+                    this.selectedStage &&
                 observation.properties.date.startsWith(
                     this.observationForm.value.date.year + ''
                 ) &&
