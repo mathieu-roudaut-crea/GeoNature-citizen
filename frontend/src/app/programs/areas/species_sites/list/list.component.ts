@@ -37,12 +37,14 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
     municipalities: string[] = [];
     speciesSites = [];
     taxa: any[] = [];
+    areas: any[] = [];
     programs: any[] = [];
     apiEndpoint = AppConfig.API_ENDPOINT;
     deletionModalRef;
     selectedSpeciesSiteId = 0;
     selectedProgram = null;
     selectedTaxon = null;
+    selectedArea = null;
     appConfig = AppConfig;
 
     constructor(
@@ -79,6 +81,16 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
                         array
                             .map((spec) => spec.cd_nom)
                             .indexOf(species.cd_nom) === index
+                );
+
+            this.areas = this.speciesSitesCollection.features
+                .map((features) => features.properties.area)
+                .filter((area) => area && area.id_area)
+                .filter(
+                    (area, index, array) =>
+                        array
+                            .map((area) => area.id_area)
+                            .indexOf(area.id_area) === index
                 );
         }
     }
@@ -119,12 +131,17 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
                     !this.selectedTaxon ||
                     speciesSite.properties.cd_nom === this.selectedTaxon.cd_nom;
 
+                const sameArea =
+                    !this.selectedArea ||
+                    speciesSite.properties.id_area ===
+                        this.selectedArea.id_area;
+
                 const sameProgram =
                     !this.selectedProgram ||
                     speciesSite.properties.area.id_program ===
                         this.selectedProgram.id_program;
 
-                return sameTaxon && sameProgram;
+                return sameTaxon && sameProgram && sameArea;
             }
         );
     }
