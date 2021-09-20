@@ -81,7 +81,10 @@ export class ObserversListComponent implements OnChanges {
             if (this.areas && this.areas.features) {
                 this.areasList = this.areas.features
                     .map((area) => area.properties)
-                    .filter((area) => area.id_role !== this.personalInfo.features.id_role);
+                    .filter(
+                        (area) =>
+                            area.id_role !== this.personalInfo.features.id_role
+                    );
             }
 
             this.initForm();

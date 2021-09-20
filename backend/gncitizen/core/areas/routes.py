@@ -1682,6 +1682,7 @@ def export_areas_xls(user_id):
             ]
 
             if current_user.admin:
+                basic_fields.append({"col_name": "Zones associées", "getter": lambda s: s.areas_access})
                 basic_fields.append({"col_name": "Pays", "getter": lambda s: s.country})
                 basic_fields.append({"col_name": "Code postal", "getter": lambda s: s.postal_code})
                 basic_fields.append({"col_name": "Année de naissance", "getter": lambda s: s.birth_year})
@@ -1693,12 +1694,23 @@ def export_areas_xls(user_id):
                 col += 1
             row, col = 1, 0
 
-            for observers in observers:
+            for observer in observers:
+                observer.areas_access = "Créées: "
+                created_areas = AreaModel.query.filter(AreaModel.id_role == observer.id_user).all()
+                for area in created_areas:
+                    observer.areas_access += str(area.id_area) + ", "
+
+                observer.areas_access += " / Associées: "
+
+                areas_access = AreasAccessModel.query.filter(AreasAccessModel.id_user == observer.id_user).all()
+                for area_access in areas_access:
+                    observer.areas_access += str(area_access.id_area) + ", "
+
                 for field in basic_fields:
                     args = []
                     if field.get("style"):
                         args.append(field.get("style"))
-                    ws.write(row, col, field["getter"](observers), *args)
+                    ws.write(row, col, field["getter"](observer), *args)
                     col += 1
                 row += 1
                 col = 0
