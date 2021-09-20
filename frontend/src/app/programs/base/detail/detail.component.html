@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container detail-container">
     <div class="row mt-4">
         <div>
             <div *ngIf="location; else backToProgram" (click)="location.back()" class="back-link">Retour</div>
@@ -18,44 +18,6 @@
                             : obs?.properties.taxref?.nom_vern
             }}
         </h1>
-        <div>
-            <app-areamodalflow
-                #modalFlowRef
-                *ngIf="obs && userService && (obs?.properties.id_role === userService.role_id || userService.admin)"
-                [obsUpdateData]="obs.properties"
-            >
-                <i
-                    class="fa fa-edit text-primary"
-                    placement="bottom"
-                    ngbTooltip="Editer"
-                    btn-open
-                ></i>
-            </app-areamodalflow>
-            <app-areamodalflow
-                #modalFlowRef
-                *ngIf="speciesSite && userService && (speciesSite?.properties.id_role === userService.role_id || userService.admin)"
-                [coords]="speciesSite.properties.coords"
-                [speciesSiteUpdateData]="speciesSite.properties"
-            >
-                <i
-                    class="fa fa-edit text-primary"
-                    placement="bottom"
-                    ngbTooltip="Editer"
-                    btn-open
-                ></i>
-            </app-areamodalflow>
-            <app-areamodalflow
-                *ngIf="area && userService && (area?.properties.id_role === userService.role_id || userService.admin)"
-                #modalFlowRef
-                [coords]="area.properties.coords"
-                [updateData]="area.properties"
-                [program_id]="area.properties.id_program"
-            >
-                <div class="edit-link" btn-open>
-                    Editer
-                </div>
-            </app-areamodalflow>
-        </div>
     </div>
     <div class="row mb-4">
         <div class="col-md-4 pt-4 card box-shadow">
@@ -103,20 +65,27 @@
                     >
                 </div>
                 <div *ngSwitchCase="module === 'species_sites'" class="card-body">
+                    <p *ngIf="speciesSite?.properties.species">
+                        {{
+                        speciesSite?.properties.species.nom_vern ?
+                            speciesSite?.properties.species.nom_vern :
+                            speciesSite?.properties.species.nom_complet
+                        }}
+                    </p>
                     <h5 class="card-title">
                         Individu #{{
                         species_site_id
                         }}
                     </h5>
                     <h6 class="card-subtitle mb-2 text-muted">
-                        Ajoutée le
+                        Ajouté le
                         {{
                         speciesSite?.properties.timestamp_create.substring(0, 10)
                             | date: 'longDate'
                         }}
                     </h6>
                     <p class="card-text">
-                        Inventoriée par {{ speciesSite?.properties.obs_txt }}
+                        Inventorié par {{ speciesSite?.properties.obs_txt }}
                     </p>
 
                     <p
@@ -202,7 +171,7 @@
         </div>
 
         <div class="col-md-8 pr-0">
-            <div id="map" class="col-lg-12"></div>
+            <div id="map" class="col-lg-12 species-site-map"></div>
         </div>
     </div>
     <div *ngIf="photos">

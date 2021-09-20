@@ -2,6 +2,9 @@
     min-height: 250px; /*50vh*/
     /*width: 100%;*/
 }
+#map.species-site-map {
+    min-height: 305px;
+}
 
 .cursor-pointer {
     cursor: pointer;
@@ -17,20 +20,6 @@
     min-width: 120px;
     text-align: center;
     text-transform: uppercase;
-    font-size: 14px;
-}
-
-.edit-link {
-    padding: 5px;
-    color: white;
-    border: 3px solid var(--primary);
-    cursor: pointer;
-    user-select: none;
-    margin: 10px 0px;
-    min-width: 120px;
-    text-align: center;
-    text-transform: uppercase;
-    background-color: var(--primary);
     font-size: 14px;
 }
 
