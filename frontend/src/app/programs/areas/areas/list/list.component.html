@@ -5,7 +5,7 @@
             <select
                 id="municipality"
                 name="municipality"
-                [class]="'form-control rounded-0 col-sm-12' + (userDashboard ? ' col-lg-6' : '')"
+                [class]="'form-control rounded-0 ' + (userDashboard ? 'col-md-6' : 'col-sm-12')"
                 [(ngModel)]="selectedMunicipality"
                 (ngModelChange)="onFilterChange()"
             >
@@ -16,7 +16,7 @@
                 id="program"
                 name="program"
                 type="text"
-                class="form-control rounded-0 col-lg-6 col-sm-12"
+                class="form-control rounded-0 col-sm-6"
                 [(ngModel)]="selectedProgram"
                 (ngModelChange)="onFilterChange()"
                 *ngIf="userDashboard"
