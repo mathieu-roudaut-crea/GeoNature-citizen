@@ -64,7 +64,7 @@ export class SpeciesSitesMapComponent extends BaseMapComponent {
             <div
                 [routerLink]="[
                     '/programs',
-                    data.id_program,
+                    data.area.id_program,
                     'species_sites',
                     data.id_species_site
                 ]"
