@@ -70,6 +70,9 @@ export class SpeciesSitesComponent
         );
         this.areaService.speciesSiteEdited.subscribe(this.loadData.bind(this));
         this.areaService.speciesSiteDeleted.subscribe(this.loadData.bind(this));
+        this.areaService.newSpeciesSiteObsCreated.subscribe(
+            this.loadData.bind(this)
+        );
     }
 
     ngOnInit() {
