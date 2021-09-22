@@ -49,24 +49,18 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
         formatted = format_entity(element, with_geom)
 
         if model_name == 'areas':
-            linked_species_sites_number = (
-                SpeciesSiteModel.query
-                    .filter_by(id_area=element.id_area)
-                    .filter(
-                        or_(SpeciesSiteModel.id_role != element.id_role, SpeciesSiteModel.id_role.is_(None))
-                    )
+            linked_observations_number = (
+                SpeciesSiteObservationModel.query
+                    .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                    .filter(AreaModel.id_area == element.id_area)
                     .count()
             )
-            formatted["properties"]["creator_can_delete"] = (linked_species_sites_number == 0)
-
+            formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
         if model_name == 'species_sites':
             linked_observations_number = (
                 SpeciesSiteObservationModel.query
                     .filter_by(id_species_site=element.id_species_site)
-                    .filter(or_(
-                        SpeciesSiteObservationModel.id_role != element.id_role,
-                        SpeciesSiteObservationModel.id_role.is_(None)
-                    ))
                     .count()
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
@@ -963,7 +957,16 @@ def delete_area(area_id):
             .join(UserModel, AreaModel.id_role == UserModel.id_user, full=True)
             .first()
         )
-        if area and (current_user.email == area.UserModel.email or current_user.admin):
+
+        linked_observations_number = (
+            SpeciesSiteObservationModel.query
+                .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                .filter(AreaModel.id_area == area_id)
+                .count()
+        )
+
+        if area and ((current_user.email == area.UserModel.email and linked_observations_number == 0) or current_user.admin):
             AreaModel.query.filter_by(id_area=area_id).delete()
             db.session.commit()
             return ("Area deleted successfully"), 200
@@ -1201,7 +1204,14 @@ def delete_species_site(species_site_id):
             .join(UserModel, SpeciesSiteModel.id_role == UserModel.id_user, full=True)
             .first()
         )
-        if species_site and (current_user.email == species_site.UserModel.email or current_user.admin):
+
+        linked_observations_number = (
+            SpeciesSiteObservationModel.query
+                .filter_by(id_species_site=species_site_id)
+                .count()
+        )
+
+        if species_site and ((current_user.email == species_site.UserModel.email and linked_observations_number == 0) or current_user.admin):
             SpeciesSiteModel.query.filter_by(id_species_site=species_site_id).delete()
             db.session.commit()
             return ("species_site deleted successfully"), 200
