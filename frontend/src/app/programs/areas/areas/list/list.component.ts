@@ -112,8 +112,9 @@ export class AreasListComponent implements OnChanges, OnInit {
         this.areas = this.areasCollection['features'].filter((area) => {
             const sameMunicipality =
                 !this.selectedMunicipality ||
-                area.properties.municipality_data.area_code ===
-                    this.selectedMunicipality.area_code;
+                (area.properties.municipality_data &&
+                    area.properties.municipality_data.area_code ===
+                        this.selectedMunicipality.area_code);
 
             const sameProgram =
                 !this.selectedProgram ||
