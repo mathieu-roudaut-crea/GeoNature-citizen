@@ -1693,6 +1693,8 @@ def export_areas_xls(user_id):
 
             if current_user.admin:
                 basic_fields.append({"col_name": "Zones associées", "getter": lambda s: s.areas_access})
+                basic_fields.append({"col_name": "Statut", "getter": lambda s: 'Admin' if s.admin else ("Relai" if s.is_relay else "Utilisateur")})
+                basic_fields.append({"col_name": "Relai lié", "getter": lambda s: s.linked_relay.organism if s.linked_relay else ""})
                 basic_fields.append({"col_name": "Pays", "getter": lambda s: s.country})
                 basic_fields.append({"col_name": "Code postal", "getter": lambda s: s.postal_code})
                 basic_fields.append({"col_name": "Année de naissance", "getter": lambda s: s.birth_year})
