@@ -1491,10 +1491,11 @@ def export_areas_xls(user_id):
         fields = (
             {"col_name": "ID", "getter": lambda area: area.id_area},
             {"col_name": "Programme", "getter": lambda area: area.program.title},
-            {"col_name": "Créateur", "getter": lambda area: area.obs_txt + ' (' + str(area.id_role) + ')'},
+            {"col_name": "Créateur", "getter": lambda area: area.obs_txt + " (" + str(area.id_role) + ")"},
             {"col_name": "Nom", "getter": lambda area: area.name},
             {"col_name": "Coord. x", "getter": lambda area: str(area.coordinates[0])},
             {"col_name": "Coord. y", "getter": lambda area: str(area.coordinates[1])},
+            {"col_name": "Ville", "getter": lambda area: area.municipality.area_name if area.municipality else ""},
             {
                 "col_name": "Date création",
                 "getter": lambda area: area.timestamp_create,
@@ -1518,6 +1519,7 @@ def export_areas_xls(user_id):
 
         for area in areas:
             area.coordinates = to_shape(area.geom).centroid.coords[0]
+
             for col, field in enumerate(fields):
                 args = []
                 if field.get("style"):
