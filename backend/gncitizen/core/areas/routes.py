@@ -1710,13 +1710,13 @@ def export_areas_xls(user_id):
                 observer.areas_access = "Créées: "
                 created_areas = AreaModel.query.filter(AreaModel.id_role == observer.id_user).all()
                 for area in created_areas:
-                    observer.areas_access += str(area.id_area) + ", "
+                    observer.areas_access += str(area.id_area) + " - "
 
                 observer.areas_access += " / Associées: "
 
                 areas_access = AreasAccessModel.query.filter(AreasAccessModel.id_user == observer.id_user).all()
                 for area_access in areas_access:
-                    observer.areas_access += str(area_access.id_area) + ", "
+                    observer.areas_access += str(area_access.id_area) + " - "
 
                 for field in basic_fields:
                     args = []
