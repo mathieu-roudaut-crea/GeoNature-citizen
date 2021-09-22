@@ -14,15 +14,15 @@ export class RegisterUser {
     postal_code: string;
     want_newsletter: boolean;
     is_relay: boolean;
-    linked_relay_id?: number = 0;
+    linked_relay_id?: number = null;
 
     birth_year: number;
     gender: string;
     comments: string;
 
     constructor() {
-        this.category = 'individual';
-        this.country = 'FR';
+        this.category = null;
+        this.country = null;
         this.want_newsletter = false;
         this.is_relay = false;
     }

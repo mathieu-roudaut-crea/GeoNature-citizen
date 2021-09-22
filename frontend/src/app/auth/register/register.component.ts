@@ -34,7 +34,7 @@ export class RegisterComponent {
     successMessage: string;
     relaysList: Array<Relay>;
     userAvatar: string | ArrayBuffer;
-    genderType = '0';
+    genderType = null;
     @ViewChild('registerForm', { static: false }) registerForm;
 
     constructor(
