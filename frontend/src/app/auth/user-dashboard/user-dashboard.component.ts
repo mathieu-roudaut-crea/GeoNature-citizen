@@ -68,6 +68,7 @@ export class UserDashboardComponent implements OnInit {
     tab = 'observations';
     selectedAreasTab = 'areas';
     previousObsPageData;
+    relaysList = [];
 
     constructor(
         private auth: AuthService,
@@ -467,6 +468,11 @@ export class UserDashboardComponent implements OnInit {
 
     onEditInfos(content): void {
         this.loading = true;
+
+        this.userService
+            .getRelays()
+            .subscribe((relayList) => (this.relaysList = relayList));
+
         this.userService.getPersonalInfo().subscribe((data) => {
             this.loading = false;
             this.personalInfo = data;
@@ -487,7 +493,7 @@ export class UserDashboardComponent implements OnInit {
             userForm.extention = this.extentionFile;
         }
 
-        if (userForm.linked_relay_id === 0) {
+        if (userForm.linked_relay_id == 0) {
             userForm.linked_relay_id = null;
         }
 

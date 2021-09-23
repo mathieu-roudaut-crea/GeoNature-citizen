@@ -79,7 +79,7 @@ export class RegisterComponent {
             return;
         }
 
-        if (this.user.linked_relay_id === 0) {
+        if (this.user.linked_relay_id == 0) {
             this.user.linked_relay_id = null;
         }
 
