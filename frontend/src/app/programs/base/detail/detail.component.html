@@ -107,6 +107,7 @@
                         </p>
                     </ng-template>
                     <a
+                        *ngIf="speciesSite && speciesSite.properties.json_data && speciesSite.properties.json_data.state !== true"
                         href="#"
                         (click)="$event.preventDefault(); addSpeciesSiteObservation()"
                         class="btn btn-primary"
@@ -213,7 +214,7 @@
                 <tbody>
                 <tr *ngFor="let d of attributes" class="d-flex">
                     <td class="col-4">{{ d.name }}</td>
-                    <td class="col-8">{{ d.value }}</td>
+                    <td class="col-8">{{ d.value === 'true' ? 'Oui' : d.value }}</td>
                 </tr>
                 </tbody>
             </table>

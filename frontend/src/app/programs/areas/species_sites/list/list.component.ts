@@ -63,7 +63,14 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
 
     ngOnChanges() {
         if (this.speciesSitesCollection) {
-            this.speciesSites = this.speciesSitesCollection['features'];
+            this.speciesSites = this.speciesSitesCollection['features'].filter(
+                (speciesSite) => {
+                    return (
+                        speciesSite.properties.json_data &&
+                        speciesSite.properties.json_data.state !== true
+                    );
+                }
+            );
 
             this.speciesSites.forEach((speciesSite) => {
                 const coords: Point = new Point(
