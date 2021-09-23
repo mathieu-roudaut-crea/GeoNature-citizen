@@ -1495,7 +1495,7 @@ def export_areas_xls(user_id):
             {"col_name": "Nom", "getter": lambda area: area.name},
             {"col_name": "Coord. x", "getter": lambda area: str(area.coordinates[0])},
             {"col_name": "Coord. y", "getter": lambda area: str(area.coordinates[1])},
-            {"col_name": "Ville", "getter": lambda area: area.municipality.area_name if area.municipality else ""},
+            {"col_name": "Ville", "getter": lambda area: area.municipality_data.area_name if area.municipality else ""},
             {
                 "col_name": "Date création",
                 "getter": lambda area: area.timestamp_create,
