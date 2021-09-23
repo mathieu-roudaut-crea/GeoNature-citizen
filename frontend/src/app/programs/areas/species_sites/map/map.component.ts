@@ -51,15 +51,15 @@ export const conf = {
     SCALE_CONTROL_POSITION: 'bottomleft',
     NEW_OBS_MARKER_ICON: () =>
         L.icon({
-            iconUrl: MAP_CONFIG['NEW_OBS_POINTER'],
-            iconSize: [33, 42],
-            iconAnchor: [16, 42],
+            iconUrl: MAP_CONFIG['SPECIES_SITE_POINTER'],
+            iconSize: [48, 48],
+            iconAnchor: [24, 48],
         }),
     OBS_MARKER_ICON: () =>
         L.icon({
-            iconUrl: MAP_CONFIG['OBS_POINTER'],
-            iconSize: [33, 42],
-            iconAnchor: [16, 42],
+            iconUrl: MAP_CONFIG['SPECIES_SITE_POINTER'],
+            iconSize: [48, 48],
+            iconAnchor: [24, 48],
         }),
     OBSERVATION_LAYER: () =>
         L.markerClusterGroup({
