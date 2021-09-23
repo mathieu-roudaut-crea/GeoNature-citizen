@@ -4,7 +4,7 @@ import shapely
 import io
 
 from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, SpeciesStageModel, StagesStepModel, \
-    MediaOnSpeciesSiteObservationModel, MediaOnStagesStepsModel, AreasAccessModel
+    MediaOnSpeciesSiteObservationModel, MediaOnStagesStepsModel, AreasAccessModel, MediaOnSpeciesSiteModel
 
 from server import db
 
@@ -631,7 +631,29 @@ def get_species_sites_by_program(id):
 
         species_sites = species_sites_query.all()
 
-        return prepare_list(species_sites, model_name="species_sites")
+        formatted_list = prepare_list(species_sites, model_name="species_sites")
+
+        for species_site in formatted_list.features:
+            species_site["properties"]["photos"] = []
+            photos = (
+                db.session.query(MediaModel, SpeciesSiteModel)
+                    .filter(SpeciesSiteModel.id_species_site == species_site['properties']['id_species_site'])
+                    .join(
+                        MediaOnSpeciesSiteModel,
+                        MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
+                    )
+                    .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
+                    .all()
+            )
+            species_site["properties"]["photos"] = [
+                {
+                    "url": "/media/{}".format(p.MediaModel.filename),
+                    "id_media": p.MediaModel.id_media
+                }
+                for p in photos
+            ]
+
+        return formatted_list
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -1053,6 +1075,23 @@ def get_species_site(pk):
 
             formatted_species_site["properties"]["stages"] = stages
 
+        photos = (
+            db.session.query(MediaModel, SpeciesSiteModel)
+                .filter(SpeciesSiteModel.id_species_site == pk)
+                .join(
+                    MediaOnSpeciesSiteModel,
+                    MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
+                )
+                .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
+                .all()
+        )
+        formatted_species_site["properties"]["photos"] = [
+            {
+                "url": "/media/{}".format(p.MediaModel.filename),
+            }
+            for p in photos
+        ]
+
         return {"features": [formatted_species_site]}, 200
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -1098,7 +1137,7 @@ def post_species_site():
             description: Species site created
         """
     try:
-        request_data = dict(request.get_json())
+        request_data = request.form
 
         datas2db = {}
         for field in request_data:
@@ -1120,7 +1159,7 @@ def post_species_site():
             raise GeonatureApiError(e)
 
         try:
-            shape = asShape(request_data["geometry"])
+            shape = asShape(json.loads(request_data["geometry"]))
             new_species_site.geom = from_shape(Point(shape), srid=4326)
         except Exception as e:
             current_app.logger.debug(e)
@@ -1139,10 +1178,43 @@ def post_species_site():
         new_species_site.uuid_sinp = uuid.uuid4()
 
         db.session.add(new_species_site)
+
         db.session.commit()
+
         # Réponse en retour
         result = SpeciesSiteModel.query.get(new_species_site.id_species_site)
-        return {"message": "New species site created.", "features": [format_entity(result)]}, 200
+        response_dict = format_entity(result)
+
+        # Enregistrement de la photo
+        try:
+            files = request.files
+            if request_data.get("photos[0]", None) is not None:
+                max_length = len(request_data.keys())
+                files = []
+                for index in range(max_length):
+                    if request_data.get("photos[" + str(index) + "]", None) is None:
+                        break
+                    files.append(request_data.get("photos[" + str(index) + "]"))
+
+            file = save_upload_files(
+                files,
+                "species_site",
+                result.cd_nom,
+                result.id_species_site,
+                MediaOnSpeciesSiteModel,
+            )
+            current_app.logger.debug(
+                "[post_observation] ObsTax UPLOAD FILE {}".format(file)
+            )
+            response_dict["photos"] = file
+
+        except Exception as e:
+            current_app.logger.warning(
+                "[post_observation] ObsTax ERROR ON FILE SAVING", str(e)
+            )
+
+
+        return {"message": "New species site created.", "features": [response_dict]}, 200
     except Exception as e:
         current_app.logger.warning("Error: %s", str(e))
         return {"error_message": str(e)}, 400
@@ -1156,7 +1228,7 @@ def update_species_site():
         current_user_email = get_jwt_identity()
         current_user = UserModel.query.filter_by(email=current_user_email).one()
 
-        update_data = dict(request.get_json())
+        update_data = request.form
         species_site = SpeciesSiteModel.query.filter_by(id_species_site=update_data.get("id_species_site"))
         if current_user.email != UserModel.query.get(species_site.first().id_role).email and current_user.admin != 1:
             return ("unauthorized"), 403
@@ -1166,7 +1238,7 @@ def update_species_site():
             update_species_site[prop] = update_data[prop]
 
         try:
-            _coordinates = update_data["geometry"]["coordinates"]
+            _coordinates = json.loads(update_data["geometry"])["coordinates"]
             _point = Point(_coordinates[0], _coordinates[1])
             _shape = asShape(_point)
             update_species_site["geom"] = from_shape(Point(_shape), srid=4326)
@@ -1178,10 +1250,51 @@ def update_species_site():
             json_data = update_data.get("json_data")
             if json_data is not None:
                 update_species_site["json_data"] = json.loads(json_data)
-                print(update_species_site["json_data"])
         except Exception as e:
             current_app.logger.warning("[update_observation] json_data ", e)
             raise GeonatureApiError(e)
+
+        # Delete selected existing media
+        try:
+            id_media_to_delete = json.loads(update_data.get("delete_media", "[]"))
+            if len(id_media_to_delete):
+                db.session.query(MediaOnSpeciesSiteModel).filter(
+                    MediaOnSpeciesSiteModel.id_media.in_(tuple(id_media_to_delete)),
+                    MediaOnSpeciesSiteModel.id_data_source
+                    == update_data.get("id_species_site"),
+                ).delete(synchronize_session="fetch")
+                db.session.query(MediaModel).filter(
+                    MediaModel.id_media.in_(tuple(id_media_to_delete))
+                ).delete(synchronize_session="fetch")
+        except Exception as e:
+            current_app.logger.warning("[update_species_site] delete media ", e)
+            raise GeonatureApiError(e)
+
+        try:
+            files = request.files
+            if update_data.get("photos[0]", None) is not None:
+                max_length = len(update_data.keys())
+                files = []
+                for index in range(max_length):
+                    if update_data.get("photos[" + str(index) + "]", None) is None:
+                        break
+                    files.append(update_data.get("photos[" + str(index) + "]"))
+
+            file = save_upload_files(
+                files,
+                "species_site",
+                update_data.get("cd_nom"),
+                update_data.get("id_species_site", 0),
+                MediaOnSpeciesSiteModel,
+            )
+            current_app.logger.debug(
+                "[update_species_site] Species site UPLOAD FILE {}".format(file)
+            )
+        except Exception as e:
+            current_app.logger.warning(
+                "[update_species_site] Species site ERROR ON FILE SAVING", str(e)
+            )
+
 
         species_site.update(update_species_site, synchronize_session="fetch")
         db.session.commit()
@@ -1363,7 +1476,6 @@ def update_observation():
             current_app.logger.debug(
                 "[update_observation] ObsTax UPLOAD FILE {}".format(file)
             )
-
         except Exception as e:
             current_app.logger.warning(
                 "[update_observation] ObsTax ERROR ON FILE SAVING", str(e)

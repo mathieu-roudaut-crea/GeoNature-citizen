@@ -69,6 +69,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     @Input('coords') coords: L.Point;
     @Input('area_id') area_id: number;
     @ViewChild('photo', { static: true }) photo: ElementRef;
+
     area: any;
     formMap: L.Map;
     speciesSiteForm = new FormGroup({
@@ -84,6 +85,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     mapVars: any = {};
     AppConfig = AppConfig;
 
+    photos: any[] = [];
     jsonData: object = {};
     formOptions: any = {
         loadExternalAssets: false,
@@ -172,6 +174,56 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     }
     yourOnChangesFn(e) {
         this.jsonData = e;
+    }
+
+    addImage($event) {
+        const img = document.createElement('img');
+        img.onload = (event) => {
+            let newImage = null;
+            if (event.target) {
+                newImage = event.target;
+            } else if (!event['path'] || !event['path'].length) {
+                newImage = event['path'][0];
+            }
+            if (!newImage) {
+                console.error('No image found on this navigator');
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            let resizeTimeNumber = 1;
+            const maxHeightRatio =
+                newImage.height / AppConfig.imageUpload.maxHeight;
+            if (maxHeightRatio > 1) {
+                resizeTimeNumber = maxHeightRatio;
+            }
+            const maxWidthRatio =
+                newImage.width / AppConfig.imageUpload.maxWidth;
+            if (maxWidthRatio > 1 && maxWidthRatio > maxHeightRatio) {
+                resizeTimeNumber = maxWidthRatio;
+            }
+
+            canvas.width = newImage.width / resizeTimeNumber;
+            canvas.height = newImage.height / resizeTimeNumber;
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const resizedImage = canvas.toDataURL(
+                'image/jpeg',
+                AppConfig.imageUpload.quality
+            );
+
+            this.photos.push(resizedImage);
+        };
+        img.src = window.URL.createObjectURL($event.file);
+    }
+    deleteImage(event) {
+        for (let i = 0; i < this.photos.length; i++) {
+            if (this.photos[i] == event.file) {
+                this.photos.splice(i, 1);
+            }
+        }
     }
 
     ngAfterViewInit(): void {
@@ -332,15 +384,31 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     }
 
     onFormSubmit(): Promise<object> {
-        console.debug('formValues:', this.speciesSiteForm.value);
+        const formData: FormData = new FormData();
+        const formValues = this.speciesSiteForm.value;
+        console.log('formValues', formValues);
 
-        const formData = this.speciesSiteForm.value;
+        ['name', 'cd_nom', 'id_species_site'].forEach((key) => {
+            if (formValues[key]) {
+                formData.append(key, formValues[key]);
+            }
+        });
+
+        formData.append('geometry', JSON.stringify(formValues['geometry']));
+
         if (this.jsonData) {
-            formData.json_data = JSON.stringify(this.jsonData);
+            formData.append('json_data', JSON.stringify(this.jsonData));
         }
 
         if (this.speciesSiteForm.value.cd_nom.cd_nom) {
-            formData.cd_nom = this.speciesSiteForm.value.cd_nom.cd_nom;
+            formData.append('cd_nom', this.speciesSiteForm.value.cd_nom.cd_nom);
+        }
+
+        let index = 0;
+        console.log('send form with phots', this.photos);
+        for (const photoData of this.photos) {
+            formData.append('photos[' + index + ']', photoData);
+            index++;
         }
 
         return this.postSpeciesSite(formData)
@@ -354,23 +422,21 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     }
 
     postSpeciesSite(formData): Observable<any> {
-        const httpOptions = {
-            headers: new HttpHeaders({
-                Accept: 'application/json',
-            }),
-        };
         if (this.data.speciesSiteUpdateData) {
+            const id_media_to_delete = this.data.speciesSiteUpdateData.photos
+                .filter((p) => p.checked)
+                .map((p) => p.id_media);
+            formData.append('delete_media', JSON.stringify(id_media_to_delete));
+
             return this.http.patch<any>(
                 `${this.URL}/areas/species_sites/`,
-                formData,
-                httpOptions
+                formData
             );
         } else {
-            formData.id_area = this.area_id;
+            formData.append('id_area', this.area_id);
             return this.http.post<any>(
                 `${this.URL}/areas/species_sites/`,
-                formData,
-                httpOptions
+                formData
             );
         }
     }
