@@ -1694,6 +1694,7 @@ def export_areas_xls(user_id):
             ]
 
             if current_user.admin:
+                basic_fields.append({"col_name": "Zones créées", "getter": lambda s: s.created_areas})
                 basic_fields.append({"col_name": "Zones associées", "getter": lambda s: s.areas_access})
                 basic_fields.append({"col_name": "Statut", "getter": lambda s: 'Admin' if s.admin else ("Relai" if s.is_relay else "Utilisateur")})
                 basic_fields.append({"col_name": "Relai lié", "getter": lambda s: s.linked_relay.organism if s.linked_relay else ""})
@@ -1709,13 +1710,12 @@ def export_areas_xls(user_id):
             row, col = 1, 0
 
             for observer in observers:
-                observer.areas_access = "Créées: "
+                observer.created_areas = ""
                 created_areas = AreaModel.query.filter(AreaModel.id_role == observer.id_user).all()
                 for area in created_areas:
-                    observer.areas_access += str(area.id_area) + " - "
+                    observer.created_areas += str(area.id_area) + " - "
 
-                observer.areas_access += " / Associées: "
-
+                observer.areas_access = ""
                 areas_access = AreasAccessModel.query.filter(AreasAccessModel.id_user == observer.id_user).all()
                 for area_access in areas_access:
                     observer.areas_access += str(area_access.id_area) + " - "
