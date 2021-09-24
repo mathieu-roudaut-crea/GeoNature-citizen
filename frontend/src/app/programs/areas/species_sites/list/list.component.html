@@ -53,8 +53,8 @@
             >
                 <img
                     src="{{
-                        speciesSite.properties.photo
-                            ? apiEndpoint + speciesSite.properties.photo.url
+                        speciesSite.properties.photos && speciesSite.properties.photos.length
+                            ? apiEndpoint + speciesSite.properties.photos[0].url
                             : 'assets/no_photo_light.png'
                     }}"
                 />
