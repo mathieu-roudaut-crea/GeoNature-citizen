@@ -4,15 +4,18 @@ import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
 import { AreaModalFlowService } from '../../modalflow/modalflow.service';
 import { HttpClient } from '@angular/common/http';
-import {
-    BaseDetailComponent,
-    markerIcon,
-} from '../../../base/detail/detail.component';
+import { BaseDetailComponent } from '../../../base/detail/detail.component';
 import { Location } from '@angular/common';
 import { AreaService } from '../../areas.service';
 import { UserService } from '../../../../auth/user-dashboard/user.service.service';
+import { MAP_CONFIG } from '../../../../../conf/map.config';
 
 declare let $: any;
+const markerIcon = L.icon({
+    iconUrl: MAP_CONFIG['SPECIES_SITE_POINTER'],
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+});
 
 @Component({
     selector: 'app-area-detail',
@@ -68,7 +71,15 @@ export class AreaDetailComponent
             if (this.leafletArea) {
                 this.map.removeLayer(this.leafletArea);
             }
-            this.leafletArea = L.geoJSON(this.area).addTo(this.map);
+            this.leafletArea = L.geoJSON(this.area);
+
+            const speciesSites = this.area.properties.species_sites.features;
+            speciesSites.forEach((speciesSite) => {
+                const coords = speciesSite.geometry.coordinates.reverse();
+                L.marker(coords, { icon: markerIcon }).addTo(this.leafletArea);
+            });
+
+            this.leafletArea.addTo(this.map);
 
             const maxBounds = this.leafletArea.getBounds();
             this.map.fitBounds(maxBounds);
@@ -76,10 +87,6 @@ export class AreaDetailComponent
 
             // prepare data
             if (this.area.properties) {
-                console.log(
-                    'this.area.properties',
-                    this.area.properties.species_sites
-                );
                 const areaCenter = L.geoJSON(this.area).getBounds().getCenter();
                 this.area.properties.coords = new L.Point(
                     areaCenter.lng,
