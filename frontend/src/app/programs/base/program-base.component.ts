@@ -54,16 +54,6 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
                         return;
                     }
 
-                    // Wait for refresh token
-                    setTimeout(
-                        function () {
-                            console.log('waited for refresh from program!');
-                            // this.modalService.close();
-                            // this.verifyProgramPrivacyAndUser();
-                        }.bind(this),
-                        2000
-                    );
-
                     const loginModalRef = this.modalService.open(
                         LoginComponent,
                         {
