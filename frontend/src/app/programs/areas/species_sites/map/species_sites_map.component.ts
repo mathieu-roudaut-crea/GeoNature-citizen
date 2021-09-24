@@ -79,8 +79,4 @@ export class SpeciesSitesMapComponent extends BaseMapComponent {
 export class SpeciesSiteMarkerPopupComponent {
     @Input() data;
     public appConfig = AppConfig;
-
-    constructor() {
-        console.log('daaatata', this.data);
-    }
 }

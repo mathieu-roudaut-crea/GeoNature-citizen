@@ -68,7 +68,7 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
 
         features.append(formatted)
     features_data = FeatureCollection(features)
-    features_data["count"] = len(data)
+    features_data["count"] = len(features)
     if maximum_count != 0:
         features_data["maximum_count"] = maximum_count
     return features_data
@@ -402,7 +402,7 @@ def get_admin_species_sites():
                     .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
-        species_sites = species_sites_query.order_by(func.lower(SpeciesSiteModel.name)).all()
+        species_sites = species_sites_query.order_by(SpeciesSiteModel.id_species_site).limit(500).all()
 
         formatted_list = prepare_list(species_sites, model_name="species_sites")
 
@@ -527,7 +527,7 @@ def get_admin_observations():
             features.append(formatted)
 
         data = FeatureCollection(features)
-        data["count"] = len(data)
+        data["count"] = len(features)
         data["maximum_count"] = observations_count
 
         return data, 200
@@ -765,7 +765,7 @@ def get_observations_by_program(id):
             features.append(formatted)
 
         data = FeatureCollection(features)
-        data["count"] = len(data)
+        data["count"] = len(features)
         data["maximum_count"] = observations_count
 
         return data, 200
