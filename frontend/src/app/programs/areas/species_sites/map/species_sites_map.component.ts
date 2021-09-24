@@ -44,8 +44,8 @@ export class SpeciesSitesMapComponent extends BaseMapComponent {
         <ng-container>
             <img
                 [src]="
-                    data.photo
-                        ? appConfig.API_ENDPOINT + data.photo.url
+                    data.photos && data.photos.length
+                        ? appConfig.API_ENDPOINT + data.photos[0].url
                         : 'assets/no_photo_light.png'
                 "
             />
@@ -79,4 +79,8 @@ export class SpeciesSitesMapComponent extends BaseMapComponent {
 export class SpeciesSiteMarkerPopupComponent {
     @Input() data;
     public appConfig = AppConfig;
+
+    constructor() {
+        console.log('daaatata', this.data);
+    }
 }

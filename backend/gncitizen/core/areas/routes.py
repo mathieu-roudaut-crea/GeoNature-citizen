@@ -404,7 +404,29 @@ def get_admin_species_sites():
 
         species_sites = species_sites_query.order_by(func.lower(SpeciesSiteModel.name)).all()
 
-        return prepare_list(species_sites)
+        formatted_list = prepare_list(species_sites, model_name="species_sites")
+
+        for species_site in formatted_list.features:
+            species_site["properties"]["photos"] = []
+            photos = (
+                db.session.query(MediaModel, SpeciesSiteModel)
+                    .filter(SpeciesSiteModel.id_species_site == species_site['properties']['id_species_site'])
+                    .join(
+                        MediaOnSpeciesSiteModel,
+                        MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
+                    )
+                    .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
+                    .all()
+            )
+            species_site["properties"]["photos"] = [
+                {
+                    "url": "/media/{}".format(p.MediaModel.filename),
+                    "id_media": p.MediaModel.id_media
+                }
+                for p in photos
+            ]
+
+        return formatted_list
     except Exception as e:
         return {"error_message": str(e)}, 400
 

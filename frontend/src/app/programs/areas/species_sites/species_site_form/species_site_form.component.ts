@@ -424,8 +424,10 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     postSpeciesSite(formData): Observable<any> {
         if (this.data.speciesSiteUpdateData) {
             const id_media_to_delete = this.data.speciesSiteUpdateData.photos
-                .filter((p) => p.checked)
-                .map((p) => p.id_media);
+                ? this.data.speciesSiteUpdateData.photos
+                      .filter((p) => p.checked)
+                      .map((p) => p.id_media)
+                : [];
             formData.append('delete_media', JSON.stringify(id_media_to_delete));
 
             return this.http.patch<any>(
