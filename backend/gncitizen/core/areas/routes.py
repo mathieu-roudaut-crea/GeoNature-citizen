@@ -402,7 +402,7 @@ def get_admin_species_sites():
                     .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
             )
 
-        species_sites = species_sites_query.order_by(SpeciesSiteModel.id_species_site).limit(500).all()
+        species_sites = species_sites_query.order_by(SpeciesSiteModel.id_species_site).limit(1000).all()
 
         formatted_list = prepare_list(species_sites, model_name="species_sites")
 
