@@ -1211,7 +1211,7 @@ def post_species_site():
         try:
             files = request.files
             if request_data.get("photos[0]", None) is not None:
-                max_length = len(request_data.keys())
+                max_length = len(list(request_data.keys()))
                 files = []
                 for index in range(max_length):
                     if request_data.get("photos[" + str(index) + "]", None) is None:
@@ -1295,7 +1295,7 @@ def update_species_site():
         try:
             files = request.files
             if update_data.get("photos[0]", None) is not None:
-                max_length = len(update_data.keys())
+                max_length = len(list(update_data.keys()))
                 files = []
                 for index in range(max_length):
                     if update_data.get("photos[" + str(index) + "]", None) is None:
@@ -1398,7 +1398,7 @@ def post_observation(species_site_id):
         try:
             files = request.files
             if request_data.get("photos[0]", None) is not None:
-                max_length = len(request_data.keys())
+                max_length = len(list(request_data.keys()))
                 files = []
                 for index in range(max_length):
                     if request_data.get("photos[" + str(index) + "]", None) is None:
@@ -1481,7 +1481,7 @@ def update_observation():
         try:
             files = request.files
             if update_data.get("photos[0]", None) is not None:
-                max_length = len(update_data.keys())
+                max_length = len(list(update_data.keys()))
                 files = []
                 for index in range(max_length):
                     if update_data.get("photos[" + str(index) + "]", None) is None:
