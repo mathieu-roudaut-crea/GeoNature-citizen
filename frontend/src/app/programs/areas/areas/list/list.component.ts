@@ -96,6 +96,13 @@ export class AreasListComponent implements OnChanges, OnInit {
                         array
                             .map((city) => city.area_name)
                             .indexOf(municipality.area_name) === index
+                )
+                .sort((a, b) =>
+                    a.area_name > b.area_name
+                        ? 1
+                        : b.area_name > a.area_name
+                        ? -1
+                        : 0
                 );
         }
     }
