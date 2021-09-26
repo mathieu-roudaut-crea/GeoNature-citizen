@@ -165,7 +165,7 @@ class SpeciesSiteObservationModel(ObserverMixinModel, TimestampMixinModel, db.Mo
     )
     species_site = relationship("SpeciesSiteModel")
     id_stages_step = db.Column(
-        db.Integer, db.ForeignKey(StagesStepModel.id_stages_step, ondelete="CASCADE")
+        db.Integer, db.ForeignKey(StagesStepModel.id_stages_step)
     )
     stages_step = relationship("StagesStepModel")
 
