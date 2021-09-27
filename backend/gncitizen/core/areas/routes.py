@@ -725,7 +725,17 @@ def get_observations_by_program(id):
         if program.is_private:
             user_id = get_id_role_if_exists()
             if user_id:
-                observations_query = observations_query.filter(SpeciesSiteObservationModel.id_role == user_id)
+                observations_query = (
+                    observations_query
+                        .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                        .filter(or_(
+                            SpeciesSiteObservationModel.id_role == user_id,
+                            SpeciesSiteModel.id_role == user_id,
+                            AreaModel.id_role == user_id,
+                            AreasAccessModel.id_user == user_id
+                        ))
+                )
+
             else:
                 return prepare_list([])
 
