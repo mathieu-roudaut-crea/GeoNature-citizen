@@ -645,7 +645,10 @@ def get_species_sites_by_program(id):
         if program.is_private:
             user_id = get_id_role_if_exists()
             if user_id:
-                species_sites_query = species_sites_query.filter(SpeciesSiteModel.id_role == user_id)
+                species_sites_query = (species_sites_query
+                               .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                               .filter(or_(SpeciesSiteModel.id_role == user_id, AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+                )
             else:
                 return prepare_list([])
 
