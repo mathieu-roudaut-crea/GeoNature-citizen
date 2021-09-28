@@ -568,7 +568,7 @@ def get_admin_observers():
                     .filter(relay.id_user == user_id)
             )
 
-        observers = observers_query.order_by(UserModel.timestamp_create.desc()).all()
+        observers = observers_query.order_by(UserModel.username.asc()).all()
 
         return prepare_list(observers, with_geom=False)
     except Exception as e:
