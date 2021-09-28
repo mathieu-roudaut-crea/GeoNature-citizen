@@ -1638,7 +1638,7 @@ def export_areas_xls(user_id):
         fields = (
             {"col_name": "ID", "getter": lambda area: area.id_area},
             {"col_name": "Programme", "getter": lambda area: area.program.title},
-            {"col_name": "Créateur", "getter": lambda area: area.obs_txt + " (" + str(area.id_role) + ")"},
+            {"col_name": "Créateur", "getter": lambda area: str(area.obs_txt) + " (" + str(area.id_role) + ")"},
             {"col_name": "Nom", "getter": lambda area: area.name},
             {"col_name": "Coord. x", "getter": lambda area: str(area.coordinates[0])},
             {"col_name": "Coord. y", "getter": lambda area: str(area.coordinates[1])},
@@ -1699,11 +1699,11 @@ def export_areas_xls(user_id):
 
         basic_fields = (
             {"col_name": "ID", "getter": lambda s: s.id_species_site},
-            {"col_name": "Observateur", "getter": lambda s: s.obs_txt + ' (' + str(s.id_role) + ')'},
+            {"col_name": "Observateur", "getter": lambda s: str(s.obs_txt) + ' (' + str(s.id_role) + ')'},
             {"col_name": "Nom", "getter": lambda s: s.name},
             {"col_name": "Zone", "getter": lambda s: s.area.name if s.area else ''},
             {"col_name": "Espèce",
-             "getter": lambda s: (s.species.nom_vern + " (" + s.species.nom_complet + ")") if s.species else ''},
+             "getter": lambda s: (str(s.species.nom_vern) + " (" + str(s.species.nom_complet) + ")") if s.species else ''},
         )
 
         json_keys = list(set([key for species_site in species_sites for key in species_site.json_data.keys()]))
@@ -1769,13 +1769,13 @@ def export_areas_xls(user_id):
             {"col_name": "ID", "getter": lambda s: s.id_species_site_observation},
             {"col_name": "Date obs", "getter": lambda s: s.date, "style": date_style},
             {"col_name": "Date saisie", "getter": lambda s: s.timestamp_create, "style": date_style},
-            {"col_name": "Observateur", "getter": lambda s: s.obs_txt + ' (' + str(s.id_role) + ')'},
+            {"col_name": "Observateur", "getter": lambda s: str(s.obs_txt) + ' (' + str(s.id_role) + ')'},
             {"col_name": "Zone",
              "getter": lambda s: (s.species_site.area.name if s.species_site.area else '') if s.species_site else ''},
             {"col_name": "Individu", "getter": lambda s: s.species_site.name if s.species_site else ''},
             {"col_name": "Espèce",
              "getter": lambda s: (
-                 (s.species_site.species.nom_vern + " (" + s.species_site.species.nom_complet + ")")
+                 (str(s.species_site.species.nom_vern) + " (" + str(s.species_site.species.nom_complet) + ")")
                  if s.species_site.species
                  else ''
              ) if s.species_site else ''},
@@ -1880,9 +1880,7 @@ def export_areas_xls(user_id):
         xls_file = io.BytesIO()
         wb.save(xls_file)
         output = make_response(xls_file.getvalue())
-        output.headers["Content-Disposition"] = (
-                "attachment; filename=" + "export_areas.xls"
-        )
+        output.headers["Content-Disposition"] = "attachment; filename=export_areas.xls"
         output.headers["Content-type"] = "application/xls"
         return output
     except Exception as e:
