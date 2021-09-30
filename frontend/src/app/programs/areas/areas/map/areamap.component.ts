@@ -14,6 +14,7 @@ import {
 import { BaseMapComponent, conf } from './map.component';
 import { MapService } from '../../../base/map/map.service';
 import { AreaService } from '../../areas.service';
+import {MAP_CONFIG} from "../../../../../conf/map.config";
 
 @Component({
     selector: 'app-areas-map',
@@ -46,10 +47,13 @@ export class AreasMapComponent extends BaseMapComponent implements OnInit {
             this.observationMap.addLayer(
                 L.geoJSON(speciesSite, {
                     pointToLayer: (_feature, latlng): L.Marker => {
-                        const marker: L.Marker<any> = L.marker(latlng, {
-                            icon: conf.OBS_MARKER_ICON(),
+                        return L.marker(latlng, {
+                            icon: L.icon({
+                                iconUrl: MAP_CONFIG.SPECIES_SITE_POINTER,
+                                iconSize: [48, 48],
+                                iconAnchor: [24, 48],
+                            }),
                         });
-                        return marker;
                     },
                 })
             );

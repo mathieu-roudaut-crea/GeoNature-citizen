@@ -15,15 +15,14 @@ import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { Position, Point } from 'geojson';
 import * as L from 'leaflet';
 import { LeafletMouseEvent } from 'leaflet';
-import 'leaflet-fullscreen/dist/Leaflet.fullscreen';
 import 'leaflet-gesture-handling';
 
 import { AppConfig } from '../../../../../conf/app.config';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
 import { MapService } from '../../../base/map/map.service';
 import { GNCFrameworkComponent } from '../../../base/jsonform/framework/framework.component';
-
-// declare let $: any;
+import { conf } from '../../species_sites/map/map.component';
+import { ControlPosition } from 'leaflet/index';
 
 const AREA_STYLE = {
     fillColor: 'transparent',
@@ -160,13 +159,13 @@ export class AreaFormComponent implements AfterViewInit {
                     attribution: 'OpenStreetMap',
                 }).addTo(formMap);
 
-                L.control['fullscreen']({
-                    position: 'topright',
-                    title: {
-                        false: 'View Fullscreen',
-                        true: 'Exit Fullscreen',
-                    },
-                }).addTo(formMap);
+                L.control
+                    .layers(conf.BASE_LAYERS, null, {
+                        collapsed: conf.BASE_LAYER_CONTROL_INIT_COLLAPSED,
+                        position:
+                            conf.BASE_LAYER_CONTROL_POSITION as ControlPosition,
+                    })
+                    .addTo(this.formMap);
 
                 const ZoomViewer = L.Control.extend({
                     onAdd: () => {

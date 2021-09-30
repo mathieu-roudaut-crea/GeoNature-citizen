@@ -14,8 +14,7 @@ import { Observable } from 'rxjs';
 import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { Position, Point } from 'geojson';
 import * as L from 'leaflet';
-import { LeafletMouseEvent } from 'leaflet';
-import 'leaflet-fullscreen/dist/Leaflet.fullscreen';
+import { ControlPosition, LeafletMouseEvent } from 'leaflet';
 import 'leaflet-gesture-handling';
 
 import { AppConfig } from '../../../../../conf/app.config';
@@ -31,6 +30,7 @@ import {
     tap,
 } from 'rxjs/operators';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
+import { conf } from '../map/map.component';
 
 // declare let $: any;
 
@@ -50,8 +50,9 @@ const taxonAutocompleteFields = AppConfig.taxonAutocompleteFields;
 const taxonAutocompleteMaxResults = 10;
 
 export const speciesSiteFormMarkerIcon = L.icon({
-    iconUrl: 'assets/pointer-blue2.png', // TODO: Asset path should be normalized, conf ?
-    iconAnchor: [16, 42],
+    iconUrl: MAP_CONFIG.SPECIES_SITE_POINTER,
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
 });
 
 export const myMarkerTitle =
@@ -132,8 +133,10 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                 coordinates: <Position>[this.coords.x, this.coords.y],
             };
             this.speciesSiteForm.patchValue({ geometry: geo_coords });
+
             if (this.mapVars.minimapMarker)
                 this.formMap.removeLayer(this.mapVars.minimapMarker);
+
             this.mapVars.minimapMarker = L.marker(
                 [this.coords.y, this.coords.x],
                 {
@@ -265,14 +268,6 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                     attribution: 'OpenStreetMap',
                 }).addTo(formMap);
 
-                L.control['fullscreen']({
-                    position: 'topright',
-                    title: {
-                        false: 'View Fullscreen',
-                        true: 'Exit Fullscreen',
-                    },
-                }).addTo(formMap);
-
                 const ZoomViewer = L.Control.extend({
                     onAdd: () => {
                         const container = L.DomUtil.create('div');
@@ -293,6 +288,14 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                 const zv = new ZoomViewer();
                 zv.addTo(formMap);
                 zv.setPosition('bottomleft');
+
+                L.control
+                    .layers(conf.BASE_LAYERS, null, {
+                        collapsed: conf.BASE_LAYER_CONTROL_INIT_COLLAPSED,
+                        position:
+                            conf.BASE_LAYER_CONTROL_POSITION as ControlPosition,
+                    })
+                    .addTo(this.formMap);
 
                 const leafletArea = L.geoJSON(this.area, {
                     style: function (_feature) {
@@ -405,7 +408,6 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
         }
 
         let index = 0;
-        console.log('send form with phots', this.photos);
         for (const photoData of this.photos) {
             formData.append('photos[' + index + ']', photoData);
             index++;

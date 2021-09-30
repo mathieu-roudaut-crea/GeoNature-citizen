@@ -33,7 +33,6 @@ import {
     TaxonomyList,
 } from '../observation.model';
 import 'leaflet-gesture-handling';
-import 'leaflet-fullscreen/dist/Leaflet.fullscreen';
 import { ToastrService } from 'ngx-toastr';
 import { ObservationsService } from '../observations.service';
 import { MapService } from '../../base/map/map.service';
@@ -195,14 +194,6 @@ export class ObsFormComponent implements AfterViewInit {
 
                 L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: 'OpenStreetMap',
-                }).addTo(formMap);
-
-                L.control['fullscreen']({
-                    position: 'topright',
-                    title: {
-                        false: 'View Fullscreen',
-                        true: 'Exit Fullscreen',
-                    },
                 }).addTo(formMap);
 
                 L.control

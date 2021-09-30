@@ -5,14 +5,18 @@ import * as L from 'leaflet';
 import { AreaModalFlowService } from '../../modalflow/modalflow.service';
 import { AppConfig } from '../../../../../conf/app.config';
 import { HttpClient } from '@angular/common/http';
-import {
-    BaseDetailComponent,
-    markerIcon,
-} from '../../../base/detail/detail.component';
+import { BaseDetailComponent } from '../../../base/detail/detail.component';
 import { Location } from '@angular/common';
 import { AreaService } from '../../areas.service';
+import { MAP_CONFIG } from '../../../../../conf/map.config';
 
 declare let $: any;
+
+export const speciesSiteFormMarkerIcon = L.icon({
+    iconUrl: MAP_CONFIG.SPECIES_SITE_POINTER,
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+});
 
 @Component({
     selector: 'app-species-site-detail',
@@ -74,7 +78,9 @@ export class SpeciesSiteDetailComponent
                 const latLng = L.latLng(coord[1], coord[0]);
                 map.setView(latLng, 13);
 
-                L.marker(latLng, { icon: markerIcon }).addTo(map);
+                L.marker(latLng, { icon: speciesSiteFormMarkerIcon }).addTo(
+                    map
+                );
 
                 // prepare data
                 if (this.speciesSite.properties) {

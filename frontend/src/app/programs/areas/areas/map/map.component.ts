@@ -6,7 +6,8 @@ import {
     EventEmitter,
     Injector,
     Input,
-    OnChanges, OnInit,
+    OnChanges,
+    OnInit,
     Output,
     SimpleChanges,
     ViewChild,
@@ -24,7 +25,6 @@ import 'leaflet.markercluster';
 import 'leaflet.locatecontrol';
 import 'leaflet-gesture-handling';
 import { MapService } from '../../../base/map/map.service';
-import {AreaService} from "../../areas.service";
 
 export const conf = {
     MAP_ID: 'obsMap',
