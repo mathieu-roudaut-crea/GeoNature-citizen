@@ -21,6 +21,7 @@ export class AuthService {
     });
 
     redirectUrl: string;
+    refreshRequest: Observable<TokenRefresh>;
     authenticated$ = new BehaviorSubject<boolean>(this.hasRefreshToken());
     authorized$ = new BehaviorSubject<boolean>(
         this.hasAccessToken() && this.tokenExpiration(this.getAccessToken()) > 1

@@ -150,8 +150,16 @@ export class UserDashboardComponent implements OnInit {
                     }
                 }),
                 catchError((err) => {
-                    this.openLoginModal();
-                    return throwError(err);
+                    if (this.auth.refreshRequest) {
+                        this.auth.refreshRequest.subscribe((refreshToken) => {
+                            if (refreshToken && refreshToken.access_token) {
+                                this.verifyUser();
+                            }
+                        });
+                    } else {
+                        this.openLoginModal();
+                        return throwError(err);
+                    }
                 })
             )
             .subscribe((user) => {
@@ -176,6 +184,7 @@ export class UserDashboardComponent implements OnInit {
                     if (result.componentInstance) {
                         result.result.then(
                             function (result) {
+                                console.log('resulttststs login modal', result);
                                 if (result === 'registered') {
                                     this.verifyUser();
                                 }
@@ -193,6 +202,10 @@ export class UserDashboardComponent implements OnInit {
         this.loading = true;
 
         this.getAdminData();
+
+        this.userService
+            .getRelays()
+            .subscribe((relayList) => (this.relaysList = relayList));
 
         const data = [];
         this.rows = [];
@@ -468,10 +481,6 @@ export class UserDashboardComponent implements OnInit {
 
     onEditInfos(content): void {
         this.loading = true;
-
-        this.userService
-            .getRelays()
-            .subscribe((relayList) => (this.relaysList = relayList));
 
         this.userService.getPersonalInfo().subscribe((data) => {
             this.loading = false;

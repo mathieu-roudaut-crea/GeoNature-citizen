@@ -54,19 +54,27 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
                         return;
                     }
 
-                    const loginModalRef = this.modalService.open(
-                        LoginComponent,
-                        {
-                            size: 'lg',
-                            centered: true,
-                            backdrop: 'static',
-                            keyboard: false,
-                        }
-                    );
-                    loginModalRef.componentInstance.canBeClosed = false;
-                    loginModalRef.result
-                        .then(this.loadData.bind(this))
-                        .catch(this.loadData.bind(this));
+                    if (this.auth.refreshRequest) {
+                        this.auth.refreshRequest.subscribe((refreshToken) => {
+                            if (refreshToken && refreshToken.access_token) {
+                                this.verifyProgramPrivacyAndUser();
+                            }
+                        });
+                    } else {
+                        const loginModalRef = this.modalService.open(
+                            LoginComponent,
+                            {
+                                size: 'lg',
+                                centered: true,
+                                backdrop: 'static',
+                                keyboard: false,
+                            }
+                        );
+                        loginModalRef.componentInstance.canBeClosed = false;
+                        loginModalRef.result
+                            .then(this.loadData.bind(this))
+                            .catch(this.loadData.bind(this));
+                    }
                 }.bind(this)
             );
     }
