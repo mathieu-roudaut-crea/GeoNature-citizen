@@ -223,6 +223,26 @@
                     </div>
                 </div>
             </div>
+            <div class="form-row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="linked_relay_id" i18n="Linked relay@@linkedRelayLabel">
+                            Grâce à quel organisme a-t-il connu Phénoclim?
+                        </label>
+                        <div class="input-group">
+                            <select
+                                id="linked_relay_id"
+                                name="linked_relay_id"
+                                class="form-control rounded-0"
+                                formControlName="linked_relay_id"
+                            >
+                                <option value="0">Aucun</option>
+                                <option *ngFor="let relay of relaysList" [ngValue]="relay.id">{{relay.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <button
                 type="submit"
                 class="btn btn-default btn-big btn-outline-primary rounded-0"
