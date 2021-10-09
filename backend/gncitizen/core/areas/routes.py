@@ -58,6 +58,13 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
         if model_name == 'species_sites':
+            try:
+                json_data = json.loads(formatted['properties']['json_data'])
+                if json_data['state'] == "true":
+                    continue
+            except:
+                print('Invalid json in species site')
+
             linked_observations_number = (
                 SpeciesSiteObservationModel.query
                     .filter_by(id_species_site=element.id_species_site)
@@ -652,9 +659,10 @@ def get_species_sites_by_program(id):
             else:
                 return prepare_list([])
 
-        species_sites_query = species_sites_query.order_by(func.lower(SpeciesSiteModel.name))
-
-        species_sites = species_sites_query.all()
+        species_sites = (species_sites_query
+            .order_by(func.lower(SpeciesSiteModel.name))
+            .all()
+         )
 
         formatted_list = prepare_list(species_sites, model_name="species_sites")
 
