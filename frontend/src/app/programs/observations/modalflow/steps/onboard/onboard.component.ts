@@ -38,23 +38,24 @@ export class OnboardComponent implements IFlowComponent, OnInit {
     ) {}
 
     ngOnInit() {
+        this.verifyAuthorization();
+    }
+
+    verifyAuthorization() {
         this.authService.authorized$.subscribe((value) => {
-            if (value) {
-                this.timeout = setTimeout(() => this.data.next(), 0);
+            if (value || AppConfig.signup === 'never') {
+                return this.data.next();
             }
-            if (AppConfig.signup === 'never') {
-                this.data.next();
+
+            if (this.authService.refreshRequest) {
+                this.authService.refreshRequest.subscribe((refreshToken) => {
+                    if (refreshToken && refreshToken.access_token) {
+                        this.verifyAuthorization();
+                    }
+                });
             }
         });
     }
-
-    // ngOnInit() {
-    //   // Skip login/register step if already logged in
-    //   let username = localStorage.getItem("username");
-    //   if (username) {
-    //     this.data.next()
-    //   }
-    // }
 
     // Actions
     register() {
