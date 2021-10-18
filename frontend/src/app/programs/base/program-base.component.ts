@@ -54,12 +54,14 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
                         return;
                     }
 
-                    if (this.auth.refreshRequest) {
-                        this.auth.refreshRequest.subscribe((refreshToken) => {
-                            if (refreshToken && refreshToken.access_token) {
-                                this.verifyProgramPrivacyAndUser();
+                    if (this.authService.refreshRequest) {
+                        this.authService.refreshRequest.subscribe(
+                            (refreshToken) => {
+                                if (refreshToken && refreshToken.access_token) {
+                                    this.verifyProgramPrivacyAndUser();
+                                }
                             }
-                        });
+                        );
                     } else {
                         const loginModalRef = this.modalService.open(
                             LoginComponent,
