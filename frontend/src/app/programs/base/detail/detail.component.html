@@ -107,7 +107,7 @@
                         </p>
                     </ng-template>
                     <a
-                        *ngIf="speciesSite && speciesSite.properties.json_data && speciesSite.properties.json_data.state !== true"
+                        *ngIf="speciesSite && speciesSite.properties.json_data && speciesSite.properties.json_data.is_dead !== true"
                         href="#"
                         (click)="$event.preventDefault(); addSpeciesSiteObservation()"
                         class="btn btn-primary"
