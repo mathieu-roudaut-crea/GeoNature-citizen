@@ -140,6 +140,7 @@ class UserModel(TimestampMixinModel, db.Model):
         relays_list = (UserModel.query
                         .filter(UserModel.is_relay==True)
                         .filter(UserModel.active==True)
+                        .order_by(UserModel.organism.desc())
                         .all())
         return list(map(lambda x: to_json(x), relays_list))
 
