@@ -1624,7 +1624,10 @@ def export_areas_xls(user_id):
         areas_query = AreaModel.query
 
         if filter_by_user:
-            areas_query = areas_query.filter_by(id_role=user_id)
+            areas_query = (areas_query
+                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                .filter(or_(AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+            )
         elif current_user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
@@ -1632,7 +1635,10 @@ def export_areas_xls(user_id):
                 areas_query
                     .join(creator, AreaModel.id_role == creator.id_user)
                     .outerjoin(relay, relay.id_user == creator.linked_relay_id)
-                    .filter(or_(relay.id_user == current_user.id_user, AreaModel.id_role == current_user.id_user))
+                    .filter(or_(
+                        relay.id_user == current_user.id_user,
+                        AreaModel.id_role == current_user.id_user
+                    ))
             )
 
         areas = (
@@ -1686,7 +1692,11 @@ def export_areas_xls(user_id):
         species_sites_query = SpeciesSiteModel.query
 
         if filter_by_user:
-            species_sites_query = species_sites_query.filter_by(id_role=user_id)
+            species_sites_query = (species_sites_query
+                .join(AreaModel, SpeciesSiteModel.id_area == AreaModel.id_area)
+                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                .filter(or_(SpeciesSiteModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+            )
         elif current_user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
@@ -1751,7 +1761,12 @@ def export_areas_xls(user_id):
         observations_query = SpeciesSiteObservationModel.query
 
         if filter_by_user:
-            observations_query = observations_query.filter_by(id_role=user_id)
+            observations_query = (observations_query
+                .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                .join(AreaModel, SpeciesSiteModel.id_area == AreaModel.id_area)
+                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                .filter(or_(SpeciesSiteObservationModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+            )
         elif current_user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
