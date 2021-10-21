@@ -111,9 +111,9 @@ export class UserService {
         return this.http.get<Object>(`${AppConfig.API_ENDPOINT}/areas/admin`);
     }
 
-    getAdminSpeciesSites() {
+    getAdminSpeciesSites(areaId = null) {
         return this.http.get<Object>(
-            `${AppConfig.API_ENDPOINT}/areas/species_sites/admin`
+            `${AppConfig.API_ENDPOINT}/areas/species_sites/admin?area=${areaId}`
         );
     }
 

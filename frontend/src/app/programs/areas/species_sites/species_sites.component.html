@@ -11,8 +11,10 @@
                     [program_id]="program_id"
                     [displayForm]="flowService.display"
                     [userDashboard]="userDashboard"
+                    [inputAreas]="inputAreas"
                     [admin]="admin"
                     (speciesSiteSelect)="speciesSitesMapRef.showPopup($event)"
+                    (areaFilterChange)="areaFilterChange.emit($event)"
                 >
                     <app-areamodalflow
                         #modalFlowRef

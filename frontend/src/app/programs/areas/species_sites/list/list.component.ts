@@ -27,10 +27,13 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
     @Input('speciesSites') speciesSitesCollection: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
     @Input('admin') admin = false;
+    @Input('inputAreas') inputAreas;
     @Input('program_id') program_id: number;
     @Input('displayForm') display_form: boolean;
     @Output('speciesSiteSelect') speciesSiteSelect: EventEmitter<Feature> =
         new EventEmitter();
+    @Output() areaFilterChange = new EventEmitter();
+
     @ViewChild('deleteSpeciesSiteModal', { static: true })
     deleteSpeciesSiteModal: ElementRef;
 
@@ -62,6 +65,12 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
     }
 
     ngOnChanges() {
+        if (this.inputAreas && this.inputAreas.count) {
+            this.areas = this.inputAreas.features.map(
+                (areaFeature) => areaFeature.properties
+            );
+        }
+
         if (this.speciesSitesCollection) {
             this.speciesSites = this.speciesSitesCollection['features'].filter(
                 (speciesSite) => {
@@ -90,15 +99,17 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
                             .indexOf(species.cd_nom) === index
                 );
 
-            this.areas = this.speciesSitesCollection.features
-                .map((features) => features.properties.area)
-                .filter((area) => area && area.id_area)
-                .filter(
-                    (area, index, array) =>
-                        array
-                            .map((area) => area.id_area)
-                            .indexOf(area.id_area) === index
-                );
+            if (!this.inputAreas || !this.inputAreas.count) {
+                this.areas = this.speciesSitesCollection.features
+                    .map((features) => features.properties.area)
+                    .filter((area) => area && area.id_area)
+                    .filter(
+                        (area, index, array) =>
+                            array
+                                .map((area) => area.id_area)
+                                .indexOf(area.id_area) === index
+                    );
+            }
         }
     }
 
@@ -131,7 +142,20 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
         this.speciesSiteSelect.emit(e);
     }
 
+    onAreaChange(): void {
+        if (!this.inputAreas || !this.inputAreas.count) {
+            return this.onFilterChange();
+        } else if (this.selectedArea) {
+            this.areaFilterChange.emit(this.selectedArea.id_area);
+        } else {
+            this.speciesSites = [];
+        }
+    }
+
     onFilterChange(): void {
+        if (!this.speciesSitesCollection) {
+            return;
+        }
         this.speciesSites = this.speciesSitesCollection['features'].filter(
             (speciesSite) => {
                 const sameTaxon =
@@ -139,6 +163,7 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
                     speciesSite.properties.cd_nom === this.selectedTaxon.cd_nom;
 
                 const sameArea =
+                    (this.inputAreas && this.inputAreas.length) ||
                     !this.selectedArea ||
                     speciesSite.properties.id_area ===
                         this.selectedArea.id_area;

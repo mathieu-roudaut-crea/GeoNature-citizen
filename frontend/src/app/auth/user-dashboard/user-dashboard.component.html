@@ -141,8 +141,10 @@
                     <app-species-sites
                         *ngIf="selectedAreasTab === 'species_sites'"
                         [speciesSites]="adminSpeciesSites"
+                        [inputAreas]="adminAreas"
                         [userDashboard]="true"
                         [admin]="admin"
+                        (areaFilterChange)="areaFilterChange($event)"
                     >
                     </app-species-sites>
                     <app-species-sites-obs

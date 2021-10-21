@@ -6,6 +6,8 @@ import {
     ViewChildren,
     QueryList,
     Input,
+    Output,
+    EventEmitter,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -39,7 +41,10 @@ export class SpeciesSitesComponent
     title = 'SpeciesSites';
     @Input('speciesSites') speciesSites: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Input('inputAreas') inputAreas;
     @Input('admin') admin = false;
+    @Output() areaFilterChange = new EventEmitter();
+
     @ViewChild(SpeciesSitesMapComponent, { static: true })
     speciesSitesMap: SpeciesSitesMapComponent;
     @ViewChild(SpeciesSitesListComponent, { static: true })

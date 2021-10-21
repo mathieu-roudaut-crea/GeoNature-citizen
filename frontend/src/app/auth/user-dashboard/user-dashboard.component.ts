@@ -170,6 +170,22 @@ export class UserDashboardComponent implements OnInit {
         });
     }
 
+    areaFilterChange(areaId) {
+        this.userService
+            .getAdminSpeciesSites(areaId)
+            .pipe(tap((speciesSites) => speciesSites))
+            .subscribe((speciesSites) => {
+                this.adminSpeciesSites = speciesSites;
+                this.adminSpeciesSites.features.forEach((site) => {
+                    const coords: Point = new Point(
+                        site.geometry.coordinates[0],
+                        site.geometry.coordinates[1]
+                    );
+                    site.properties.coords = coords;
+                });
+            });
+    }
+
     openLoginModal() {
         const loginModalRef = this.modalService.open(LoginComponent, {
             size: 'lg',
@@ -320,18 +336,15 @@ export class UserDashboardComponent implements OnInit {
         }
         const adminData = [];
         const adminAreas = this.userService.getAdminAreas();
-        const adminSpeciesSites = this.userService.getAdminSpeciesSites();
         const adminObservers = this.userService.getAdminObservers();
 
         adminData.push(adminAreas);
-        adminData.push(adminSpeciesSites);
         adminData.push(adminObservers);
 
         forkJoin(adminData).subscribe((data: any) => {
             if (data.length > 1) {
                 this.adminAreas = data[0];
-                this.adminSpeciesSites = data[1];
-                this.adminObservers = data[2];
+                this.adminObservers = data[1];
 
                 this.adminAreas.features.forEach((area) => {
                     const areaCenter = geoJSON(area).getBounds().getCenter();
@@ -339,14 +352,6 @@ export class UserDashboardComponent implements OnInit {
                         areaCenter.lng,
                         areaCenter.lat
                     );
-                });
-
-                this.adminSpeciesSites.features.forEach((site) => {
-                    const coords: Point = new Point(
-                        site.geometry.coordinates[0],
-                        site.geometry.coordinates[1]
-                    );
-                    site.properties.coords = coords;
                 });
             }
         });

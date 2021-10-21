@@ -8,16 +8,16 @@ import { HttpClient } from '@angular/common/http';
 export class AreaService {
     constructor(private http: HttpClient) {}
 
-    @Output() newAreaCreated: EventEmitter<any> = new EventEmitter();
-    @Output() areaEdited: EventEmitter<any> = new EventEmitter();
+    @Output() newAreaCreated = new EventEmitter();
+    @Output() areaEdited = new EventEmitter();
     @Output() areaDeleted = new EventEmitter();
 
-    @Output() newSpeciesSiteCreated: EventEmitter<any> = new EventEmitter();
-    @Output() speciesSiteEdited: EventEmitter<any> = new EventEmitter();
+    @Output() newSpeciesSiteCreated = new EventEmitter();
+    @Output() speciesSiteEdited = new EventEmitter();
     @Output() speciesSiteDeleted = new EventEmitter();
 
-    @Output() newSpeciesSiteObsCreated: EventEmitter<any> = new EventEmitter();
-    @Output() speciesSiteObsEdited: EventEmitter<any> = new EventEmitter();
+    @Output() newSpeciesSiteObsCreated = new EventEmitter();
+    @Output() speciesSiteObsEdited = new EventEmitter();
     @Output() speciesSiteObsDeleted = new EventEmitter();
 
     deleteArea(areaId) {
