@@ -50,16 +50,7 @@ export class SpeciesSitesMapComponent extends BaseMapComponent {
                 "
             />
             <p>
-                <b>{{ data.name }}</b
-                ><br />
-                <span
-                    >Ajoutée par {{ data.obs_txt }}<br />
-                    le
-                    {{
-                        data.timestamp_create.substring(0, 10)
-                            | date: 'longDate'
-                    }} </span
-                ><br />
+                <b>{{ data.name }}</b>
             </p>
             <div
                 [routerLink]="[

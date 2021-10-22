@@ -68,13 +68,6 @@
                     <p [title]="area.properties.obs_txt">
                         ajoutée par <span>{{ area.properties.obs_txt }}</span>
                     </p>
-                    <p>
-                        le
-                        <span>{{
-                            area.properties.timestamp_create.substring(0, 10)
-                                | date: 'longDate'
-                        }}</span>
-                    </p>
                 </div>
                 <div class="add-species-site" *ngIf="!userDashboard">
                     <div title="Ajouter un individu" (click)="onAddSpeciesSiteClick(area.properties.id_area)">
