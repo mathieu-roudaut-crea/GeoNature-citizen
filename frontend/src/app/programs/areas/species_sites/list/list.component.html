@@ -85,7 +85,9 @@
                         </span>
                     </h5>
                     <p *ngIf="speciesSite.properties.species"
-                       [title]="speciesSite.properties.species.nom_vern + ', ' + speciesSite.properties.species.nom_complet">
+                       [title]="speciesSite.properties.species.nom_vern + ', ' + speciesSite.properties.species.nom_complet"
+                        class="notranslate"
+                    >
                         {{ speciesSite.properties.species.nom_vern }}
                     </p>
                     <p [title]="speciesSite.properties.obs_txt" *ngIf="userDashboard">

@@ -40,7 +40,7 @@
             >
                 <div [class]="(userDashboard ? 'dashboard-list' : '') + ' infos'">
                     <h5 [title]="area.properties.name">
-                        <div class="name">{{ area.properties.name }}</div>
+                        <div class="name notranslate">{{ area.properties.name }}</div>
                         <span *ngIf="area.properties.id_role === userService.role_id || admin" class="pull-right">
                             <app-areamodalflow
                                 #modalFlowRef
