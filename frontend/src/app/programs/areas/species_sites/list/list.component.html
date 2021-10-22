@@ -93,14 +93,6 @@
                     <p [title]="speciesSite.properties.obs_txt" *ngIf="userDashboard">
                         ajoutée par <span>{{ speciesSite.properties.obs_txt }}</span>
                     </p>
-                    <p>
-                        le
-                        <span>
-                            {{
-                            speciesSite.properties.timestamp_create.substring(0, 10) | date: 'longDate'
-                            }}
-                        </span>
-                    </p>
                 </div>
                 <div *ngIf="!userDashboard" class="add-species-site-observation">
                     <div title="Ajouter une observation"
