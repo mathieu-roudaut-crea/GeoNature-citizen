@@ -5,6 +5,8 @@ import {
     ViewChild,
     ElementRef,
     Input,
+    Inject,
+    LOCALE_ID,
 } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -115,6 +117,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     jsonFormIsValid: any;
 
     constructor(
+        @Inject(LOCALE_ID) readonly localeId: string,
         private http: HttpClient,
         private mapService: MapService,
         private dateParser: NgbDateParserFormatter,
@@ -304,6 +307,25 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                 }).addTo(formMap);
 
                 const maxBounds = leafletArea.getBounds();
+                L.control
+                    .locate({
+                        icon: 'fa fa-compass',
+                        position: 'topleft',
+                        strings: {
+                            title: MAP_CONFIG.LOCATE_CONTROL_TITLE[
+                                this.localeId
+                            ]
+                                ? MAP_CONFIG.LOCATE_CONTROL_TITLE[this.localeId]
+                                : 'Me géolocaliser',
+                        },
+                        getLocationBounds: (locationEvent) =>
+                            locationEvent.bounds.extend(maxBounds),
+                        locateOptions: {
+                            enableHighAccuracy: false,
+                        },
+                    } as any)
+                    .addTo(formMap);
+
                 formMap.fitBounds(maxBounds);
                 formMap.setMaxBounds(maxBounds);
 

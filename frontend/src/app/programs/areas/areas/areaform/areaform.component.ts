@@ -5,13 +5,14 @@ import {
     ViewChild,
     ElementRef,
     Input,
+    Inject,
+    LOCALE_ID,
 } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 // import { map, tap } from 'rxjs/operators';
 
-import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { Position, Point } from 'geojson';
 import * as L from 'leaflet';
 import { LeafletMouseEvent } from 'leaflet';
@@ -83,9 +84,9 @@ export class AreaFormComponent implements AfterViewInit {
     advancedMode = false;
 
     constructor(
+        @Inject(LOCALE_ID) readonly localeId: string,
         private http: HttpClient,
-        private mapService: MapService,
-        private dateParser: NgbDateParserFormatter
+        private mapService: MapService
     ) {}
 
     ngOnInit(): void {
@@ -195,6 +196,26 @@ export class AreaFormComponent implements AfterViewInit {
                 }).addTo(formMap);
 
                 const maxBounds: L.LatLngBounds = programArea.getBounds();
+
+                L.control
+                    .locate({
+                        icon: 'fa fa-compass',
+                        position: 'topleft',
+                        strings: {
+                            title: MAP_CONFIG.LOCATE_CONTROL_TITLE[
+                                this.localeId
+                            ]
+                                ? MAP_CONFIG.LOCATE_CONTROL_TITLE[this.localeId]
+                                : 'Me géolocaliser',
+                        },
+                        getLocationBounds: (locationEvent) =>
+                            locationEvent.bounds.extend(maxBounds),
+                        locateOptions: {
+                            enableHighAccuracy: false,
+                        },
+                    } as any)
+                    .addTo(formMap);
+
                 formMap.fitBounds(maxBounds);
                 formMap.setMaxBounds(maxBounds);
 
