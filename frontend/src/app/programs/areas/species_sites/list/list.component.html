@@ -61,7 +61,7 @@
                 <div [class]="(userDashboard ? 'dashboard-list' : '') + ' infos'">
                     <h5>
                         <div class="name">{{ speciesSite.properties.name }}</div>
-                        <span *ngIf="speciesSite.properties.id_role === userService.role_id || admin" class="pull-right">
+                        <span *ngIf="speciesSite.properties.users_with_access.includes(userService.role_id) || speciesSite.properties.id_role === userService.role_id || admin" class="pull-right">
                             <app-areamodalflow
                                 #modalFlowRef
                                 [coords]="speciesSite.properties.coords"
@@ -79,7 +79,7 @@
                                 placement="bottom"
                                 ngbTooltip="Supprimer"
                                 (click)="onDeleteSpeciesSiteModalOpen(speciesSite.properties.id_species_site)"
-                                *ngIf="speciesSite.properties.creator_can_delete || admin"
+                                *ngIf="speciesSite.properties.id_role === userService.role_id && speciesSite.properties.creator_can_delete || admin"
                                 owner-actions
                             ></i>
                         </span>

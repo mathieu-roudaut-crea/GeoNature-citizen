@@ -57,6 +57,16 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
                     .count()
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
+
+            users_with_access = (
+                UserModel.query
+                    .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
+                    .join(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
+                    .filter(AreaModel.id_area == element.id_area)
+                    .all()
+            )
+            formatted["properties"]["users_with_access"] = list(map(lambda user_access: user_access.id_user, users_with_access))
+
         if model_name == 'species_sites':
             linked_observations_number = (
                 SpeciesSiteObservationModel.query
@@ -64,6 +74,16 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
                     .count()
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
+
+            users_with_access = (
+                UserModel.query
+                    .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
+                    .outerjoin(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
+                    .join(SpeciesSiteModel, or_(SpeciesSiteModel.id_area == AreasAccessModel.id_area, SpeciesSiteModel.id_area == AreaModel.id_area, SpeciesSiteModel.id_role == UserModel.id_user))
+                    .filter(SpeciesSiteModel.id_species_site == element.id_species_site)
+                    .all()
+            )
+            formatted["properties"]["users_with_access"] = list(map(lambda user: user.id_user, users_with_access))
 
 
         features.append(formatted)
@@ -961,9 +981,13 @@ def update_area():
         current_user = UserModel.query.filter_by(email=current_user_email).one()
 
         update_data = dict(request.get_json())
-        print(update_data)
         area = AreaModel.query.filter_by(id_area=update_data.get("id_area", 0))
-        if current_user.email != UserModel.query.get(area.first().id_role).email and current_user.admin != 1:
+        area_user_access = AreasAccessModel.query.filter(
+            AreasAccessModel.id_area == update_data.get("id_area", 0),
+            AreasAccessModel.id_user == current_user.id_user
+        ).all()
+
+        if current_user.email != UserModel.query.get(area.first().id_role).email and len(area_user_access) == 0 and current_user.admin != 1:
             return ("unauthorized"), 403
 
         update_area = {}
@@ -1273,8 +1297,17 @@ def update_species_site():
         current_user = UserModel.query.filter_by(email=current_user_email).one()
 
         update_data = request.form
-        species_site = SpeciesSiteModel.query.filter_by(id_species_site=update_data.get("id_species_site"))
-        if current_user.email != UserModel.query.get(species_site.first().id_role).email and current_user.admin != 1:
+        species_site = SpeciesSiteModel.query.filter_by(id_species_site=update_data.get("id_species_site", 0))
+        area_user_access = (UserModel.query
+            .outerjoin(AreasAccessModel, AreasAccessModel.id_user == current_user.id_user)
+            .outerjoin(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == current_user.id_user))
+            .join(SpeciesSiteModel, or_(SpeciesSiteModel.id_area == AreaModel.id_area, SpeciesSiteModel.id_role == current_user.id_user))
+            .filter(
+                SpeciesSiteModel.id_species_site == update_data.get("id_species_site", 0)
+            ).all()
+        )
+
+        if current_user.email != UserModel.query.get(species_site.first().id_role).email and len(area_user_access) == 0 and current_user.admin != 1:
             return ("unauthorized"), 403
 
         update_species_site = {}

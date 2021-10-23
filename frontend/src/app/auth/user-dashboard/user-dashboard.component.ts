@@ -200,7 +200,6 @@ export class UserDashboardComponent implements OnInit {
                     if (result.componentInstance) {
                         result.result.then(
                             function (result) {
-                                console.log('resulttststs login modal', result);
                                 if (result === 'registered') {
                                     this.verifyUser();
                                 }
@@ -564,8 +563,6 @@ export class UserDashboardComponent implements OnInit {
                         'image/jpeg',
                         AppConfig.imageUpload.quality
                     );
-
-                    console.log('resized image', resizedImage);
 
                     this.userAvatar = resizedImage;
                     this.newAvatar = resizedImage;

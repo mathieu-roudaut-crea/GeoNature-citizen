@@ -46,8 +46,6 @@ export class UserService {
     }
 
     updatePersonalData(personalInfo) {
-        console.log('up', personalInfo);
-
         return this.http
             .patch(`${AppConfig.API_ENDPOINT}/user/info`, personalInfo, {
                 headers: this.headers,
