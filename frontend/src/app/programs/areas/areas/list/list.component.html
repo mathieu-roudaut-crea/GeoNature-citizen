@@ -41,7 +41,12 @@
                 <div [class]="(userDashboard ? 'dashboard-list' : '') + ' infos'">
                     <h5 [title]="area.properties.name">
                         <div class="name notranslate">{{ area.properties.name }}</div>
-                        <span *ngIf="area.properties.users_with_access.includes(userService.role_id) || area.properties.id_role === userService.role_id || admin" class="pull-right">
+                        <span
+                            *ngIf="(area.properties.users_with_access && area.properties.users_with_access.includes(userService.role_id)) ||
+                                 area.properties.id_role === userService.role_id ||
+                                 admin"
+                            class="pull-right">
+
                             <app-areamodalflow
                                 #modalFlowRef
                                 [coords]="area.properties.coords"
