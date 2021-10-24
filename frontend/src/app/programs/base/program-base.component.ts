@@ -15,6 +15,7 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
     programs: Program[];
     program: Program;
     programFeature: FeatureCollection;
+    abstract modalService: any;
     abstract flowService: any;
 
     protected constructor(private authService: AuthService) {}
@@ -45,40 +46,24 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
             return;
         }
 
-        this.authService
-            .isLoggedIn()
-            .pipe(first())
-            .subscribe(
-                function (isLoggedIn) {
-                    if (isLoggedIn || !this.modalService) {
-                        return;
-                    }
+        const token = this.authService.getAccessToken();
+        if (
+            (token && this.authService.tokenExpiration(token) > 1) ||
+            !this.modalService
+        ) {
+            return;
+        }
 
-                    if (this.authService.refreshRequest) {
-                        this.authService.refreshRequest.subscribe(
-                            (refreshToken) => {
-                                if (refreshToken && refreshToken.access_token) {
-                                    this.verifyProgramPrivacyAndUser();
-                                }
-                            }
-                        );
-                    } else {
-                        const loginModalRef = this.modalService.open(
-                            LoginComponent,
-                            {
-                                size: 'lg',
-                                centered: true,
-                                backdrop: 'static',
-                                keyboard: false,
-                            }
-                        );
-                        loginModalRef.componentInstance.canBeClosed = false;
-                        loginModalRef.result
-                            .then(this.loadData.bind(this))
-                            .catch(this.loadData.bind(this));
-                    }
-                }.bind(this)
-            );
+        const loginModalRef = this.modalService.open(LoginComponent, {
+            size: 'lg',
+            centered: true,
+            backdrop: 'static',
+            keyboard: false,
+        });
+        loginModalRef.componentInstance.canBeClosed = false;
+        loginModalRef.result
+            .then(this.loadData.bind(this))
+            .catch(this.loadData.bind(this));
     }
 
     loadData() {}

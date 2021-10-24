@@ -59,7 +59,7 @@ export class AuthInterceptor implements HttpInterceptor {
                 return next.handle(request);
             }
 
-            const refreshRequest = this.auth.performTokenRefresh().pipe(
+            return this.auth.performTokenRefresh().pipe(
                 mergeMap((data: TokenRefresh) => {
                     if (data && !!data.access_token) {
                         localStorage.setItem('access_token', data.access_token);
@@ -81,11 +81,8 @@ export class AuthInterceptor implements HttpInterceptor {
                 }),
                 finalize(() => {
                     this.refreshing = false;
-                    this.auth.refreshRequest = null;
                 })
             );
-            this.auth.refreshRequest = refreshRequest;
-            return refreshRequest;
         } else {
             return this.token$.pipe(
                 filter((token: string | null) => !!token),

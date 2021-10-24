@@ -108,11 +108,12 @@ export class UserDashboardComponent implements OnInit {
     }
 
     verifyUser() {
-        const access_token = localStorage.getItem('access_token');
-        if (!access_token) {
+        const token = this.auth.getAccessToken();
+        if (!token || this.auth.tokenExpiration(token) < 1) {
             this.openLoginModal();
             return;
         }
+
         this.auth
             .ensureAuthorized()
             .pipe(
@@ -150,16 +151,8 @@ export class UserDashboardComponent implements OnInit {
                     }
                 }),
                 catchError((err) => {
-                    if (this.auth.refreshRequest) {
-                        this.auth.refreshRequest.subscribe((refreshToken) => {
-                            if (refreshToken && refreshToken.access_token) {
-                                this.verifyUser();
-                            }
-                        });
-                    } else {
-                        this.openLoginModal();
-                        return throwError(err);
-                    }
+                    this.openLoginModal();
+                    return throwError(err);
                 })
             )
             .subscribe((user) => {

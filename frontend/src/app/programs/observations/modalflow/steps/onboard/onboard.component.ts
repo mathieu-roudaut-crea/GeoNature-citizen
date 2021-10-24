@@ -42,19 +42,13 @@ export class OnboardComponent implements IFlowComponent, OnInit {
     }
 
     verifyAuthorization() {
-        this.authService.authorized$.subscribe((value) => {
-            if (value || AppConfig.signup === 'never') {
-                return this.data.next();
-            }
-
-            if (this.authService.refreshRequest) {
-                this.authService.refreshRequest.subscribe((refreshToken) => {
-                    if (refreshToken && refreshToken.access_token) {
-                        this.verifyAuthorization();
-                    }
-                });
-            }
-        });
+        const token = this.authService.getAccessToken();
+        if (
+            AppConfig.signup === 'never' ||
+            (token && this.authService.tokenExpiration(token) > 1)
+        ) {
+            return this.data.next();
+        }
     }
 
     // Actions
