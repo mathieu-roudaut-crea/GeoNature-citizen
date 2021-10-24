@@ -59,7 +59,7 @@ export class SpeciesSitesComponent
         private programService: GncProgramsService,
         public flowService: AreaModalFlowService,
         public areaService: AreaService,
-        private modalService: ModalsTopbarService,
+        protected modalService: ModalsTopbarService,
         authService: AuthService
     ) {
         super(authService);

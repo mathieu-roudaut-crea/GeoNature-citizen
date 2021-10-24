@@ -49,7 +49,7 @@ export class AreasComponent extends ProgramBaseComponent implements OnInit {
         private programService: GncProgramsService,
         public flowService: AreaModalFlowService,
         public areaService: AreaService,
-        private modalService: ModalsTopbarService,
+        protected modalService: ModalsTopbarService,
         authService: AuthService
     ) {
         super(authService);

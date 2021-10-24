@@ -15,7 +15,7 @@ export abstract class ProgramBaseComponent implements AfterViewInit {
     programs: Program[];
     program: Program;
     programFeature: FeatureCollection;
-    abstract modalService: any;
+    protected modalService: any;
     abstract flowService: any;
 
     protected constructor(private authService: AuthService) {}
