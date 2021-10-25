@@ -224,7 +224,7 @@ export class TopbarComponent implements OnInit {
                         select.click();
                     }
                 }.bind(this),
-                100
+                1000
             );
         }.bind(this);
 

@@ -214,7 +214,6 @@ export abstract class BaseMapComponent implements OnChanges {
         this.observationMap.on('zoomend', (e) => {
             // Condition to check where the we go above the MINZOOM
             // to transform the Polygon to Marker
-            console.log('zoom', e.target.getZoom(), this.markerToggle);
             if (e.target.getZoom() < MINZOOM && !this.markerToggle) {
                 this.markerToggle = true;
                 this.updateGeoJson();
