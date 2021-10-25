@@ -14,7 +14,7 @@ import {
 import { BaseMapComponent, conf } from './map.component';
 import { MapService } from '../../../base/map/map.service';
 import { AreaService } from '../../areas.service';
-import {MAP_CONFIG} from "../../../../../conf/map.config";
+import { MAP_CONFIG } from '../../../../../conf/map.config';
 
 @Component({
     selector: 'app-areas-map',
@@ -73,14 +73,7 @@ export class AreasMapComponent extends BaseMapComponent implements OnInit {
             <p>
                 <b>{{ data.name }}</b
                 ><br />
-                <span
-                    >Ajoutée par {{ data.obs_txt }}<br />
-                    le
-                    {{
-                        data.timestamp_create.substring(0, 10)
-                            | date: 'longDate'
-                    }} </span
-                ><br />
+                <span> Ajoutée par {{ data.obs_txt }} </span><br />
             </p>
             <div
                 [routerLink]="[
