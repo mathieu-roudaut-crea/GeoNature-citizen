@@ -28,7 +28,7 @@ import { MapService } from '../../../base/map/map.service';
 
 export const conf = {
     MAP_ID: 'obsMap',
-    GEOLOCATION_HIGH_ACCURACY: false,
+    GEOLOCATION_HIGH_ACCURACY: true,
     BASE_LAYERS: MAP_CONFIG['BASEMAPS'].reduce((acc, baseLayer: Object) => {
         const layerConf: any = {
             name: baseLayer['name'],

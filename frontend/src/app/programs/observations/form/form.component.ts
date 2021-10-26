@@ -43,7 +43,7 @@ declare let $: any;
 
 const map_conf = {
     GEOLOCATION_CONTROL_POSITION: 'topright',
-    GEOLOCATION_HIGH_ACCURACY: false,
+    GEOLOCATION_HIGH_ACCURACY: true,
     PROGRAM_AREA_STYLE: {
         fillColor: 'transparent',
         weight: 2,

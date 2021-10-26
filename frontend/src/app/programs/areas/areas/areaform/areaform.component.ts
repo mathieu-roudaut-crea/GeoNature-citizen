@@ -211,7 +211,7 @@ export class AreaFormComponent implements AfterViewInit {
                         getLocationBounds: (locationEvent) =>
                             locationEvent.bounds.extend(maxBounds),
                         locateOptions: {
-                            enableHighAccuracy: false,
+                            enableHighAccuracy: true,
                         },
                     } as any)
                     .addTo(formMap);
