@@ -680,6 +680,12 @@ def get_species_sites_by_program(id):
                 return prepare_list([])
 
         species_sites = (species_sites_query
+             .filter(
+                or_(
+                    SpeciesSiteModel.json_data.comparator.has_key('is_dead') != True,
+                    SpeciesSiteModel.json_data['is_dead'].astext == "false"
+                )
+            )
             .order_by(func.lower(SpeciesSiteModel.name))
             .all()
          )
