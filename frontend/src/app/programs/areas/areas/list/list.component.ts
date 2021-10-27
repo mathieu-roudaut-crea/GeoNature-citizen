@@ -17,6 +17,7 @@ import { AppConfig } from '../../../../../conf/app.config';
 import * as L from 'leaflet';
 import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
+import { share, tap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-areas-list',
@@ -108,7 +109,15 @@ export class AreasListComponent implements OnChanges, OnInit {
     }
 
     onAddSpeciesSiteClick(area_id) {
-        this.flowService.addAreaSpeciesSite(area_id);
+        this.programService
+            .getProgramTaxonomyList(this.program_id)
+            .pipe(
+                tap((species) => {
+                    this.flowService.addAreaSpeciesSite(area_id, species);
+                }),
+                share()
+            )
+            .subscribe();
     }
 
     onAreaClick(e): void {

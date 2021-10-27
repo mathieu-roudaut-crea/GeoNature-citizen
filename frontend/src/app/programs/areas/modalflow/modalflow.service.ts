@@ -53,8 +53,8 @@ export class AreaModalFlowService extends ModalFlowService {
         return items;
     }
 
-    addAreaSpeciesSite(area_id) {
-        const init_data = { area_id: area_id };
+    addAreaSpeciesSite(area_id, species = null) {
+        const init_data = { area_id: area_id, species: species };
         this.openFormModal(init_data);
     }
 

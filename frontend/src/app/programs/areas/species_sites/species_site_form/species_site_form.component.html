@@ -31,7 +31,7 @@
                         >
                         </option>
                         <option
-                            *ngFor="let s of surveySpecies$ | async"
+                            *ngFor="let s of taxa"
                             [value]="s.taxref.cd_nom"
                         >
                             {{
@@ -57,7 +57,7 @@
                     [class.ng-valid]="selectedTaxon"
                     [class.ng-invalid]="!selectedTaxon"
                 >
-                    <div *ngFor="let s of surveySpecies$ | async">
+                    <div *ngFor="let s of taxa">
                         <div
                             class="obs-img default-img"
                             [class.selected]="isSelectedTaxon(s)"

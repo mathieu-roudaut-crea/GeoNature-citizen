@@ -70,6 +70,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     private readonly URL = AppConfig.API_ENDPOINT;
     @Input('data') data;
     @Input('coords') coords: L.Point;
+    @Input('species') species;
     @Input('area_id') area_id: number;
     @ViewChild('photo', { static: true }) photo: ElementRef;
 
@@ -238,28 +239,21 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
             .subscribe((result) => {
                 this.area = result;
 
-                this.surveySpecies$ = this.programService
-                    .getProgramTaxonomyList(
-                        this.area.features[0].properties.id_program
-                    )
-                    .pipe(
-                        tap((species) => {
-                            this.taxa = species;
-                            this.taxaCount = Object.keys(this.taxa).length;
-                            if (
-                                this.taxaCount >=
-                                this.taxonAutocompleteInputThreshold
-                            ) {
-                                this.inputAutoCompleteSetup();
-                            } else if (this.taxaCount == 1) {
-                                this.onTaxonSelected(this.taxa[0]);
-                            }
-                        }),
-                        share()
-                    );
-                this.surveySpecies$.subscribe();
-
-                console.debug('speciesSiteForm', this.speciesSiteForm);
+                if (this.species && this.species.length) {
+                    this.updateTaxa(this.species);
+                } else {
+                    this.surveySpecies$ = this.programService
+                        .getProgramTaxonomyList(
+                            this.area.features[0].properties.id_program
+                        )
+                        .pipe(
+                            tap((species) => {
+                                this.updateTaxa(species);
+                            }),
+                            share()
+                        );
+                    this.surveySpecies$.subscribe();
+                }
 
                 // build map control
                 const formMap = L.map('formMap', {
@@ -390,6 +384,17 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
                     minimapMarker: myMarker,
                 };
             });
+    }
+
+    updateTaxa(species) {
+        this.taxa = species;
+        this.taxaCount = Object.keys(this.taxa).length;
+        console.log('updateTaxa species', this.taxaCount, species);
+        if (this.taxaCount >= this.taxonAutocompleteInputThreshold) {
+            this.inputAutoCompleteSetup();
+        } else if (this.taxaCount == 1) {
+            this.onTaxonSelected(this.taxa[0]);
+        }
     }
 
     setJsonFormIsValid(isValid) {
