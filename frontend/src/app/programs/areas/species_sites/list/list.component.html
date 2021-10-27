@@ -60,7 +60,7 @@
                 />
                 <div [class]="(userDashboard ? 'dashboard-list' : '') + ' infos'">
                     <h5>
-                        <div class="name">{{ speciesSite.properties.name }}</div>
+                        <div class="name notranslate">{{ speciesSite.properties.name }}</div>
                         <span *ngIf="speciesSite.properties.users_with_access.includes(userService.role_id) || speciesSite.properties.id_role === userService.role_id || admin" class="pull-right">
                             <app-areamodalflow
                                 #modalFlowRef
@@ -86,7 +86,6 @@
                     </h5>
                     <p *ngIf="speciesSite.properties.species"
                        [title]="speciesSite.properties.species.nom_vern + ', ' + speciesSite.properties.species.nom_complet"
-                        class="notranslate"
                     >
                         {{ speciesSite.properties.species.nom_vern }}
                     </p>
