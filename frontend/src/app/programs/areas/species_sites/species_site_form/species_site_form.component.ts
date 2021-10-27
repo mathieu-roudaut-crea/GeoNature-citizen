@@ -70,7 +70,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     private readonly URL = AppConfig.API_ENDPOINT;
     @Input('data') data;
     @Input('coords') coords: L.Point;
-    @Input('species') species;
+    @Input('species') species = [];
     @Input('area_id') area_id: number;
     @ViewChild('photo', { static: true }) photo: ElementRef;
 
@@ -90,7 +90,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     AppConfig = AppConfig;
 
     photos: any[] = [];
-    jsonData: object = {};
+    jsonData: any = {};
     formOptions: any = {
         loadExternalAssets: false,
         debug: false,
@@ -101,7 +101,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     GNCBootstrap4Framework: any = {
         framework: GNCFrameworkComponent,
     };
-    formInputObject: object;
+    formInputObject: any;
     readyToDisplay = false;
     partialLayout: any[] = [];
     advancedMode = false;
@@ -112,7 +112,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
     // taxonomyListID: number;
     taxa: TaxonomyList;
     surveySpecies$: Observable<TaxonomyList>;
-    species: Object[] = [];
+
     taxaCount: number;
     selectedTaxon: any;
     jsonFormIsValid: any;
@@ -413,7 +413,7 @@ export class SpeciesSiteFormComponent implements AfterViewInit {
         });
     }
 
-    onFormSubmit(): Promise<object> {
+    onFormSubmit(): Promise<any> {
         const formData: FormData = new FormData();
         const formValues = this.speciesSiteForm.value;
         console.log('formValues', formValues);
