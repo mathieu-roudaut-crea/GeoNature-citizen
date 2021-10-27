@@ -666,21 +666,20 @@ def get_species_sites_by_program(id):
 
         program = ProgramsModel.query.get(id)
         if program.is_private:
-            user_id = get_id_role_if_exists()
-            if user_id:
+            logged_user_id = get_id_role_if_exists()
+            if logged_user_id:
                 species_sites_query = (species_sites_query
                                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                               .filter(or_(SpeciesSiteModel.id_role == user_id, AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+                               .filter(or_(
+                                    SpeciesSiteModel.id_role == logged_user_id,
+                                    AreaModel.id_role == logged_user_id,
+                                    AreasAccessModel.id_user == logged_user_id
+                                ))
                 )
             else:
                 return prepare_list([])
 
         species_sites = (species_sites_query
-             .filter(
-                or_(
-                    SpeciesSiteModel.json_data.comparator.has_key('is_dead') != True,
-                    SpeciesSiteModel.json_data['is_dead'].astext == "false")
-                )
             .order_by(func.lower(SpeciesSiteModel.name))
             .all()
          )
