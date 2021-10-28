@@ -58,14 +58,14 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
 
-            users_with_access = (
-                UserModel.query
-                    .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
-                    .join(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
-                    .filter(AreaModel.id_area == element.id_area)
-                    .all()
-            )
-            formatted["properties"]["users_with_access"] = list(map(lambda user_access: user_access.id_user, users_with_access))
+            # users_with_access = (
+            #     UserModel.query
+            #         .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
+            #         .join(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
+            #         .filter(AreaModel.id_area == element.id_area)
+            #         .all()
+            # )
+            # formatted["properties"]["users_with_access"] = list(map(lambda user_access: user_access.id_user, users_with_access))
 
         if model_name == 'species_sites':
             linked_observations_number = (
@@ -669,53 +669,48 @@ def get_species_sites_by_program(id):
             logged_user_id = get_id_role_if_exists()
             if logged_user_id:
                 species_sites_query = (species_sites_query
-                    .filter(
-                        SpeciesSiteModel.id_role == logged_user_id
-                    )
+                               .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                               .filter(or_(
+                                    SpeciesSiteModel.id_role == logged_user_id,
+                                    AreaModel.id_role == logged_user_id,
+                                    AreasAccessModel.id_user == logged_user_id
+                                ))
                 )
-                # species_sites_query = (species_sites_query
-                #                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                #                .filter(or_(
-                #                     SpeciesSiteModel.id_role == logged_user_id,
-                #                     AreaModel.id_role == logged_user_id,
-                #                     AreasAccessModel.id_user == logged_user_id
-                #                 ))
-                # )
             else:
                 return prepare_list([])
 
         species_sites = (species_sites_query
-            #  .filter(
-            #     or_(
-            #         SpeciesSiteModel.json_data.comparator.has_key('is_dead') != True,
-            #         SpeciesSiteModel.json_data['is_dead'].astext == "false"
-            #     )
-            # )
+             .filter(
+                or_(
+                    SpeciesSiteModel.json_data.comparator.has_key('is_dead') != True,
+                    SpeciesSiteModel.json_data['is_dead'].astext == "false"
+                )
+            )
             .order_by(func.lower(SpeciesSiteModel.name))
             .all()
          )
 
         formatted_list = prepare_list(species_sites, model_name="species_sites")
-        #
-        # for species_site in formatted_list.features:
-        #     species_site["properties"]["photos"] = []
-        #     photos = (
-        #         db.session.query(MediaModel, SpeciesSiteModel)
-        #             .filter(SpeciesSiteModel.id_species_site == species_site['properties']['id_species_site'])
-        #             .join(
-        #                 MediaOnSpeciesSiteModel,
-        #                 MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
-        #             )
-        #             .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
-        #             .all()
-        #     )
-        #     species_site["properties"]["photos"] = [
-        #         {
-        #             "url": "/media/{}".format(p.MediaModel.filename),
-        #             "id_media": p.MediaModel.id_media
-        #         }
-        #         for p in photos
-        #     ]
+
+        for species_site in formatted_list.features:
+            species_site["properties"]["photos"] = []
+            photos = (
+                db.session.query(MediaModel, SpeciesSiteModel)
+                    .filter(SpeciesSiteModel.id_species_site == species_site['properties']['id_species_site'])
+                    .join(
+                        MediaOnSpeciesSiteModel,
+                        MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
+                    )
+                    .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
+                    .all()
+            )
+            species_site["properties"]["photos"] = [
+                {
+                    "url": "/media/{}".format(p.MediaModel.filename),
+                    "id_media": p.MediaModel.id_media
+                }
+                for p in photos
+            ]
 
         return formatted_list
     except Exception as e:
