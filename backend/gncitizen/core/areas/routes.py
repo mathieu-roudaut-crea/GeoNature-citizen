@@ -58,15 +58,6 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
 
-            users_with_access = (
-                UserModel.query
-                    .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
-                    .join(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
-                    .filter(AreaModel.id_area == element.id_area)
-                    .all()
-            )
-            formatted["properties"]["users_with_access"] = list(map(lambda user_access: user_access.id_user, users_with_access))
-
         if model_name == 'species_sites':
             linked_observations_number = (
                 SpeciesSiteObservationModel.query
@@ -74,17 +65,6 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
                     .count()
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
-
-            users_with_access = (
-                UserModel.query
-                    .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
-                    .outerjoin(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
-                    .join(SpeciesSiteModel, or_(SpeciesSiteModel.id_area == AreasAccessModel.id_area, SpeciesSiteModel.id_area == AreaModel.id_area, SpeciesSiteModel.id_role == UserModel.id_user))
-                    .filter(SpeciesSiteModel.id_species_site == element.id_species_site)
-                    .all()
-            )
-            formatted["properties"]["users_with_access"] = list(map(lambda user: user.id_user, users_with_access))
-
 
         features.append(formatted)
     features_data = FeatureCollection(features)
@@ -621,6 +601,7 @@ def get_areas_by_program(id):
     try:
         areas_query = AreaModel.query.filter_by(id_program=id)
 
+        has_edit_access = False
         program = ProgramsModel.query.get(id)
         if program.is_private:
             user_id = get_id_role_if_exists()
@@ -629,11 +610,18 @@ def get_areas_by_program(id):
                                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
                                .filter(or_(AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
                 )
+                has_edit_access = True
             else:
                 return prepare_list([])
 
         areas = areas_query.order_by(func.lower(AreaModel.name)).all()
-        return prepare_list(areas, model_name="areas")
+
+        formatted_list = prepare_list(areas, model_name="areas")
+
+        for area in formatted_list.features:
+            area["properties"]["has_edit_access"] = has_edit_access
+
+        return formatted_list
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -663,6 +651,7 @@ def get_species_sites_by_program(id):
                                .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                                .filter_by(id_program=id)
                                )
+        has_edit_access = False
 
         program = ProgramsModel.query.get(id)
         if program.is_private:
@@ -676,6 +665,7 @@ def get_species_sites_by_program(id):
                                         AreasAccessModel.id_user == logged_user_id
                                     ))
                 )
+                has_edit_access = True
             else:
                 return prepare_list([])
 
@@ -693,6 +683,7 @@ def get_species_sites_by_program(id):
         formatted_list = prepare_list(species_sites, model_name="species_sites")
 
         for species_site in formatted_list.features:
+            species_site["properties"]["has_edit_access"] = has_edit_access
             species_site["properties"]["photos"] = []
             photos = (
                 db.session.query(MediaModel, SpeciesSiteModel)
