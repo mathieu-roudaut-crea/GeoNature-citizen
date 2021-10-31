@@ -58,14 +58,14 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
 
-            # users_with_access = (
-            #     UserModel.query
-            #         .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
-            #         .join(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
-            #         .filter(AreaModel.id_area == element.id_area)
-            #         .all()
-            # )
-            # formatted["properties"]["users_with_access"] = list(map(lambda user_access: user_access.id_user, users_with_access))
+            users_with_access = (
+                UserModel.query(UserModel.id_user)
+                    .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
+                    .join(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
+                    .filter(AreaModel.id_area == element.id_area)
+                    .all()
+            )
+            formatted["properties"]["users_with_access"] = list(map(lambda user_access: user_access.id_user, users_with_access))
 
         if model_name == 'species_sites':
             linked_observations_number = (
@@ -669,12 +669,12 @@ def get_species_sites_by_program(id):
             logged_user_id = get_id_role_if_exists()
             if logged_user_id:
                 species_sites_query = (species_sites_query
-                               .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                               .filter(or_(
-                                    SpeciesSiteModel.id_role == logged_user_id,
-                                    AreaModel.id_role == logged_user_id,
-                                    AreasAccessModel.id_user == logged_user_id
-                                ))
+                                        .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                                        .filter(or_(
+                                        SpeciesSiteModel.id_role == logged_user_id,
+                                        AreaModel.id_role == logged_user_id,
+                                        AreasAccessModel.id_user == logged_user_id
+                                    ))
                 )
             else:
                 return prepare_list([])
@@ -711,6 +711,42 @@ def get_species_sites_by_program(id):
                 }
                 for p in photos
             ]
+
+        return formatted_list
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/program/<int:id>/species_sites_test/", methods=["GET"])
+@json_resp
+@jwt_required(optional=True)
+def get_species_sites_by_program_test(id):
+    """Get all program's species sites
+    ---
+    tags:
+      - Areas (External module)
+    definitions:
+      FeatureCollection:
+        properties:
+          type: dict
+          description: species site properties
+        geometry:
+          type: geojson
+          description: GeoJson geometry
+    responses:
+      200:
+        description: List of all species sites
+    """
+    try:
+        species_sites_query = (SpeciesSiteModel.query
+                               .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                               )
+
+        species_sites = (species_sites_query
+            .all()
+         )
+
+        formatted_list = prepare_list(species_sites, model_name="species_sites")
 
         return formatted_list
     except Exception as e:
