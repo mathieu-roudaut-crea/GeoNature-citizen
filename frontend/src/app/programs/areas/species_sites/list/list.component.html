@@ -61,7 +61,7 @@
                 <div [class]="(userDashboard ? 'dashboard-list' : '') + ' infos'">
                     <h5>
                         <div class="name notranslate">{{ speciesSite.properties.name }}</div>
-                        <span *ngIf="speciesSite.properties.users_with_access.includes(userService.role_id) || speciesSite.properties.id_role === userService.role_id || admin" class="pull-right">
+                        <span *ngIf="speciesSite.properties.has_edit_access || speciesSite.properties.id_role === userService.role_id || admin" class="pull-right">
                             <app-areamodalflow
                                 #modalFlowRef
                                 [coords]="speciesSite.properties.coords"

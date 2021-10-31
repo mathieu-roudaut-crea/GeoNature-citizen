@@ -42,7 +42,7 @@
                     <h5 [title]="area.properties.name">
                         <div class="name notranslate">{{ area.properties.name }}</div>
                         <span
-                            *ngIf="(area.properties.users_with_access && area.properties.users_with_access.includes(userService.role_id)) ||
+                            *ngIf="area.properties.has_edit_access ||
                                  area.properties.id_role === userService.role_id ||
                                  admin"
                             class="pull-right">
