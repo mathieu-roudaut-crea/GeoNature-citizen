@@ -762,7 +762,7 @@ def get_species_sites_by_program_test(id):
             .all()
          )
 
-        formatted_list = prepare_list(species_sites)
+        formatted_list = prepare_list(species_sites, model_name="species_sites")
 
         return formatted_list
     except Exception as e:
