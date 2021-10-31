@@ -816,7 +816,10 @@ def get_observations_by_program(id):
             else:
                 return prepare_list([])
 
-        observations_query = observations_query.order_by(SpeciesSiteObservationModel.timestamp_create.desc())
+        observations_query = (observations_query
+            .group_by(SpeciesSiteObservationModel.id_species_site_observation)
+            .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
+        )
 
         observations_count = observations_query.count()
 
@@ -1635,23 +1638,6 @@ def delete_observation(observation_id):
             return ("delete unauthorized"), 403
     except Exception as e:
         return {"message": str(e)}, 500
-
-@areas_api.route("/species_sites/<int:site_id>/observations/<int:visit_id>/photos", methods=["POST"])
-@json_resp
-@jwt_required(optional=True)
-def post_observation_photo(species_site_id, observation_id):
-    try:
-        current_app.logger.debug("UPLOAD FILE? " + str(request.files))
-        if request.files:
-            files = save_upload_files(
-                request.files, "species_site_id", species_site_id, observation_id, MediaOnSpeciesSiteObservationModel,
-            )
-            current_app.logger.debug("UPLOAD FILE {}".format(files))
-            return files, 200
-        return [], 200
-    except Exception as e:
-        current_app.logger.error("Error: %s", str(e))
-        return {"error_message": str(e)}, 400
 
 
 @areas_api.route("/observations/<int:pk>", methods=["GET"])
