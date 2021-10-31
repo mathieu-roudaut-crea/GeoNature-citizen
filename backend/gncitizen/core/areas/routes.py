@@ -59,7 +59,7 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
 
             users_with_access = (
-                UserModel.query(UserModel.id_user)
+                UserModel.query
                     .outerjoin(AreasAccessModel, UserModel.id_user == AreasAccessModel.id_user)
                     .join(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == UserModel.id_user))
                     .filter(AreaModel.id_area == element.id_area)
