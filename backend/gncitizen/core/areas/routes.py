@@ -740,13 +740,29 @@ def get_species_sites_by_program_test(id):
     try:
         species_sites_query = (SpeciesSiteModel.query
                                .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                               .filter_by(id_program=id)
                                )
+
+        program = ProgramsModel.query.get(id)
+        if program.is_private:
+            logged_user_id = get_id_role_if_exists()
+            if logged_user_id:
+                species_sites_query = (species_sites_query
+                                        .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                                        .filter(or_(
+                                        SpeciesSiteModel.id_role == logged_user_id,
+                                        AreaModel.id_role == logged_user_id,
+                                        AreasAccessModel.id_user == logged_user_id
+                                    ))
+                )
+            else:
+                return prepare_list([])
 
         species_sites = (species_sites_query
             .all()
          )
 
-        formatted_list = prepare_list(species_sites, model_name="species_sites")
+        formatted_list = prepare_list(species_sites)
 
         return formatted_list
     except Exception as e:
