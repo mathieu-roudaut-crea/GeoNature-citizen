@@ -69,6 +69,7 @@ export class UserDashboardComponent implements OnInit {
     selectedAreasTab = 'areas';
     previousObsPageData;
     relaysList = [];
+    selectedAreaId = 0;
 
     constructor(
         private auth: AuthService,
@@ -89,8 +90,12 @@ export class UserDashboardComponent implements OnInit {
 
         this.areaService.areaEdited.subscribe(this.getData.bind(this));
         this.areaService.areaDeleted.subscribe(this.getData.bind(this));
-        this.areaService.speciesSiteEdited.subscribe(this.getData.bind(this));
-        this.areaService.speciesSiteDeleted.subscribe(this.getData.bind(this));
+        this.areaService.speciesSiteEdited.subscribe(
+            this.areaFilterChange.bind(this)
+        );
+        this.areaService.speciesSiteDeleted.subscribe(
+            this.areaFilterChange.bind(this)
+        );
         this.userService.userEdited.subscribe(this.getData.bind(this));
         this.areaService.speciesSiteObsEdited.subscribe(
             this.refreshAdminObservationsList.bind(this)
@@ -163,7 +168,12 @@ export class UserDashboardComponent implements OnInit {
         });
     }
 
-    areaFilterChange(areaId) {
+    areaFilterChange(areaId = 0) {
+        if (areaId > 0) {
+            this.selectedAreaId = areaId;
+        } else if (this.selectedAreaId > 0) {
+            areaId = this.selectedAreaId;
+        }
         this.userService
             .getAdminSpeciesSites(areaId)
             .pipe(tap((speciesSites) => speciesSites))
