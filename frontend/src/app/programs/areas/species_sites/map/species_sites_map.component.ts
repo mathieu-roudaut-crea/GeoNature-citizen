@@ -1,4 +1,3 @@
-import * as L from 'leaflet';
 import { AppConfig } from '../../../../../conf/app.config';
 
 import {
@@ -12,6 +11,7 @@ import {
 } from '@angular/core';
 import { BaseMapComponent } from './map.component';
 import { MapService } from '../../../base/map/map.service';
+import { AreaService } from '../../areas.service';
 
 @Component({
     selector: 'app-species-sites-map',
@@ -26,9 +26,19 @@ export class SpeciesSitesMapComponent extends BaseMapComponent {
         @Inject(LOCALE_ID) readonly localeId: string,
         resolver: ComponentFactoryResolver,
         injector: Injector,
-        mapService: MapService
+        mapService: MapService,
+        private areaService: AreaService
     ) {
         super(resolver, injector, mapService);
+    }
+
+    ngOnInit() {
+        this.areaService.speciesSiteEdited.subscribe(() =>
+            this.observationMap.closePopup()
+        );
+        this.areaService.speciesSiteDeleted.subscribe(() =>
+            this.observationMap.closePopup()
+        );
     }
 
     getPopupComponentFactory(): any {
