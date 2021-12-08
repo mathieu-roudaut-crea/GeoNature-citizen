@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, filter } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 
 import { AppConfig } from '../../conf/app.config';
+import { Url } from 'url';
 
 export interface Taxon {
     cd_nom: number;
@@ -34,11 +35,37 @@ export interface Taxon {
     url: string;
 }
 
+type TaxaList = {
+    cd_nom: number;
+    search_name: string;
+    cd_ref: number;
+    nom_valide: string;
+    lb_nom: string;
+    regne: string;
+    group2_inpn: string;
+};
+
+type Media = {
+    id_media: number;
+    cd_ref: number;
+    titre: string;
+    url: Url;
+    chemin: string | null;
+    auteur: string | null;
+    desc_media: string | null;
+    is_public: boolean;
+    supprime: boolean;
+    id_type: number;
+    nom_type_media: string;
+    desc_type_media: string;
+};
+
 @Injectable({
     providedIn: 'root',
 })
 export class TaxhubService {
     private readonly URL = AppConfig.API_ENDPOINT;
+    private readonly apiTaxhub = AppConfig.API_TAXHUB;
     taxon: any;
 
     constructor(
@@ -51,9 +78,10 @@ export class TaxhubService {
             .get<Taxon>(`${this.URL}/taxonomy/taxon/${cd_nom}`)
             .pipe(
                 map((taxon) => {
-                    taxon.nom_complet_html_sanitized = this.domSanitizer.bypassSecurityTrustHtml(
-                        taxon.nom_complet_html
-                    );
+                    taxon.nom_complet_html_sanitized =
+                        this.domSanitizer.bypassSecurityTrustHtml(
+                            taxon.nom_complet_html
+                        );
                     return taxon;
                 }),
                 // tap(taxon => {
@@ -62,6 +90,23 @@ export class TaxhubService {
                 //   return taxon;
                 // }),
                 catchError(this.handleError<Taxon>(`getTaxon(${cd_nom})`))
+            );
+    }
+
+    getList(idList: number): Observable<TaxaList[]> {
+        return this.http.get<TaxaList[]>(
+            `${this.apiTaxhub}/taxref/allnamebylist/${idList}`
+        );
+    }
+
+    getMainPicture(cdNom: number): Observable<Url> {
+        return this.http
+            .get<Media>(`${this.apiTaxhub}/api/tmedias/bycdref/${cdNom}`)
+            .pipe(
+                filter((resp) =>
+                    ['Photo_principale'].includes(resp.nom_type_media)
+                ),
+                map((resp) => resp.url)
             );
     }
 
