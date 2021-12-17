@@ -450,10 +450,6 @@ def get_program_years(program_id):
             if not year[0] in years:
                 years.append(year[0])
 
-        print('---------------------areas_queryaa-----------------')
-        print(years)
-        print('---------------------areas_queryaFINN-----------------')
-
         return {"years": years}
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -959,7 +955,8 @@ def get_species_sites_by_program(id):
                                     StagesStepModel.id_stages_step == SpeciesSiteObservationModel.id_stages_step,
                                     SpeciesSiteObservationModel.date.between(str(date.today().year) + '-01-01', str(date.today().year) + '-12-31')))
                     .filter(
-                    SpeciesSiteModel.id_species_site == species_site.properties['id_species_site']
+                    SpeciesSiteModel.id_species_site == species_site.properties['id_species_site'],
+                    SpeciesStageModel.active == True
                 )
                     .order_by(SpeciesStageModel.id_species_stage)
                     .group_by(SpeciesStageModel.id_species_stage)
