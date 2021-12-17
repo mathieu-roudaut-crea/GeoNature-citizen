@@ -67,15 +67,18 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
                 UserModel.query
                     .join(AreaModel, AreaModel.id_role == UserModel.id_user)
                     .filter(AreaModel.id_area == element.id_area)
-                    .one()
+                    .first()
             )
-            formatted["properties"]["creator"] = format_entity(creator, with_geom=False)
+            formatted["properties"]["creator"] = format_entity(creator, with_geom=False) if creator is not None else {}
 
-            relay_observers = (UserModel.query
-                               .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
-                               .filter(UserModel.linked_relay_id == creator.id_user)
-                               )
-            formatted["properties"]["relay_observers"] = prepare_list(relay_observers, with_geom=False)
+            if creator is not None:
+                relay_observers = (UserModel.query
+                                   .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                                   .filter(UserModel.linked_relay_id == creator.id_user)
+                                   )
+                formatted["properties"]["relay_observers"] = prepare_list(relay_observers, with_geom=False)
+            else:
+                formatted["properties"]["relay_observers"] = []
 
             linked_users = (UserModel.query
                             .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)

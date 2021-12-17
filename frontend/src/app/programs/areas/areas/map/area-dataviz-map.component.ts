@@ -86,7 +86,7 @@ export class AreasDatavizMapComponent
         <ng-container>
             <p>
                 <b>{{ data.name }}</b>
-                <span *ngIf="data.creator.properties.is_relay">
+                <span *ngIf="data.creator && data.creator.properties && data.creator.properties.is_relay">
                     <br *ngIf="data.creator.properties.organism" />
                     {{ data.creator.properties.organism }}
                     (<a
@@ -108,7 +108,7 @@ export class AreasDatavizMapComponent
                     <span class="participants">
                         <b>Participants:</b>
                         <br />
-                        <span class="linked-user-container">
+                        <span class="linked-user-container" *ngIf="data.creator">
                             <img
                                 *ngIf="data.creator.properties.avatar"
                                 alt="creator avatar"

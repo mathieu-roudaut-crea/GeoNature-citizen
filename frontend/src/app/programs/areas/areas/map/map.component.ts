@@ -356,7 +356,9 @@ export abstract class BaseMapComponent implements OnChanges {
             pointToLayer: (_feature, latlng): L.Marker => {
                 const marker: L.Marker<any> = L.marker(latlng, {
                     icon: this.isDataviz
-                        ? _feature.properties.creator.properties.is_relay
+                        ? _feature.properties.creator &&
+                          _feature.properties.creator.properties &&
+                          _feature.properties.creator.properties.is_relay
                             ? conf.RELAY_MARKER_ICON()
                             : conf.OBSERVER_MARKER_ICON()
                         : conf.AREA_MARKER_ICON(),
