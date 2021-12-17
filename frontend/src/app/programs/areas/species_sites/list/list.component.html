@@ -8,7 +8,8 @@
                 [(ngModel)]="selectedTaxon"
                 (ngModelChange)="onFilterChange()"
             >
-                <option [ngValue]="null" i18n="All species select option@@allSpeciesSelectOption">Toutes espèces</option>
+                <option [ngValue]="null"
+                        i18n="All species select option@@allSpeciesSelectOption">Toutes espèces</option>
                 <option *ngFor="let s of taxa" [ngValue]="s">
                     {{ s.nom_vern }}
                     <span *ngIf="appConfig.taxonDisplaySciName">(<i>{{ s.nom_complet }}</i>)</span>
@@ -61,7 +62,9 @@
                 <div [class]="(userDashboard ? 'dashboard-list' : '') + ' infos'">
                     <h5>
                         <div class="name notranslate">{{ speciesSite.properties.name }}</div>
-                        <span *ngIf="speciesSite.properties.has_edit_access || speciesSite.properties.id_role === userService.role_id || admin" class="pull-right">
+                        <span
+                            *ngIf="speciesSite.properties.has_edit_access || speciesSite.properties.id_role === userService.role_id || admin"
+                            class="pull-right">
                             <app-areamodalflow
                                 #modalFlowRef
                                 [coords]="speciesSite.properties.coords"
@@ -91,6 +94,21 @@
                     </p>
                     <p [title]="speciesSite.properties.obs_txt" *ngIf="userDashboard">
                         ajoutée par <span>{{ speciesSite.properties.obs_txt }}</span>
+                    </p>
+                    <p *ngIf="!userDashboard">
+                        <span *ngFor="let stage of speciesSite.properties.stages"
+                              [title]="
+                            stage.last_obs_date !== 'None'
+                                ? 'Noté le ' +
+                                  (stage.last_obs_date | date: 'longDate')
+                                : stage.name
+                        ">
+                            <img
+                                class="stage-icon" alt="{{ stage.name }} icon"
+                                src="assets/stages/{{stage.obs_count > 0 ? 'selected-' : ''}}{{ stage.icon }}"
+                                (click)="onAddSpeciesSiteObservationClick(speciesSite.properties.id_species_site, {id_species_stage: stage.id_species_stage, last_obs_id: stage.last_obs_id})"
+                            />
+                        </span>
                     </p>
                 </div>
                 <div *ngIf="!userDashboard" class="add-species-site-observation">

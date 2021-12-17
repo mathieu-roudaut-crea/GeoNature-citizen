@@ -100,7 +100,7 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
                 );
 
             if (!this.inputAreas || !this.inputAreas.count) {
-                this.areas = this.speciesSitesCollection.features
+                const speciesSitesAreas = this.speciesSitesCollection.features
                     .map((features) => features.properties.area)
                     .filter((area) => area && area.id_area)
                     .filter(
@@ -109,12 +109,50 @@ export class SpeciesSitesListComponent implements OnChanges, OnInit {
                                 .map((area) => area.id_area)
                                 .indexOf(area.id_area) === index
                     );
+
+                if (
+                    !(
+                        speciesSitesAreas.length === this.areas.length &&
+                        this.areas
+                            .map((area) => area.id_area)
+                            .every(
+                                (value, index) =>
+                                    value ===
+                                    speciesSitesAreas.map(
+                                        (area) => area.id_area
+                                    )[index]
+                            )
+                    )
+                ) {
+                    this.areas = speciesSitesAreas;
+                }
             }
         }
+        this.onAreaChange();
     }
 
-    onAddSpeciesSiteObservationClick(species_site_id) {
-        this.flowService.addSpeciesSiteObservation(species_site_id);
+    onAddSpeciesSiteObservationClick(
+        species_site_id,
+        options: { id_species_stage?; last_obs_id? } = {}
+    ) {
+        if (options.last_obs_id) {
+            this.programService
+                .getSpeciesSiteObsDetails(options.last_obs_id)
+                .subscribe((observation) => {
+                    this.flowService.addSpeciesSiteObservation(
+                        species_site_id,
+                        {
+                            observation: observation.features[0].properties,
+                            id_species_stage: options.id_species_stage,
+                        }
+                    );
+                });
+            return;
+        }
+
+        this.flowService.addSpeciesSiteObservation(species_site_id, {
+            id_species_stage: options.id_species_stage,
+        });
     }
 
     onDeleteSpeciesSiteModalOpen(selectedSpeciesSiteId: number) {

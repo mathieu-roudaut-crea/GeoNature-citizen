@@ -70,6 +70,13 @@
     flex: 1;
 }
 
+#list .espece .infos .stage-icon {
+    width: 30px;
+    height: 30px;
+    min-width: auto !important;
+    max-width: none !important;
+}
+
 #list .espece .infos h5 {
     display: flex;
     margin-bottom: 0;

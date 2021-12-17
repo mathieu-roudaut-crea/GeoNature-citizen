@@ -58,9 +58,15 @@ export class AreaModalFlowService extends ModalFlowService {
         this.openFormModal(init_data);
     }
 
-    addSpeciesSiteObservation(species_site_id) {
-        const init_data = { species_site_id: species_site_id };
-        console.log('init_data', init_data);
+    addSpeciesSiteObservation(
+        species_site_id,
+        options: { id_species_stage?; observation? } = {}
+    ) {
+        const init_data = {
+            species_site_id: species_site_id,
+            id_species_stage: options.id_species_stage,
+            obsUpdateData: options.observation,
+        };
         this.openFormModal(init_data);
     }
 

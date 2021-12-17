@@ -6,6 +6,22 @@ popup {
     align-items: center;
 }
 
+popup .stages-container .stage-icon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: auto !important;
+    max-width: none !important;
+    cursor: pointer;
+}
+
+popup .stages-container {
+    display: flex;
+}
+
+popup > p {
+    flex: 1;
+}
+
 .obsMap {
     /*height: calc(100vh - var(--router-outlet-offset) - 25px); */
     margin-left: var(--list-toggler-width);

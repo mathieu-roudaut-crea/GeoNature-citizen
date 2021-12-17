@@ -1,0 +1,77 @@
+<div id="dataviz-container" class="row flex-row-reverse">
+    <div class="filters col-sm-12 col-md-4 col-xl-3">
+        <div class="mountains-filters">
+            <select
+                name="mountains"
+                (change)="onChangeMountainFilter($event)"
+            >
+                <option [value]="null">
+                    Tous les massifs
+                </option>
+                <option *ngFor="let mountain of mountains; let mountainIndex = index;" [value]="mountainIndex">
+                    {{ mountain.name }}
+                </option>
+            </select>
+        </div>
+        <div class="species-filters" *ngIf="speciesList && speciesList.features">
+            <select
+                name="species"
+                (change)="onChangeSpeciesFilter($event)"
+            >
+                <option [value]="null">
+                    Toutes les espèces
+                </option>
+                <option *ngFor="let species of speciesList.features" [value]="species.properties.cd_nom">
+                    {{ species.properties.nom_complet }}
+                </option>
+            </select>
+        </div>
+        <div class="years-filters" *ngIf="years">
+            <select
+                name="years"
+                (change)="onChangeYearsFilter($event)"
+            >
+                <option [value]="null">
+                    Toutes les années
+                </option>
+                <option *ngFor="let year of years" [value]="year">
+                    {{ year }}
+                </option>
+            </select>
+        </div>
+        <div class="observers-category-filters" *ngIf="appConfig.categoriesEnum">
+            <select
+                name="observers-category"
+                (change)="onChangeObserversCategoryFilter($event)"
+            >
+                <option [value]="null">
+                    Toutes les catégories d'observateurs
+                </option>
+                <option *ngFor="let category of appConfig.categoriesEnum | keyvalue" [value]="category.key">
+                    {{ category.value }}
+                </option>
+            </select>
+        </div>
+        <div class="statistics" *ngIf="statistics">
+            <div>
+                <b>{{ statistics.areasNumber }}</b> zones d'observations
+            </div>
+            <div>
+                suivies par <b>{{ statistics.observersNumber }}</b> observateurs
+            </div>
+            <div>
+                dont <b>{{ statistics.relaysNumber }}</b> relais
+            </div>
+            <div>
+                <b>{{ statistics.observationsNumber }}</b> observations
+            </div>
+        </div>
+    </div>
+    <div class="dataviz-content col-sm-12 col-md-8 col-xl-9">
+        <app-areas-dataviz-map
+            *ngIf="areas && areas.features"
+            #areasMapRef
+            [features]="areas"
+        ></app-areas-dataviz-map>
+    </div>
+</div>

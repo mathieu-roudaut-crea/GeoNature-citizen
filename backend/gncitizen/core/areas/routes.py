@@ -7,18 +7,22 @@ from .models import AreaModel, SpeciesSiteModel, SpeciesSiteObservationModel, Sp
     MediaOnSpeciesSiteObservationModel, MediaOnStagesStepsModel, AreasAccessModel, MediaOnSpeciesSiteModel
 
 from server import db
+from datetime import date
 
 from flask import Blueprint, request, current_app, json, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, and_
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql import extract
 from shapely.geometry import asShape, Point
 from geoalchemy2.shape import from_shape, to_shape
 from geojson import FeatureCollection
 from utils_flask_sqla_geo.utilsgeometry import circle_from_point
 
+from gncitizen.core.ref_geo.models import LAreas
 from gncitizen.core.users.models import UserModel
+from gncitizen.core.taxonomy.models import Taxref
 from gncitizen.core.commons.models import ProgramsModel, MediaModel
 from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.jwt import get_id_role_if_exists
@@ -51,12 +55,34 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
         if model_name == 'areas':
             linked_observations_number = (
                 SpeciesSiteObservationModel.query
-                    .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                    .join(SpeciesSiteModel,
+                          SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
                     .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                     .filter(AreaModel.id_area == element.id_area)
                     .count()
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
+
+            creator = (
+                UserModel.query
+                    .join(AreaModel, AreaModel.id_role == UserModel.id_user)
+                    .filter(AreaModel.id_area == element.id_area)
+                    .one()
+            )
+            formatted["properties"]["creator"] = format_entity(creator, with_geom=False)
+
+            relay_observers = (UserModel.query
+                               .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                               .filter(UserModel.linked_relay_id == creator.id_user)
+                               )
+            formatted["properties"]["relay_observers"] = prepare_list(relay_observers, with_geom=False)
+
+            linked_users = (UserModel.query
+                            .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                            .filter(AreasAccessModel.id_area == element.id_area,
+                                    AreasAccessModel.id_user == UserModel.id_user)
+                            )
+            formatted["properties"]["linked_users"] = prepare_list(linked_users, with_geom=False)
 
         if model_name == 'species_sites':
             linked_observations_number = (
@@ -116,6 +142,10 @@ def generate_observation(id_species_site_observation):
     features = []
     feature = get_geojson_feature(observation.SpeciesSiteObservationModel.species_site.geom)
     feature["properties"]["cd_nom"] = observation.SpeciesSiteObservationModel.species_site.cd_nom
+
+    feature["properties"]["id_species_site"] = observation.SpeciesSiteObservationModel.id_species_site
+    feature["properties"]["id_stages_step"] = observation.SpeciesSiteObservationModel.id_stages_step
+    feature["properties"]["date"] = observation.SpeciesSiteObservationModel.date
 
     # Populate "properties"
     for k in result_dict:
@@ -247,6 +277,181 @@ def get_user_areas():
                  .all())
 
         return prepare_list(areas, model_name="areas")
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("program/<int:program_id>/species", methods=["GET"])
+@json_resp
+def get_program_species(program_id):
+    """Get all species in user's area
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all species
+    """
+    try:
+        species = (Taxref.query
+                   .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == Taxref.cd_nom)
+                   .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                   .filter(AreaModel.id_program == program_id)
+                   .order_by(func.lower(Taxref.nom_complet))
+                   .all())
+
+        return prepare_list(species, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("program/<int:program_id>/statistics", methods=["GET"])
+@json_resp
+def get_program_statistics(program_id):
+    """Get statistics about program areas, observations and observers
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: object {'areasNumber': int, 'observersNumber': int, 'relaysNumber': int, 'observationsNumber': int}
+
+    """
+    try:
+        areas_query = (AreaModel.query
+                       .outerjoin(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                       .filter(AreaModel.id_program == program_id)
+                       )
+        observers_query = (UserModel.query
+                           .outerjoin(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                           .join(AreaModel, or_(UserModel.id_user == AreaModel.id_role,
+                                                AreasAccessModel.id_area == AreaModel.id_area))
+                           .join(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                           .filter(AreaModel.id_program == program_id)
+                           )
+        observations_query = (SpeciesSiteObservationModel.query
+                              .join(SpeciesSiteModel,
+                                    SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                              .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                              .filter(AreaModel.id_program == program_id)
+                              )
+
+        year = request.args.get('year', None)
+        if year is not None:
+            areas_query = (areas_query
+                           .join(SpeciesSiteObservationModel,
+                                 SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                           .filter(SpeciesSiteObservationModel.date.between(year + '-01-01', year + '-12-31'))
+                           )
+            observers_query = (observers_query
+                               .join(SpeciesSiteObservationModel,
+                                     SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                               .filter(SpeciesSiteObservationModel.date.between(year + '-01-01', year + '-12-31'))
+                               )
+            observations_query = (observations_query
+                                  .filter(SpeciesSiteObservationModel.date.between(year + '-01-01', year + '-12-31'))
+                                  )
+
+        species = request.args.get('species', None)
+        if species is not None:
+            areas_query = areas_query.filter(SpeciesSiteModel.cd_nom == species)
+            observers_query = observers_query.filter(SpeciesSiteModel.cd_nom == species)
+            observations_query = observations_query.filter(SpeciesSiteModel.cd_nom == species)
+
+        postal_codes = request.args.get('postal_codes', None)
+        if postal_codes is not None and len(postal_codes) > 1:
+            areas_query = (areas_query
+                .join(LAreas, LAreas.id_area == AreaModel.municipality)
+                .filter(
+                or_(*[LAreas.area_code.startswith(postal_code) for postal_code in postal_codes.split(",")]))
+            )
+            observers_query = (observers_query
+                .join(LAreas, LAreas.id_area == AreaModel.municipality)
+                .filter(
+                or_(*[LAreas.area_code.startswith(postal_code) for postal_code in postal_codes.split(",")]))
+            )
+            observations_query = (observations_query
+                .join(LAreas, LAreas.id_area == AreaModel.municipality)
+                .filter(
+                or_(*[LAreas.area_code.startswith(postal_code) for postal_code in postal_codes.split(",")]))
+            )
+
+        observers_category = request.args.get('observers_category', None)
+        if observers_category is not None:
+            areas_query = (areas_query
+                .join(UserModel, UserModel.id_user == AreaModel.id_role)
+                .filter(UserModel.category == observers_category)
+            )
+            observers_query = (observers_query
+                .filter(UserModel.category == observers_category)
+            )
+            observations_query = (observations_query
+                .join(UserModel, UserModel.id_user == AreaModel.id_role)
+                .filter(UserModel.category == observers_category)
+            )
+
+        areasNumber = (areas_query
+                       .order_by(AreaModel.id_area)
+                       .group_by(AreaModel.id_area)
+                       .count()
+                       )
+        observersNumber = (observers_query
+                           .order_by(UserModel.id_user)
+                           .group_by(UserModel.id_user)
+                           .count()
+                           )
+        relaysNumber = (observers_query.filter(UserModel.is_relay == True)
+                        .order_by(UserModel.id_user)
+                        .group_by(UserModel.id_user)
+                        .count()
+                        )
+        observationsNumber = (observations_query
+                              .order_by(SpeciesSiteObservationModel.id_species_site_observation)
+                              .group_by(SpeciesSiteObservationModel.id_species_site_observation)
+                              .count()
+                              )
+
+        return {
+            'areasNumber': areasNumber,
+            'observersNumber': observersNumber,
+            'relaysNumber': relaysNumber,
+            'observationsNumber': observationsNumber
+        }
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("program/<int:program_id>/years", methods=["GET"])
+@json_resp
+def get_program_years(program_id):
+    """Get all years in which a least one observation was added
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all years
+    """
+    try:
+        areas_query = (db.session.query(extract('year', SpeciesSiteObservationModel.date))
+                       .select_from(SpeciesSiteObservationModel)
+                       .join(SpeciesSiteModel,
+                             SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                       .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                       .filter(AreaModel.id_program == program_id)
+                       )
+
+        years = []
+        years_results = areas_query.all()
+        for year in years_results:
+            if not year[0] in years:
+                years.append(year[0])
+
+        print('---------------------areas_queryaa-----------------')
+        print(years)
+        print('---------------------areas_queryaFINN-----------------')
+
+        return {"years": years}
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -415,9 +620,9 @@ def get_admin_species_sites():
                 db.session.query(MediaModel, SpeciesSiteModel)
                     .filter(SpeciesSiteModel.id_species_site == species_site['properties']['id_species_site'])
                     .join(
-                        MediaOnSpeciesSiteModel,
-                        MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
-                    )
+                    MediaOnSpeciesSiteModel,
+                    MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
+                )
                     .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
                     .all()
             )
@@ -473,23 +678,24 @@ def get_admin_observations():
             return prepare_list([])
 
         observations_query = (SpeciesSiteObservationModel.query
-                .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
-        )
+                              .join(SpeciesSiteModel,
+                                    SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                              )
 
         if user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
             observations_query = (observations_query
-                    .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
-                    .outerjoin(relay, relay.id_user == creator.linked_relay_id)
-                    .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
-            )
+                                  .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
+                                  .outerjoin(relay, relay.id_user == creator.linked_relay_id)
+                                  .filter(or_(relay.id_user == current_user_id, creator.id_user == current_user_id))
+                                  )
 
         if id_program > 0:
             observations_query = (observations_query
-                .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                .filter(AreaModel.id_program == id_program)
-            )
+                                  .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                                  .filter(AreaModel.id_program == id_program)
+                                  )
 
         observations_count = observations_query.count()
 
@@ -599,20 +805,54 @@ def get_areas_by_program(id):
         description: List of all areas
     """
     try:
-        areas_query = AreaModel.query.filter_by(id_program=id)
-
+        areas_query = (AreaModel.query
+                       .filter_by(id_program=id)
+                       )
         has_edit_access = False
         program = ProgramsModel.query.get(id)
-        if program.is_private:
+        if program.is_private and request.args.get('all-data', None) is None:
             user_id = get_id_role_if_exists()
             if user_id:
                 areas_query = (areas_query
                                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
                                .filter(or_(AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
-                )
+                               )
                 has_edit_access = True
             else:
                 return prepare_list([])
+
+        year = request.args.get('year', None)
+        species = request.args.get('species', None)
+
+        if year is not None or species is not None:
+            areas_query = areas_query.join(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+
+        if year is not None:
+            areas_query = (areas_query
+                           .join(SpeciesSiteObservationModel,
+                                 SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                           .filter(SpeciesSiteObservationModel.date.between(year + '-01-01', year + '-12-31'))
+                           )
+
+        if species is not None:
+            areas_query = (areas_query
+                           .filter(SpeciesSiteModel.cd_nom == species)
+                           )
+
+        postal_codes = request.args.get('postal_codes', None)
+        if postal_codes is not None and len(postal_codes) > 1:
+            areas_query = (areas_query
+                .join(LAreas, LAreas.id_area == AreaModel.municipality)
+                .filter(
+                or_(*[LAreas.area_code.startswith(postal_code) for postal_code in postal_codes.split(",")]))
+            )
+
+        observers_category = request.args.get('observers_category', None)
+        if observers_category is not None:
+            areas_query = (areas_query
+                .join(UserModel, UserModel.id_user == AreaModel.id_role)
+                .filter(UserModel.category == observers_category)
+            )
 
         areas = areas_query.order_by(func.lower(AreaModel.name)).all()
 
@@ -658,27 +898,27 @@ def get_species_sites_by_program(id):
             logged_user_id = get_id_role_if_exists()
             if logged_user_id:
                 species_sites_query = (species_sites_query
-                                        .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                                        .filter(or_(
-                                        SpeciesSiteModel.id_role == logged_user_id,
-                                        AreaModel.id_role == logged_user_id,
-                                        AreasAccessModel.id_user == logged_user_id
-                                    ))
+                    .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                    .filter(or_(
+                    SpeciesSiteModel.id_role == logged_user_id,
+                    AreaModel.id_role == logged_user_id,
+                    AreasAccessModel.id_user == logged_user_id
+                ))
                 )
                 has_edit_access = True
             else:
                 return prepare_list([])
 
         species_sites = (species_sites_query
-             .filter(
-                or_(
-                    SpeciesSiteModel.json_data.comparator.has_key('is_dead') != True,
-                    SpeciesSiteModel.json_data['is_dead'].astext == "false"
-                )
+                         .filter(
+            or_(
+                SpeciesSiteModel.json_data.comparator.has_key('is_dead') != True,
+                SpeciesSiteModel.json_data['is_dead'].astext == "false"
             )
-            .order_by(func.lower(SpeciesSiteModel.name))
-            .all()
-         )
+        )
+                         .order_by(func.lower(SpeciesSiteModel.name))
+                         .all()
+                         )
 
         formatted_list = prepare_list(species_sites, model_name="species_sites")
 
@@ -689,9 +929,9 @@ def get_species_sites_by_program(id):
                 db.session.query(MediaModel, SpeciesSiteModel)
                     .filter(SpeciesSiteModel.id_species_site == species_site['properties']['id_species_site'])
                     .join(
-                        MediaOnSpeciesSiteModel,
-                        MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
-                    )
+                    MediaOnSpeciesSiteModel,
+                    MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
+                )
                     .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
                     .all()
             )
@@ -703,57 +943,38 @@ def get_species_sites_by_program(id):
                 for p in photos
             ]
 
-        return formatted_list
-    except Exception as e:
-        return {"error_message": str(e)}, 400
-
-
-@areas_api.route("/program/<int:id>/species_sites_test/", methods=["GET"])
-@json_resp
-@jwt_required(optional=True)
-def get_species_sites_by_program_test(id):
-    """Get all program's species sites
-    ---
-    tags:
-      - Areas (External module)
-    definitions:
-      FeatureCollection:
-        properties:
-          type: dict
-          description: species site properties
-        geometry:
-          type: geojson
-          description: GeoJson geometry
-    responses:
-      200:
-        description: List of all species sites
-    """
-    try:
-        species_sites_query = (SpeciesSiteModel.query
-                               .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                               .filter_by(id_program=id)
-                               )
-
-        program = ProgramsModel.query.get(id)
-        if program.is_private:
-            logged_user_id = get_id_role_if_exists()
-            if logged_user_id:
-                species_sites_query = (species_sites_query
-                                        .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                                        .filter(or_(
-                                        SpeciesSiteModel.id_role == logged_user_id,
-                                        AreaModel.id_role == logged_user_id,
-                                        AreasAccessModel.id_user == logged_user_id
-                                    ))
+            species_site["properties"]["stages"] = []
+            stages = (
+                db.session.query(SpeciesStageModel, func.max(SpeciesSiteObservationModel.id_species_site_observation),
+                                 func.max(SpeciesSiteObservationModel.timestamp_create),
+                                 func.count(SpeciesSiteObservationModel.id_species_site_observation))
+                    .outerjoin(StagesStepModel, and_(StagesStepModel.id_species_stage == SpeciesStageModel.id_species_stage,
+                                    StagesStepModel.order > 1))
+                    .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
+                    .outerjoin(SpeciesSiteObservationModel,
+                               and_(SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site,
+                                    StagesStepModel.id_stages_step == SpeciesSiteObservationModel.id_stages_step,
+                                    SpeciesSiteObservationModel.date.between(str(date.today().year) + '-01-01', str(date.today().year) + '-12-31')))
+                    .filter(
+                    SpeciesSiteModel.id_species_site == species_site.properties['id_species_site']
                 )
-            else:
-                return prepare_list([])
+                    .order_by(SpeciesStageModel.id_species_stage)
+                    .group_by(SpeciesStageModel.id_species_stage)
+                    .all()
+            )
 
-        species_sites = (species_sites_query
-            .all()
-         )
-
-        formatted_list = prepare_list(species_sites, model_name="species_sites")
+            species_site["properties"]["stages"] = [
+                {
+                    "id_species_stage": stage.SpeciesStageModel.id_species_stage,
+                    "order": stage.SpeciesStageModel.order,
+                    "icon": stage.SpeciesStageModel.icon,
+                    "name": stage.SpeciesStageModel.name,
+                    "last_obs_id": stage[1],
+                    "last_obs_date": str(stage[2]),
+                    "obs_count": stage[3]
+                }
+                for stage in stages
+            ]
 
         return formatted_list
     except Exception as e:
@@ -806,20 +1027,20 @@ def get_observations_by_program(id):
                     observations_query
                         .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
                         .filter(or_(
-                            SpeciesSiteObservationModel.id_role == user_id,
-                            SpeciesSiteModel.id_role == user_id,
-                            AreaModel.id_role == user_id,
-                            AreasAccessModel.id_user == user_id
-                        ))
+                        SpeciesSiteObservationModel.id_role == user_id,
+                        SpeciesSiteModel.id_role == user_id,
+                        AreaModel.id_role == user_id,
+                        AreasAccessModel.id_user == user_id
+                    ))
                 )
 
             else:
                 return prepare_list([])
 
         observations_query = (observations_query
-            .group_by(SpeciesSiteObservationModel.id_species_site_observation)
-            .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
-        )
+                              .group_by(SpeciesSiteObservationModel.id_species_site_observation)
+                              .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
+                              )
 
         observations_count = observations_query.count()
 
@@ -905,7 +1126,7 @@ def get_area(pk):
                                 .filter_by(id_species_site=species_site['properties']['id_species_site'])
                                 .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
                                 .first()
-            )
+                                )
             if last_observation is not None:
                 species_site["properties"]["last_observation"] = last_observation.as_dict(True)
 
@@ -1038,7 +1259,8 @@ def update_area():
             AreasAccessModel.id_user == current_user.id_user
         ).all()
 
-        if current_user.email != UserModel.query.get(area.first().id_role).email and len(area_user_access) == 0 and current_user.admin != 1:
+        if current_user.email != UserModel.query.get(area.first().id_role).email and len(
+                area_user_access) == 0 and current_user.admin != 1:
             return ("unauthorized"), 403
 
         update_area = {}
@@ -1094,9 +1316,9 @@ def delete_area(area_id):
     try:
         area = (
             db.session.query(AreaModel, UserModel)
-            .filter(AreaModel.id_area == area_id)
-            .join(UserModel, AreaModel.id_role == UserModel.id_user, full=True)
-            .first()
+                .filter(AreaModel.id_area == area_id)
+                .join(UserModel, AreaModel.id_role == UserModel.id_user, full=True)
+                .first()
         )
 
         linked_observations_number = (
@@ -1107,7 +1329,8 @@ def delete_area(area_id):
                 .count()
         )
 
-        if area and ((current_user.email == area.UserModel.email and linked_observations_number == 0) or current_user.admin):
+        if area and (
+                (current_user.email == area.UserModel.email and linked_observations_number == 0) or current_user.admin):
             AreaModel.query.filter_by(id_area=area_id).delete()
             db.session.commit()
             return ("Area deleted successfully"), 200
@@ -1198,9 +1421,9 @@ def get_species_site(pk):
             db.session.query(MediaModel, SpeciesSiteModel)
                 .filter(SpeciesSiteModel.id_species_site == pk)
                 .join(
-                    MediaOnSpeciesSiteModel,
-                    MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
-                )
+                MediaOnSpeciesSiteModel,
+                MediaOnSpeciesSiteModel.id_data_source == SpeciesSiteModel.id_species_site,
+            )
                 .join(MediaModel, MediaOnSpeciesSiteModel.id_media == MediaModel.id_media)
                 .all()
         )
@@ -1332,7 +1555,6 @@ def post_species_site():
                 "[post_observation] ObsTax ERROR ON FILE SAVING", str(e)
             )
 
-
         return {"message": "New species site created.", "features": [response_dict]}, 200
     except Exception as e:
         current_app.logger.warning("Error: %s", str(e))
@@ -1350,15 +1572,18 @@ def update_species_site():
         update_data = request.form
         species_site = SpeciesSiteModel.query.filter_by(id_species_site=update_data.get("id_species_site", 0))
         area_user_access = (UserModel.query
-            .outerjoin(AreasAccessModel, AreasAccessModel.id_user == current_user.id_user)
-            .outerjoin(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area, AreaModel.id_role == current_user.id_user))
-            .join(SpeciesSiteModel, or_(SpeciesSiteModel.id_area == AreaModel.id_area, SpeciesSiteModel.id_role == current_user.id_user))
-            .filter(
-                SpeciesSiteModel.id_species_site == update_data.get("id_species_site", 0)
-            ).all()
-        )
+                            .outerjoin(AreasAccessModel, AreasAccessModel.id_user == current_user.id_user)
+                            .outerjoin(AreaModel, or_(AreaModel.id_area == AreasAccessModel.id_area,
+                                                      AreaModel.id_role == current_user.id_user))
+                            .join(SpeciesSiteModel, or_(SpeciesSiteModel.id_area == AreaModel.id_area,
+                                                        SpeciesSiteModel.id_role == current_user.id_user))
+                            .filter(
+            SpeciesSiteModel.id_species_site == update_data.get("id_species_site", 0)
+        ).all()
+                            )
 
-        if current_user.email != UserModel.query.get(species_site.first().id_role).email and len(area_user_access) == 0 and current_user.admin != 1:
+        if current_user.email != UserModel.query.get(species_site.first().id_role).email and len(
+                area_user_access) == 0 and current_user.admin != 1:
             return ("unauthorized"), 403
 
         update_species_site = {}
@@ -1423,7 +1648,6 @@ def update_species_site():
                 "[update_species_site] Species site ERROR ON FILE SAVING", str(e)
             )
 
-
         species_site.update(update_species_site, synchronize_session="fetch")
         db.session.commit()
         return ("species_site updated successfully"), 200
@@ -1441,9 +1665,9 @@ def delete_species_site(species_site_id):
     try:
         species_site = (
             db.session.query(SpeciesSiteModel, UserModel)
-            .filter(SpeciesSiteModel.id_species_site == species_site_id)
-            .join(UserModel, SpeciesSiteModel.id_role == UserModel.id_user, full=True)
-            .first()
+                .filter(SpeciesSiteModel.id_species_site == species_site_id)
+                .join(UserModel, SpeciesSiteModel.id_role == UserModel.id_user, full=True)
+                .first()
         )
 
         linked_observations_number = (
@@ -1452,12 +1676,13 @@ def delete_species_site(species_site_id):
                 .count()
         )
 
-        if species_site and ((current_user.email == species_site.UserModel.email and linked_observations_number == 0) or current_user.admin):
+        if species_site and ((
+                                     current_user.email == species_site.UserModel.email and linked_observations_number == 0) or current_user.admin):
             SpeciesSiteModel.query.filter_by(id_species_site=species_site_id).delete()
             db.session.commit()
             return ("species_site deleted successfully"), 200
         else:
-            return ("delete unauthorized "+species_site.name), 403
+            return ("delete unauthorized " + species_site.name), 403
     except Exception as e:
         return {"message": str(e)}, 500
 
@@ -1470,7 +1695,8 @@ def post_observation(species_site_id):
         request_data = request.form
 
         new_observation = SpeciesSiteObservationModel(
-            id_species_site=species_site_id, date=request_data.get("date", None), id_stages_step=request_data.get("stages_step_id", None),
+            id_species_site=species_site_id, date=request_data.get("date", None),
+            id_stages_step=request_data.get("stages_step_id", None),
         )
 
         try:
@@ -1480,7 +1706,6 @@ def post_observation(species_site_id):
         except Exception as e:
             current_app.logger.warning("[post_areas] json_data ", e)
             raise GeonatureApiError(e)
-
 
         id_role = get_id_role_if_exists()
         if id_role is not None:
@@ -1626,9 +1851,9 @@ def delete_observation(observation_id):
     try:
         observation = (
             db.session.query(SpeciesSiteObservationModel, UserModel)
-            .filter(SpeciesSiteObservationModel.id_species_site_observation == observation_id)
-            .join(UserModel, SpeciesSiteObservationModel.id_role == UserModel.id_user, full=True)
-            .first()
+                .filter(SpeciesSiteObservationModel.id_species_site_observation == observation_id)
+                .join(UserModel, SpeciesSiteObservationModel.id_role == UserModel.id_user, full=True)
+                .first()
         )
         if observation and (current_user.email == observation.UserModel.email or current_user.admin):
             SpeciesSiteObservationModel.query.filter_by(id_species_site_observation=observation_id).delete()
@@ -1679,9 +1904,9 @@ def export_areas_xls(user_id):
 
         filter_by_user = True
         if (
-            request.args.get('all-data')
-            and request.args.get('all-data') == 'true'
-            and (current_user.admin == 1 or current_user.is_relay == 1)
+                request.args.get('all-data')
+                and request.args.get('all-data') == 'true'
+                and (current_user.admin == 1 or current_user.is_relay == 1)
         ):
             filter_by_user = False
 
@@ -1695,9 +1920,9 @@ def export_areas_xls(user_id):
 
         if filter_by_user:
             areas_query = (areas_query
-                .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                .filter(or_(AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
-            )
+                           .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
+                           .filter(or_(AreaModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+                           )
         elif current_user.admin != 1:
             creator = aliased(UserModel)
             relay = aliased(UserModel)
@@ -1706,9 +1931,9 @@ def export_areas_xls(user_id):
                     .join(creator, AreaModel.id_role == creator.id_user)
                     .outerjoin(relay, relay.id_user == creator.linked_relay_id)
                     .filter(or_(
-                        relay.id_user == current_user.id_user,
-                        AreaModel.id_role == current_user.id_user
-                    ))
+                    relay.id_user == current_user.id_user,
+                    AreaModel.id_role == current_user.id_user
+                ))
             )
 
         areas = (
@@ -1765,7 +1990,8 @@ def export_areas_xls(user_id):
             species_sites_query = (species_sites_query
                 .join(AreaModel, SpeciesSiteModel.id_area == AreaModel.id_area)
                 .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                .filter(or_(SpeciesSiteModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+                .filter(
+                or_(SpeciesSiteModel.id_role == user_id, AreasAccessModel.id_user == user_id))
             )
         elif current_user.admin != 1:
             creator = aliased(UserModel)
@@ -1774,7 +2000,8 @@ def export_areas_xls(user_id):
                 species_sites_query
                     .join(creator, SpeciesSiteModel.id_role == creator.id_user)
                     .outerjoin(relay, relay.id_user == creator.linked_relay_id)
-                    .filter(or_(relay.id_user == current_user.id_user, SpeciesSiteModel.id_role == current_user.id_user))
+                    .filter(
+                    or_(relay.id_user == current_user.id_user, SpeciesSiteModel.id_role == current_user.id_user))
             )
 
         species_sites = (
@@ -1789,7 +2016,8 @@ def export_areas_xls(user_id):
             {"col_name": "Nom", "getter": lambda s: s.name},
             {"col_name": "Zone", "getter": lambda s: s.area.name if s.area else ''},
             {"col_name": "Espèce",
-             "getter": lambda s: (str(s.species.nom_vern) + " (" + str(s.species.nom_complet) + ")") if s.species else ''},
+             "getter": lambda s: (
+                     str(s.species.nom_vern) + " (" + str(s.species.nom_complet) + ")") if s.species else ''},
         )
 
         json_keys = list(set([key for species_site in species_sites for key in species_site.json_data.keys()]))
@@ -1832,10 +2060,12 @@ def export_areas_xls(user_id):
 
         if filter_by_user:
             observations_query = (observations_query
-                .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                .join(SpeciesSiteModel,
+                      SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
                 .join(AreaModel, SpeciesSiteModel.id_area == AreaModel.id_area)
                 .outerjoin(AreasAccessModel, AreasAccessModel.id_area == AreaModel.id_area)
-                .filter(or_(SpeciesSiteObservationModel.id_role == user_id, AreasAccessModel.id_user == user_id))
+                .filter(
+                or_(SpeciesSiteObservationModel.id_role == user_id, AreasAccessModel.id_user == user_id))
             )
         elif current_user.admin != 1:
             creator = aliased(UserModel)
@@ -1845,9 +2075,9 @@ def export_areas_xls(user_id):
                     .join(creator, SpeciesSiteObservationModel.id_role == creator.id_user)
                     .outerjoin(relay, relay.id_user == creator.linked_relay_id)
                     .filter(or_(
-                        relay.id_user == current_user.id_user,
-                        SpeciesSiteObservationModel.id_role == current_user.id_user
-                    ))
+                    relay.id_user == current_user.id_user,
+                    SpeciesSiteObservationModel.id_role == current_user.id_user
+                ))
             )
 
         observations = (
@@ -1870,7 +2100,8 @@ def export_areas_xls(user_id):
                  if s.species_site.species
                  else ''
              ) if s.species_site else ''},
-            {"col_name": "Stade", "getter": lambda s: s.stages_step.species_stage.name if s.stages_step and s.stages_step.species_stage else ''},
+            {"col_name": "Stade", "getter": lambda
+                s: s.stages_step.species_stage.name if s.stages_step and s.stages_step.species_stage else ''},
             {"col_name": "Etape", "getter": lambda s: s.stages_step.name if s.stages_step else ''},
         )
         json_keys = list(set([key for observation in observations for key in observation.json_data.keys()]))
@@ -1910,9 +2141,9 @@ def export_areas_xls(user_id):
                     observers_query
                         .outerjoin(relay, relay.id_user == UserModel.linked_relay_id)
                         .filter(or_(
-                            relay.id_user == current_user.id_user,
-                            UserModel.id_user == current_user.id_user
-                        ))
+                        relay.id_user == current_user.id_user,
+                        UserModel.id_user == current_user.id_user
+                    ))
                 )
 
             observers = (
@@ -1934,12 +2165,15 @@ def export_areas_xls(user_id):
             if current_user.admin:
                 basic_fields.append({"col_name": "Zones créées", "getter": lambda s: s.created_areas})
                 basic_fields.append({"col_name": "Zones associées", "getter": lambda s: s.areas_access})
-                basic_fields.append({"col_name": "Statut", "getter": lambda s: 'Admin' if s.admin else ("Relai" if s.is_relay else "Utilisateur")})
-                basic_fields.append({"col_name": "Relai lié", "getter": lambda s: s.linked_relay.organism if s.linked_relay else ""})
+                basic_fields.append({"col_name": "Statut", "getter": lambda s: 'Admin' if s.admin else (
+                    "Relai" if s.is_relay else "Utilisateur")})
+                basic_fields.append(
+                    {"col_name": "Relai lié", "getter": lambda s: s.linked_relay.organism if s.linked_relay else ""})
                 basic_fields.append({"col_name": "Pays", "getter": lambda s: s.country})
                 basic_fields.append({"col_name": "Code postal", "getter": lambda s: s.postal_code})
                 basic_fields.append({"col_name": "Année de naissance", "getter": lambda s: s.birth_year})
-                basic_fields.append({"col_name": "Genre", "getter": lambda s: ('Femme' if (s.gender == 'f') else ('Homme' if (s.gender == 'm') else s.gender))})
+                basic_fields.append({"col_name": "Genre", "getter": lambda s: (
+                    'Femme' if (s.gender == 'f') else ('Homme' if (s.gender == 'm') else s.gender))})
 
             row, col = 0, 0
             for field in basic_fields:

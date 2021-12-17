@@ -41,6 +41,10 @@ const sorted = (property: string) => {
     };
 };
 
+interface YearsResponse {
+    years: number[];
+}
+
 @Injectable({
     deps: [
         [new Optional(), new SkipSelf(), GncProgramsService],
@@ -144,9 +148,12 @@ export class GncProgramsService implements OnInit {
             );
     }
 
-    getProgramAreas(id: number): Observable<FeatureCollection> {
+    getProgramAreas(id: number, filters = {}): Observable<FeatureCollection> {
+        const parameters = this.getParametersFromFilters(filters);
         return this.http
-            .get<FeatureCollection>(`${this.URL}/areas/programs/${id}`)
+            .get<FeatureCollection>(
+                `${this.URL}/areas/programs/${id}${parameters}`
+            )
             .pipe(
                 catchError(
                     this.handleError<FeatureCollection>(
@@ -191,6 +198,42 @@ export class GncProgramsService implements OnInit {
                     )
                 )
             );
+    }
+
+    getProgramSpecies(programId) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/program/${programId}/species`
+        );
+    }
+
+    getProgramYears(programId) {
+        return this.http.get<YearsResponse>(
+            `${AppConfig.API_ENDPOINT}/areas/program/${programId}/years`
+        );
+    }
+
+    getProgramStatistics(programId, filters = {}) {
+        const parameters = this.getParametersFromFilters(
+            Object.assign(filters, { 'all-data': true })
+        );
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/program/${programId}/statistics${parameters}`
+        );
+    }
+
+    getParametersFromFilters(filters) {
+        let parameters = '';
+        let paramIndex = 0;
+        for (const filterIndex in Object.keys(filters)) {
+            const filterName = Object.keys(filters)[filterIndex];
+            const filterValue = filters[filterName];
+            const preChar = paramIndex ? '&' : '?';
+            if (filterValue) {
+                paramIndex++;
+                parameters += `${preChar}${filterName}=${filterValue}`;
+            }
+        }
+        return parameters;
     }
 
     getSiteDetails(id: number): Observable<FeatureCollection> {

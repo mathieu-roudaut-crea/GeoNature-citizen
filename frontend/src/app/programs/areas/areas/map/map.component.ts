@@ -57,9 +57,21 @@ export const conf = {
             iconSize: [33, 42],
             iconAnchor: [16, 42],
         }),
-    OBS_MARKER_ICON: () =>
+    AREA_MARKER_ICON: () =>
         L.icon({
             iconUrl: MAP_CONFIG['OBS_POINTER'],
+            iconSize: [33, 42],
+            iconAnchor: [16, 42],
+        }),
+    OBSERVER_MARKER_ICON: () =>
+        L.icon({
+            iconUrl: 'assets/user_location_d1954e.svg',
+            iconSize: [33, 42],
+            iconAnchor: [16, 42],
+        }),
+    RELAY_MARKER_ICON: () =>
+        L.icon({
+            iconUrl: 'assets/user_location_8e3414.svg',
             iconSize: [33, 42],
             iconAnchor: [16, 42],
         }),
@@ -130,6 +142,8 @@ export abstract class BaseMapComponent implements OnChanges {
     injector: Injector;
     mapService: MapService;
     markerToggle = true;
+    isDataviz = false;
+    pathLines = [];
 
     abstract localeId: string;
     abstract feature_id_key: string;
@@ -225,6 +239,9 @@ export abstract class BaseMapComponent implements OnChanges {
         });
 
         this.observationMap.on('popupclose', (_e) => {
+            this.pathLines.forEach((pathLine) => {
+                this.observationMap.removeLayer(pathLine);
+            });
             if (this.openPopupAfterClose && this.obsPopup) {
                 this.showPopup(this.obsPopup);
             } else {
@@ -300,10 +317,49 @@ export abstract class BaseMapComponent implements OnChanges {
                 }
                 const popupContent = this.getPopupContent(feature);
                 layer.bindPopup(popupContent);
+
+                layer.on({
+                    click: (event) => {
+                        const relay_observers =
+                            event.target.feature.properties.relay_observers
+                                .features;
+                        relay_observers.forEach((observer) => {
+                            this.features.features.forEach((area) => {
+                                if (
+                                    area.properties.id_role ===
+                                    observer.properties.id_user
+                                ) {
+                                    const geometry = Object.assign(
+                                        area.geometry
+                                    );
+                                    const pathLine = L.polyline(
+                                        [
+                                            [
+                                                event.latlng.lat,
+                                                event.latlng.lng,
+                                            ],
+                                            [
+                                                geometry.coordinates[0][0][1],
+                                                geometry.coordinates[0][0][0],
+                                            ],
+                                        ],
+                                        { color: '#8e3414' }
+                                    );
+                                    this.pathLines.push(pathLine);
+                                    this.observationMap.addLayer(pathLine);
+                                }
+                            });
+                        });
+                    },
+                });
             },
             pointToLayer: (_feature, latlng): L.Marker => {
                 const marker: L.Marker<any> = L.marker(latlng, {
-                    icon: conf.OBS_MARKER_ICON(),
+                    icon: this.isDataviz
+                        ? _feature.properties.creator.properties.is_relay
+                            ? conf.RELAY_MARKER_ICON()
+                            : conf.OBSERVER_MARKER_ICON()
+                        : conf.AREA_MARKER_ICON(),
                 });
                 this.markers.push({
                     feature: _feature,
@@ -437,16 +493,16 @@ export abstract class BaseMapComponent implements OnChanges {
         });
         let visibleParent: L.Marker = this.observationLayer.getVisibleParent(
             L.marker(marker.marker.getLatLng(), {
-                icon: conf.OBS_MARKER_ICON(),
+                icon: conf.AREA_MARKER_ICON(),
             })
         );
         if (!visibleParent) {
             this.observationMap.panTo(marker.marker.getLatLng());
             visibleParent = L.marker(marker.marker.getLatLng(), {
-                icon: conf.OBS_MARKER_ICON(),
+                icon: conf.AREA_MARKER_ICON(),
             });
         }
-        const popup = L.popup()
+        L.popup()
             .setLatLng(visibleParent.getLatLng())
             .setContent(this.getPopupContent(feature))
             .openOn(this.observationMap);

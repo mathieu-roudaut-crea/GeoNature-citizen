@@ -105,6 +105,7 @@ class SpeciesStageModel(db.Model):
     __table_args__ = {"schema": "gnc_areas"}
     id_species_stage = db.Column(db.Integer, primary_key=True, unique=True)
     name = db.Column(db.String(250))
+    icon = db.Column(db.String(250))
     active = db.Column(db.Boolean(), default=True)
     cd_nom = db.Column(db.Integer, db.ForeignKey(Taxref.cd_nom), nullable=False)
     order = db.Column(db.Integer)

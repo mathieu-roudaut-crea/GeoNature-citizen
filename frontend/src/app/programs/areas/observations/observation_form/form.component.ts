@@ -128,6 +128,11 @@ export class SpeciesSiteObservationFormComponent
                     this.speciesSite.properties.stages.features.filter(
                         (stage) => stage.properties.active
                     );
+
+                if (this.data.id_species_stage) {
+                    this.selectedStage = this.data.id_species_stage;
+                }
+
                 this.onSelectedStageChange();
             });
     }

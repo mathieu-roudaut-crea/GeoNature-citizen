@@ -5,6 +5,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { ObsComponent } from './programs/observations/obs.component';
 import { SitesComponent } from './programs/sites/sites.component';
+import { DatavizComponent } from './programs/areas/areas/dataviz/dataviz.component';
 import { AreasComponent } from './programs/areas/areas.component';
 import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
 import { SpeciesSitesObsComponent } from './programs/areas/observations/observations.component';
@@ -65,6 +66,11 @@ const appRoutes: Routes = [
     {
         path: 'programs/:id/areas',
         component: AreasComponent,
+        resolve: { programs: ProgramsResolve },
+    },
+    {
+        path: 'programs/:id/areas/dataviz',
+        component: DatavizComponent,
         resolve: { programs: ProgramsResolve },
     },
     { path: 'synthesis/species/:id', component: SpeciesComponent },

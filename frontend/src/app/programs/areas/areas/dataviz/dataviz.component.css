@@ -1,0 +1,21 @@
+.dataviz-content {
+    height: 500px;
+}
+
+.filters select {
+    padding: 6px;
+    word-wrap: normal;
+    border: 1px solid white;
+    border-radius: 4px;
+    margin: 5px 0;
+    width: 100%;
+}
+
+.filters .statistics {
+    font-size: 20px;
+}
+
+.filters .statistics > div {
+    border-bottom: 1px solid grey;
+    padding: 5px 0;
+}

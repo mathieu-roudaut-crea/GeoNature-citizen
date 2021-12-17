@@ -85,7 +85,7 @@ export class AuthService {
             .post<LogoutPayload>(url, { headers: this.headers })
             .pipe(
                 catchError((error) => {
-                    console.error(`[logout] error "${error}"`);
+                    console.error(`[logout] error`, error);
                     localStorage.removeItem('access_token');
                     // localStorage.removeItem("refresh_token");
                     this.authenticated$.next(false);

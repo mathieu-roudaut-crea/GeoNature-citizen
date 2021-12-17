@@ -68,6 +68,7 @@ import { SiteModalFlowService } from './programs/sites/modalflow/modalflow.servi
 import { SiteService } from './programs/sites/sites.service';
 
 import { AreasComponent } from './programs/areas/areas.component';
+import { DatavizComponent } from './programs/areas/areas/dataviz/dataviz.component';
 import { AreaDetailComponent } from './programs/areas/areas/detail/detail.component';
 import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
 import { SpeciesSitesObsComponent } from './programs/areas/observations/observations.component';
@@ -85,6 +86,10 @@ import {
     AreasMapComponent,
     AreaMarkerPopupComponent,
 } from './programs/areas/areas/map/areamap.component';
+import {
+    AreasDatavizMapComponent,
+    AreaDatavizMarkerPopupComponent,
+} from './programs/areas/areas/map/area-dataviz-map.component';
 import {
     SpeciesSitesMapComponent,
     SpeciesSiteMarkerPopupComponent,
@@ -146,12 +151,15 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         SpeciesSitesObsComponent,
         ObserversListComponent,
         AdminObserversComponent,
+        DatavizComponent,
         AreaFormComponent,
         AreasListComponent,
         SpeciesSitesListComponent,
         SpeciesSitesObsListComponent,
         AreasMapComponent,
+        AreasDatavizMapComponent,
         AreaMarkerPopupComponent,
+        AreaDatavizMarkerPopupComponent,
         SpeciesSitesMapComponent,
         SpeciesSiteMarkerPopupComponent,
         AreaDetailComponent,
@@ -244,6 +252,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         MarkerPopupComponent,
         SiteMarkerPopupComponent,
         AreaMarkerPopupComponent,
+        AreaDatavizMarkerPopupComponent,
         SpeciesSiteMarkerPopupComponent,
     ],
     exports: [AdminComponent],
