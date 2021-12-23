@@ -859,31 +859,6 @@ def get_areas_by_program(id):
         for area in formatted_list.features:
             area["properties"]["has_edit_access"] = has_edit_access
 
-            if request.args.get('all-data', None) is not None:
-                creator = (
-                    UserModel.query
-                        .join(AreaModel, AreaModel.id_role == UserModel.id_user)
-                        .filter(AreaModel.id_area == area["properties"]['id_area'])
-                        .first()
-                )
-                area["properties"]["creator"] = format_anon_user(creator, ['email', 'phone'])
-
-                if creator is not None:
-                    relay_observers = (UserModel.query
-                                       .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
-                                       .filter(UserModel.linked_relay_id == creator.id_user)
-                                       )
-                    area["properties"]["relay_observers"] = prepare_anon_users_list(relay_observers)
-                else:
-                    area["properties"]["relay_observers"] = []
-
-                linked_users = (UserModel.query
-                                .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
-                                .filter(AreasAccessModel.id_area == area["properties"]['id_area'],
-                                        AreasAccessModel.id_user == UserModel.id_user)
-                                )
-                area["properties"]["linked_users"] = prepare_anon_users_list(linked_users)
-
         return formatted_list
     except Exception as e:
         return {"error_message": str(e)}, 400
