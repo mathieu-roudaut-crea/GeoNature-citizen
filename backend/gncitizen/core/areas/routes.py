@@ -819,10 +819,6 @@ def get_areas_by_program(id):
                 .filter(AreaModel.id_program == id)
         )
 
-        areas = areas_query.order_by(func.lower(AreaModel.name)).group_by(AreaModel.id_area).all()
-        fields = ['id_area', 'name', 'id_role'] if request.args.get('all-data', None) is not None else None
-        return prepare_list(list(map(lambda area: area[0], areas)), with_geom=False, fields=fields)
-
         has_edit_access = False
         program = ProgramsModel.query.get(id)
         if program.is_private and request.args.get('all-data', None) is None:
