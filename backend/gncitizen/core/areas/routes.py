@@ -34,23 +34,24 @@ from gncitizen.utils.geo import get_municipality_id_from_wkb
 areas_api = Blueprint("areas", __name__)
 
 
-def format_entity(data, with_geom=True):
+def format_entity(data, with_geom=True, fields=None):
     if with_geom:
         feature = get_geojson_feature(data.geom)
     else:
         feature = {"properties": {}}
     data_dict = data.as_dict(True)
-    for k in data_dict:
+    columns = fields if fields is not None else data_dict
+    for k in columns:
         if k not in ("geom",):
             feature["properties"][k] = data_dict[k]
 
     return feature
 
 
-def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
+def prepare_list(data, with_geom=True, maximum_count=0, model_name=None, fields=None):
     features = []
     for element in data:
-        formatted = format_entity(element, with_geom)
+        formatted = format_entity(element, with_geom, fields=fields)
 
         if model_name == 'areas':
             linked_observations_number = (
@@ -62,30 +63,6 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
                     .count()
             )
             formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
-
-            creator = (
-                UserModel.query
-                    .join(AreaModel, AreaModel.id_role == UserModel.id_user)
-                    .filter(AreaModel.id_area == element.id_area)
-                    .first()
-            )
-            formatted["properties"]["creator"] = format_entity(creator, with_geom=False) if creator is not None else {}
-
-            if creator is not None:
-                relay_observers = (UserModel.query
-                                   .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
-                                   .filter(UserModel.linked_relay_id == creator.id_user)
-                                   )
-                formatted["properties"]["relay_observers"] = prepare_list(relay_observers, with_geom=False)
-            else:
-                formatted["properties"]["relay_observers"] = []
-
-            linked_users = (UserModel.query
-                            .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
-                            .filter(AreasAccessModel.id_area == element.id_area,
-                                    AreasAccessModel.id_user == UserModel.id_user)
-                            )
-            formatted["properties"]["linked_users"] = prepare_list(linked_users, with_geom=False)
 
         if model_name == 'species_sites':
             linked_observations_number = (
@@ -100,6 +77,27 @@ def prepare_list(data, with_geom=True, maximum_count=0, model_name=None):
     features_data["count"] = len(features)
     if maximum_count != 0:
         features_data["maximum_count"] = maximum_count
+    return features_data
+
+
+def format_anon_user(data, extra_columns=[]):
+    if data is None:
+        return {}
+
+    columns = ['id_user', 'username', 'timestamp_create', 'is_relay', 'avatar'] + extra_columns
+    feature = {"properties": {}}
+    for k in columns:
+        feature["properties"][k] = (data.as_dict())[k]
+
+    return feature
+
+
+def prepare_anon_users_list(data):
+    features = []
+    for element in data:
+        features.append(format_anon_user(element))
+    features_data = FeatureCollection(features)
+    features_data["count"] = len(features)
     return features_data
 
 
@@ -382,16 +380,16 @@ def get_program_statistics(program_id):
         observers_category = request.args.get('observers_category', None)
         if observers_category is not None:
             areas_query = (areas_query
-                .join(UserModel, UserModel.id_user == AreaModel.id_role)
-                .filter(UserModel.category == observers_category)
-            )
+                           .join(UserModel, UserModel.id_user == AreaModel.id_role)
+                           .filter(UserModel.category == observers_category)
+                           )
             observers_query = (observers_query
-                .filter(UserModel.category == observers_category)
-            )
+                               .filter(UserModel.category == observers_category)
+                               )
             observations_query = (observations_query
-                .join(UserModel, UserModel.id_user == AreaModel.id_role)
-                .filter(UserModel.category == observers_category)
-            )
+                                  .join(UserModel, UserModel.id_user == AreaModel.id_role)
+                                  .filter(UserModel.category == observers_category)
+                                  )
 
         areasNumber = (areas_query
                        .order_by(AreaModel.id_area)
@@ -849,16 +847,42 @@ def get_areas_by_program(id):
         observers_category = request.args.get('observers_category', None)
         if observers_category is not None:
             areas_query = (areas_query
-                .join(UserModel, UserModel.id_user == AreaModel.id_role)
-                .filter(UserModel.category == observers_category)
-            )
+                           .join(UserModel, UserModel.id_user == AreaModel.id_role)
+                           .filter(UserModel.category == observers_category)
+                           )
 
         areas = areas_query.order_by(func.lower(AreaModel.name)).all()
 
-        formatted_list = prepare_list(areas, model_name="areas")
+        fields = ['id_area', 'name', 'id_role'] if request.args.get('all-data', None) is not None else None
+        formatted_list = prepare_list(areas, model_name="areas", fields=fields)
 
         for area in formatted_list.features:
             area["properties"]["has_edit_access"] = has_edit_access
+
+            if request.args.get('all-data', None) is not None:
+                creator = (
+                    UserModel.query
+                        .join(AreaModel, AreaModel.id_role == UserModel.id_user)
+                        .filter(AreaModel.id_area == area["properties"]['id_area'])
+                        .first()
+                )
+                area["properties"]["creator"] = format_anon_user(creator, ['email', 'phone'])
+
+                if creator is not None:
+                    relay_observers = (UserModel.query
+                                       .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                                       .filter(UserModel.linked_relay_id == creator.id_user)
+                                       )
+                    area["properties"]["relay_observers"] = prepare_anon_users_list(relay_observers)
+                else:
+                    area["properties"]["relay_observers"] = []
+
+                linked_users = (UserModel.query
+                                .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                                .filter(AreasAccessModel.id_area == area["properties"]['id_area'],
+                                        AreasAccessModel.id_user == UserModel.id_user)
+                                )
+                area["properties"]["linked_users"] = prepare_anon_users_list(linked_users)
 
         return formatted_list
     except Exception as e:
@@ -947,13 +971,15 @@ def get_species_sites_by_program(id):
                 db.session.query(SpeciesStageModel, func.max(SpeciesSiteObservationModel.id_species_site_observation),
                                  func.max(SpeciesSiteObservationModel.timestamp_create),
                                  func.count(SpeciesSiteObservationModel.id_species_site_observation))
-                    .outerjoin(StagesStepModel, and_(StagesStepModel.id_species_stage == SpeciesStageModel.id_species_stage,
+                    .outerjoin(StagesStepModel,
+                               and_(StagesStepModel.id_species_stage == SpeciesStageModel.id_species_stage,
                                     StagesStepModel.order > 1))
                     .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
                     .outerjoin(SpeciesSiteObservationModel,
                                and_(SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site,
                                     StagesStepModel.id_stages_step == SpeciesSiteObservationModel.id_stages_step,
-                                    SpeciesSiteObservationModel.date.between(str(date.today().year) + '-01-01', str(date.today().year) + '-12-31')))
+                                    SpeciesSiteObservationModel.date.between(str(date.today().year) + '-01-01',
+                                                                             str(date.today().year) + '-12-31')))
                     .filter(
                     SpeciesSiteModel.id_species_site == species_site.properties['id_species_site'],
                     SpeciesStageModel.active == True
