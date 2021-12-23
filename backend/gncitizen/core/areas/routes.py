@@ -958,7 +958,7 @@ def get_species_sites_by_program(id):
                     SpeciesSiteModel.id_species_site == species_site.properties['id_species_site'],
                     SpeciesStageModel.active == True
                 )
-                    .order_by(SpeciesStageModel.id_species_stage)
+                    .order_by(SpeciesStageModel.order)
                     .group_by(SpeciesStageModel.id_species_stage)
                     .all()
             )
