@@ -12,7 +12,7 @@ from datetime import date
 from flask import Blueprint, request, current_app, json, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func, or_, and_, distinct
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import extract
 from shapely.geometry import asShape, Point
@@ -48,30 +48,10 @@ def format_entity(data, with_geom=True, fields=None):
     return feature
 
 
-def prepare_list(data, with_geom=True, maximum_count=0, model_name=None, fields=None):
+def prepare_list(data, with_geom=True, maximum_count=0, fields=None):
     features = []
     for element in data:
         formatted = format_entity(element, with_geom, fields=fields)
-
-        if model_name == 'areas':
-            linked_observations_number = (
-                SpeciesSiteObservationModel.query
-                    .join(SpeciesSiteModel,
-                          SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
-                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                    .filter(AreaModel.id_area == element.id_area)
-                    .count()
-            )
-            formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
-
-        if model_name == 'species_sites':
-            linked_observations_number = (
-                SpeciesSiteObservationModel.query
-                    .filter_by(id_species_site=element.id_species_site)
-                    .count()
-            )
-            formatted["properties"]["creator_can_delete"] = (linked_observations_number == 0)
-
         features.append(formatted)
     features_data = FeatureCollection(features)
     features_data["count"] = len(features)
@@ -84,8 +64,9 @@ def format_anon_user(data, extra_columns=[]):
     if data is None:
         return {}
 
-    columns = ['id_user', 'username', 'timestamp_create', 'is_relay', 'avatar'] + extra_columns
     feature = {"properties": {}}
+
+    columns = ['id_user', 'username', 'timestamp_create', 'is_relay', 'avatar'] + extra_columns
     for k in columns:
         feature["properties"][k] = (data.as_dict())[k]
 
@@ -272,12 +253,20 @@ def get_user_areas():
     """
     try:
         user_id = get_id_role_if_exists()
-        areas = (AreaModel.query
-                 .filter_by(id_role=user_id)
-                 .order_by(func.lower(AreaModel.name))
-                 .all())
+        areas = (
+            db.session.query(AreaModel, func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)))
+                .outerjoin(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                .outerjoin(SpeciesSiteObservationModel,
+                           SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                .filter_by(id_role=user_id)
+                .order_by(func.lower(AreaModel.name))
+                .group_by(AreaModel.id_area)
+                .all())
 
-        return prepare_list(areas, model_name="areas")
+        formatted_list = prepare_list(list(map(lambda area: area[0], areas)))
+        for area in formatted_list.features:
+            area["properties"]["creator_can_delete"] = (areas[formatted_list.features.index(area)][1] == 0)
+        return formatted_list
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -475,12 +464,23 @@ def get_user_species_sites():
     """
     try:
         user_id = get_id_role_if_exists()
-        species_sites = (SpeciesSiteModel.query
-                         .filter_by(id_role=user_id)
+        species_sites = (db.session.query(SpeciesSiteModel,
+                                          func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)))
                          .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                         .outerjoin(SpeciesSiteObservationModel,
+                                    SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                         .filter_by(id_role=user_id)
                          .order_by(func.lower(SpeciesSiteModel.name))
+                         .group_by(SpeciesSiteModel.id_species_site)
                          .all())
-        return prepare_list(species_sites, model_name="species_sites")
+
+        formatted_list = prepare_list(list(map(lambda species_site: species_site[0], species_sites)))
+
+        for species_site in formatted_list.features:
+            observations_count = species_sites[formatted_list.features.index(species_site)][1]
+            species_site["properties"]["creator_can_delete"] = (observations_count == 0)
+
+        return formatted_list
     except Exception as e:
         return {"error_message": str(e)}, 400
 
@@ -590,8 +590,13 @@ def get_admin_species_sites():
             return prepare_list([])
 
         species_sites_query = (
-            SpeciesSiteModel.query
+            db.session.query(SpeciesSiteModel,
+                             func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)))
                 .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                .outerjoin(SpeciesSiteObservationModel,
+                           SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                .order_by(func.lower(SpeciesSiteModel.name))
+
         )
 
         if user.admin != 1:
@@ -607,11 +612,14 @@ def get_admin_species_sites():
         if request.args.get('area'):
             species_sites_query = species_sites_query.filter(SpeciesSiteModel.id_area == request.args.get('area'))
 
-        species_sites = species_sites_query.order_by(SpeciesSiteModel.id_species_site).all()
+        species_sites = species_sites_query.order_by(SpeciesSiteModel.id_species_site).group_by(
+            SpeciesSiteModel.id_species_site).all()
 
-        formatted_list = prepare_list(species_sites, model_name="species_sites")
+        formatted_list = prepare_list(list(map(lambda species_site: species_site[0], species_sites)))
 
         for species_site in formatted_list.features:
+            observations_count = species_sites[formatted_list.features.index(species_site)][1]
+            species_site["properties"]["creator_can_delete"] = (observations_count == 0)
             species_site["properties"]["photos"] = []
             photos = (
                 db.session.query(MediaModel, SpeciesSiteModel)
@@ -802,9 +810,19 @@ def get_areas_by_program(id):
         description: List of all areas
     """
     try:
-        areas_query = (AreaModel.query
-                       .filter_by(id_program=id)
-                       )
+        areas_query = (
+            db.session.query(AreaModel, func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)))
+                .outerjoin(SpeciesSiteModel,
+                           AreaModel.id_area == SpeciesSiteModel.id_area)
+                .outerjoin(SpeciesSiteObservationModel,
+                           SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                .filter(AreaModel.id_program == id)
+        )
+
+        areas = areas_query.order_by(func.lower(AreaModel.name)).group_by(AreaModel.id_area).all()
+        fields = ['id_area', 'name', 'id_role'] if request.args.get('all-data', None) is not None else None
+        return prepare_list(list(map(lambda area: area[0], areas)), with_geom=False, fields=fields)
+
         has_edit_access = False
         program = ProgramsModel.query.get(id)
         if program.is_private and request.args.get('all-data', None) is None:
@@ -820,9 +838,6 @@ def get_areas_by_program(id):
 
         year = request.args.get('year', None)
         species = request.args.get('species', None)
-
-        if year is not None or species is not None:
-            areas_query = areas_query.join(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
 
         if year is not None:
             areas_query = (areas_query
@@ -851,13 +866,39 @@ def get_areas_by_program(id):
                            .filter(UserModel.category == observers_category)
                            )
 
-        areas = areas_query.order_by(func.lower(AreaModel.name)).all()
+        areas = areas_query.order_by(func.lower(AreaModel.name)).group_by(AreaModel.id_area).all()
 
         fields = ['id_area', 'name', 'id_role'] if request.args.get('all-data', None) is not None else None
-        formatted_list = prepare_list(areas, model_name="areas", fields=fields)
+        formatted_list = prepare_list(list(map(lambda area: area[0], areas)), fields=fields)
 
         for area in formatted_list.features:
             area["properties"]["has_edit_access"] = has_edit_access
+            area["properties"]["creator_can_delete"] = (areas[formatted_list.features.index(area)][1] == 0)
+
+            if request.args.get('all-data', None) is not None:
+                creator = (
+                    UserModel.query
+                        .join(AreaModel, AreaModel.id_role == UserModel.id_user)
+                        .filter(AreaModel.id_area == area["properties"]['id_area'])
+                        .first()
+                )
+                area["properties"]["creator"] = format_anon_user(creator, ['email', 'phone'])
+
+                if creator is not None:
+                    relay_observers = (UserModel.query
+                                       .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                                       .filter(UserModel.linked_relay_id == creator.id_user)
+                                       )
+                    area["properties"]["relay_observers"] = prepare_anon_users_list(relay_observers)
+                else:
+                    area["properties"]["relay_observers"] = []
+
+                linked_users = (UserModel.query
+                                .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                                .filter(AreasAccessModel.id_area == area["properties"]['id_area'],
+                                        AreasAccessModel.id_user == UserModel.id_user)
+                                )
+                area["properties"]["linked_users"] = prepare_anon_users_list(linked_users)
 
         return formatted_list
     except Exception as e:
@@ -885,10 +926,15 @@ def get_species_sites_by_program(id):
         description: List of all species sites
     """
     try:
-        species_sites_query = (SpeciesSiteModel.query
+        species_sites_query = (db.session.query(SpeciesSiteModel,
+                                                func.count(
+                                                    distinct(SpeciesSiteObservationModel.id_species_site_observation)))
                                .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                               .filter_by(id_program=id)
+                               .outerjoin(SpeciesSiteObservationModel,
+                                          SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                               .filter(AreaModel.id_program == id)
                                )
+
         has_edit_access = False
 
         program = ProgramsModel.query.get(id)
@@ -915,12 +961,15 @@ def get_species_sites_by_program(id):
             )
         )
                          .order_by(func.lower(SpeciesSiteModel.name))
+                         .group_by(SpeciesSiteModel.id_species_site)
                          .all()
                          )
 
-        formatted_list = prepare_list(species_sites, model_name="species_sites")
+        formatted_list = prepare_list(list(map(lambda species_site: species_site[0], species_sites)))
 
         for species_site in formatted_list.features:
+            observations_count = species_sites[formatted_list.features.index(species_site)][1]
+            species_site["properties"]["creator_can_delete"] = (observations_count == 0)
             species_site["properties"]["has_edit_access"] = has_edit_access
             species_site["properties"]["photos"] = []
             photos = (
