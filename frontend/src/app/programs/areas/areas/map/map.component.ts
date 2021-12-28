@@ -318,6 +318,13 @@ export abstract class BaseMapComponent implements OnChanges {
                         feature: feature,
                         marker: layer,
                     });
+
+                    const color = this.isDataviz
+                        ? feature.properties.creator_is_relay
+                            ? '#8e3414'
+                            : '#d1954e'
+                        : 'blue';
+                    layer.setStyle({ color: color });
                 }
 
                 const popupContent = this.getPopupContent(feature);
@@ -463,7 +470,8 @@ export abstract class BaseMapComponent implements OnChanges {
                         this.programMaxBounds.contains([
                             e.latlng.lat,
                             e.latlng.lng,
-                        ])
+                        ]) &&
+                        !this.isDataviz
                     ) {
                         this.newObsMarker = L.circle(e.latlng, {
                             radius: 500,
