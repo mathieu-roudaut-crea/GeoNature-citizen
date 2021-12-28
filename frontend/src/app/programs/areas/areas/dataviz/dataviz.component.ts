@@ -28,6 +28,7 @@ export class DatavizComponent implements OnInit {
     statistics = {};
 
     program_id;
+    loading = false;
 
     mountains = [
         {
@@ -83,17 +84,20 @@ export class DatavizComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.loading = true;
         this.programsService
             .getProgramSpecies(this.program_id)
             .toPromise()
             .then((response) => {
                 this.speciesList = response;
+                this.loading = false;
             });
         this.programsService
             .getProgramYears(this.program_id)
             .toPromise()
             .then((response) => {
                 this.years = response.years;
+                this.loading = false;
             });
 
         this.getStatisticsFromFilters();
@@ -119,6 +123,7 @@ export class DatavizComponent implements OnInit {
     }
 
     getStatisticsFromFilters() {
+        this.loading = true;
         this.programsService
             .getProgramStatistics(this.program_id, this.getFilters())
             .toPromise()
@@ -131,6 +136,7 @@ export class DatavizComponent implements OnInit {
             .toPromise()
             .then((response) => {
                 this.areas = response;
+                this.loading = false;
             });
     }
 

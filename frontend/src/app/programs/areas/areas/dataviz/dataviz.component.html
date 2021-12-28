@@ -74,4 +74,17 @@
             [features]="areas"
         ></app-areas-dataviz-map>
     </div>
+
+    <div *ngIf="loading">
+        <div id="loading-container">
+            <div class="loading-text">
+                <h4>Chargement en cours...</h4>
+            </div>
+            <div id="spinner">
+                <div class="loader-1"></div>
+                <div class="loader-2"></div>
+                <div class="loader-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
