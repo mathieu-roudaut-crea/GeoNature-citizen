@@ -43,6 +43,8 @@ export class DatavizComponent implements OnInit {
                 '26',
                 '13',
                 '83',
+                'CH',
+                'IT',
             ],
         },
         { name: 'Jura', postalCodes: ['01', '39', '25'] },
@@ -63,7 +65,10 @@ export class DatavizComponent implements OnInit {
                 '36',
             ],
         },
-        { name: 'Pyrénées', postalCodes: ['64', '65', '31', '09', '11', '66'] },
+        {
+            name: 'Pyrénées',
+            postalCodes: ['64', '65', '31', '09', '11', '66', 'ES', 'AD'],
+        },
         { name: 'Vosges', postalCodes: ['88', '57', '67', '68', '70', '54'] },
         { name: 'Corse', postalCodes: ['2A', '2B'] },
     ];

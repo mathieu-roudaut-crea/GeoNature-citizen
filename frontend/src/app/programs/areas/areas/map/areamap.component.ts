@@ -15,6 +15,7 @@ import { BaseMapComponent, conf } from './map.component';
 import { MapService } from '../../../base/map/map.service';
 import { AreaService } from '../../areas.service';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 @Component({
     selector: 'app-areas-map',
@@ -35,11 +36,12 @@ export class AreasMapComponent extends BaseMapComponent implements OnInit {
     constructor(
         @Inject(LOCALE_ID) readonly localeId: string,
         private areaService: AreaService,
+        programService: GncProgramsService,
         resolver: ComponentFactoryResolver,
         injector: Injector,
         mapService: MapService
     ) {
-        super(resolver, injector, mapService);
+        super(resolver, injector, mapService, programService);
     }
 
     ngOnInit() {

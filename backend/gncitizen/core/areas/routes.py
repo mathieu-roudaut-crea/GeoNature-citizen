@@ -811,11 +811,12 @@ def get_areas_by_program(id):
     """
     try:
         areas_query = (
-            db.session.query(AreaModel, func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)))
+            db.session.query(AreaModel, func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)), func.bool_and(UserModel.is_relay))
                 .outerjoin(SpeciesSiteModel,
                            AreaModel.id_area == SpeciesSiteModel.id_area)
                 .outerjoin(SpeciesSiteObservationModel,
                            SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                .outerjoin(UserModel, UserModel.id_user == AreaModel.id_role)
                 .filter(AreaModel.id_program == id)
         )
 
@@ -858,7 +859,6 @@ def get_areas_by_program(id):
         observers_category = request.args.get('observers_category', None)
         if observers_category is not None:
             areas_query = (areas_query
-                           .join(UserModel, UserModel.id_user == AreaModel.id_role)
                            .filter(UserModel.category == observers_category)
                            )
 
@@ -869,36 +869,51 @@ def get_areas_by_program(id):
 
         for area in formatted_list.features:
             area["properties"]["has_edit_access"] = has_edit_access
-            area["properties"]["creator_can_delete"] = (areas[formatted_list.features.index(area)][1] == 0)
-
-            if request.args.get('all-data', None) is not None:
-                creator = (
-                    UserModel.query
-                        .join(AreaModel, AreaModel.id_role == UserModel.id_user)
-                        .filter(AreaModel.id_area == area["properties"]['id_area'])
-                        .first()
-                )
-                area["properties"]["creator"] = format_anon_user(creator, ['email', 'phone'])
-
-                if creator is not None:
-                    relay_observers = (UserModel.query
-                                       .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
-                                       .filter(UserModel.linked_relay_id == creator.id_user)
-                                       )
-                    area["properties"]["relay_observers"] = prepare_anon_users_list(relay_observers)
-                else:
-                    area["properties"]["relay_observers"] = []
-
-                linked_users = (UserModel.query
-                                .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
-                                .filter(AreasAccessModel.id_area == area["properties"]['id_area'],
-                                        AreasAccessModel.id_user == UserModel.id_user)
-                                )
-                area["properties"]["linked_users"] = prepare_anon_users_list(linked_users)
+            associated_row = areas[formatted_list.features.index(area)]
+            area["properties"]["creator_can_delete"] = (associated_row[1] == 0)
+            area["properties"]["creator_is_relay"] = associated_row[2]
+            area["properties"]["relay_observers"] = {"features": []}
+            area["properties"]["linked_users"] = {"features": []}
 
         return formatted_list
     except Exception as e:
         return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/<int:id>/observers/", methods=["GET"])
+@json_resp
+def get_areas_observers(id):
+    response = {}
+
+    area = AreaModel.query.get(id)
+    if area is None:
+        return response, 404
+
+    creator = (
+        UserModel.query
+            .filter_by(id_user=area.id_role)
+            .first()
+    )
+
+    response["creator"] = format_anon_user(creator, ['email', 'phone'] if creator.is_relay else [])
+
+    if creator is not None:
+        relay_observers = (UserModel.query
+                           .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                           .filter(UserModel.linked_relay_id == creator.id_user)
+                           )
+        response["relay_observers"] = prepare_anon_users_list(relay_observers)
+    else:
+        response["relay_observers"] = []
+
+    linked_users = (UserModel.query
+                    .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
+                    .filter(AreasAccessModel.id_area == area.id_area,
+                            AreasAccessModel.id_user == UserModel.id_user)
+                    )
+    response["linked_users"] = prepare_anon_users_list(linked_users)
+
+    return response, 200
 
 
 @areas_api.route("/program/<int:id>/species_sites/", methods=["GET"])

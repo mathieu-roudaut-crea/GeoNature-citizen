@@ -25,6 +25,7 @@ import 'leaflet.markercluster';
 import 'leaflet.locatecontrol';
 import 'leaflet-gesture-handling';
 import { MapService } from '../../../base/map/map.service';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 export const conf = {
     MAP_ID: 'obsMap',
@@ -141,6 +142,7 @@ export abstract class BaseMapComponent implements OnChanges {
     resolver: ComponentFactoryResolver;
     injector: Injector;
     mapService: MapService;
+    programService: GncProgramsService;
     markerToggle = true;
     isDataviz = false;
     pathLines = [];
@@ -153,11 +155,13 @@ export abstract class BaseMapComponent implements OnChanges {
     constructor(
         resolver: ComponentFactoryResolver,
         injector: Injector,
-        mapService: MapService
+        mapService: MapService,
+        programService: GncProgramsService
     ) {
         this.resolver = resolver;
         this.injector = injector;
         this.mapService = mapService;
+        this.programService = programService;
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -315,50 +319,71 @@ export abstract class BaseMapComponent implements OnChanges {
                         marker: layer,
                     });
                 }
+
                 const popupContent = this.getPopupContent(feature);
                 layer.bindPopup(popupContent);
 
                 layer.on({
                     click: (event) => {
-                        const relay_observers =
-                            event.target.feature.properties.relay_observers
-                                .features;
-                        relay_observers.forEach((observer) => {
-                            this.features.features.forEach((area) => {
-                                if (
-                                    area.properties.id_role ===
-                                    observer.properties.id_user
-                                ) {
-                                    const geometry = Object.assign(
-                                        area.geometry
-                                    );
-                                    const pathLine = L.polyline(
-                                        [
-                                            [
-                                                event.latlng.lat,
-                                                event.latlng.lng,
-                                            ],
-                                            [
-                                                geometry.coordinates[0][0][1],
-                                                geometry.coordinates[0][0][0],
-                                            ],
-                                        ],
-                                        { color: '#8e3414' }
-                                    );
-                                    this.pathLines.push(pathLine);
-                                    this.observationMap.addLayer(pathLine);
-                                }
+                        this.programService
+                            .getAreaObservers(feature.properties.id_area)
+                            .toPromise()
+                            .then((response) => {
+                                console.log('obs  response ', response);
+                                const popup = event.target.getPopup();
+
+                                const feature = event.target.feature;
+                                feature.properties = Object.assign(
+                                    event.target.feature.properties,
+                                    response
+                                );
+                                popup.setContent(this.getPopupContent(feature));
+
+                                const relay_observers = event.target.feature
+                                    .properties.relay_observers
+                                    ? event.target.feature.properties
+                                          .relay_observers.features
+                                    : [];
+
+                                relay_observers.forEach((observer) => {
+                                    this.features.features.forEach((area) => {
+                                        if (
+                                            area.properties.id_role ===
+                                            observer.properties.id_user
+                                        ) {
+                                            const geometry = Object.assign(
+                                                area.geometry
+                                            );
+                                            const pathLine = L.polyline(
+                                                [
+                                                    [
+                                                        event.latlng.lat,
+                                                        event.latlng.lng,
+                                                    ],
+                                                    [
+                                                        geometry
+                                                            .coordinates[0][0][1],
+                                                        geometry
+                                                            .coordinates[0][0][0],
+                                                    ],
+                                                ],
+                                                { color: '#8e3414' }
+                                            );
+                                            this.pathLines.push(pathLine);
+                                            this.observationMap.addLayer(
+                                                pathLine
+                                            );
+                                        }
+                                    });
+                                });
                             });
-                        });
                     },
                 });
             },
             pointToLayer: (_feature, latlng): L.Marker => {
                 const marker: L.Marker<any> = L.marker(latlng, {
                     icon: this.isDataviz
-                        ? _feature.properties.creator &&
-                          _feature.properties.creator.properties &&
-                          _feature.properties.creator.properties.is_relay
+                        ? _feature.properties.creator_is_relay
                             ? conf.RELAY_MARKER_ICON()
                             : conf.OBSERVER_MARKER_ICON()
                         : conf.AREA_MARKER_ICON(),
@@ -504,6 +529,7 @@ export abstract class BaseMapComponent implements OnChanges {
                 icon: conf.AREA_MARKER_ICON(),
             });
         }
+        console.log('SHOW POPUP');
         L.popup()
             .setLatLng(visibleParent.getLatLng())
             .setContent(this.getPopupContent(feature))

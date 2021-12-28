@@ -15,6 +15,7 @@ import { BaseMapComponent } from './map.component';
 import { MapService } from '../../../base/map/map.service';
 import { AreaService } from '../../areas.service';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
+import { GncProgramsService } from '../../../../api/gnc-programs.service';
 
 @Component({
     selector: 'app-areas-dataviz-map',
@@ -44,9 +45,10 @@ export class AreasDatavizMapComponent
         private areaService: AreaService,
         resolver: ComponentFactoryResolver,
         injector: Injector,
-        mapService: MapService
+        mapService: MapService,
+        programService: GncProgramsService
     ) {
-        super(resolver, injector, mapService);
+        super(resolver, injector, mapService, programService);
     }
 
     ngOnChanges(changes) {
@@ -86,7 +88,13 @@ export class AreasDatavizMapComponent
         <ng-container>
             <p>
                 <b>{{ data.name }}</b>
-                <span *ngIf="data.creator && data.creator.properties && data.creator.properties.is_relay">
+                <span
+                    *ngIf="
+                        data.creator &&
+                        data.creator.properties &&
+                        data.creator.properties.is_relay
+                    "
+                >
                     <br *ngIf="data.creator.properties.organism" />
                     {{ data.creator.properties.organism }}
                     (<a
@@ -108,7 +116,10 @@ export class AreasDatavizMapComponent
                     <span class="participants">
                         <b>Participants:</b>
                         <br />
-                        <span class="linked-user-container" *ngIf="data.creator">
+                        <span
+                            class="linked-user-container"
+                            *ngIf="data.creator"
+                        >
                             <img
                                 *ngIf="data.creator.properties.avatar"
                                 alt="creator avatar"
@@ -139,7 +150,11 @@ export class AreasDatavizMapComponent
                         </span>
                         <span
                             class="linked-user-container"
-                            *ngFor="let user of data.linked_users.features"
+                            *ngFor="
+                                let user of data.linked_users
+                                    ? data.linked_users.features
+                                    : []
+                            "
                         >
                             <img
                                 *ngIf="user.properties.avatar"

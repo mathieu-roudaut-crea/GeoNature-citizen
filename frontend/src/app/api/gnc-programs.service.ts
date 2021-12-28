@@ -212,6 +212,10 @@ export class GncProgramsService implements OnInit {
         );
     }
 
+    getAreaObservers(id: number): Observable<Object> {
+        return this.http.get<Object>(`${this.URL}/areas/${id}/observers`);
+    }
+
     getProgramStatistics(programId, filters = {}) {
         const parameters = this.getParametersFromFilters(
             Object.assign(filters, { 'all-data': true })
