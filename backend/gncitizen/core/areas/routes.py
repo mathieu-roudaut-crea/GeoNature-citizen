@@ -423,16 +423,17 @@ def get_program_years(program_id):
         description: List of all years
     """
     try:
-        areas_query = (db.session.query(extract('year', SpeciesSiteObservationModel.date))
+        years_results = (db.session.query(extract('year', SpeciesSiteObservationModel.date))
                        .select_from(SpeciesSiteObservationModel)
                        .join(SpeciesSiteModel,
                              SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
                        .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                        .filter(AreaModel.id_program == program_id)
+                       .order_by(SpeciesSiteObservationModel.date.desc())
+                       .all()
                        )
 
         years = []
-        years_results = areas_query.all()
         for year in years_results:
             if not year[0] in years:
                 years.append(year[0])
