@@ -22,7 +22,7 @@
                     Toutes les espèces
                 </option>
                 <option *ngFor="let species of speciesList.features" [value]="species.properties.cd_nom">
-                    {{ species.properties.nom_complet }}
+                    {{ species.properties.nom_vern }}
                 </option>
             </select>
         </div>
@@ -54,6 +54,9 @@
         </div>
         <div class="statistics" *ngIf="statistics">
             <div>
+                <b>{{ statistics.observationsNumber }}</b> observations
+            </div>
+            <div>
                 <b>{{ statistics.areasNumber }}</b> zones d'observations
             </div>
             <div>
@@ -61,9 +64,6 @@
             </div>
             <div>
                 dont <b>{{ statistics.relaysNumber }}</b> relais
-            </div>
-            <div>
-                <b>{{ statistics.observationsNumber }}</b> observations
             </div>
         </div>
     </div>
