@@ -907,7 +907,8 @@ def get_areas_observers(id):
     linked_users = (UserModel.query
                     .join(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
                     .filter(AreasAccessModel.id_area == area.id_area,
-                            AreasAccessModel.id_user == UserModel.id_user)
+                            AreasAccessModel.id_user == UserModel.id_user,
+                            UserModel.id_user != area.id_role)
                     )
     response["linked_users"] = prepare_anon_users_list(linked_users)
 
