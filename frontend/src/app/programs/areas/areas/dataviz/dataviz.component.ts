@@ -43,19 +43,20 @@ export class DatavizComponent implements OnInit {
 
     ngOnInit(): void {
         this.loading = true;
+    }
+
+    ngAfterViewInit(): void {
         this.programsService
             .getProgramSpecies(this.program_id)
             .toPromise()
             .then((response) => {
                 this.speciesList = response;
-                this.loading = false;
             });
         this.programsService
             .getProgramYears(this.program_id)
             .toPromise()
             .then((response) => {
                 this.years = response.years;
-                this.loading = false;
             });
 
         this.getStatisticsFromFilters();
