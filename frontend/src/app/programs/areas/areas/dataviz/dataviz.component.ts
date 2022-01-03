@@ -30,49 +30,7 @@ export class DatavizComponent implements OnInit {
     program_id;
     loading = false;
 
-    mountains = [
-        {
-            name: 'Alpes',
-            postalCodes: [
-                '74',
-                '73',
-                '38',
-                '05',
-                '06',
-                '04',
-                '84',
-                '26',
-                '13',
-                '83',
-                'CH',
-                'IT',
-            ],
-        },
-        { name: 'Jura', postalCodes: ['01', '39', '25'] },
-        {
-            name: 'Massif Central',
-            postalCodes: [
-                '42',
-                '43',
-                '63',
-                '15',
-                '07',
-                '12',
-                '03',
-                '48',
-                '30',
-                '23',
-                '19',
-                '36',
-            ],
-        },
-        {
-            name: 'Pyrénées',
-            postalCodes: ['64', '65', '31', '09', '11', '66', 'ES', 'AD'],
-        },
-        { name: 'Vosges', postalCodes: ['88', '57', '67', '68', '70', '54'] },
-        { name: 'Corse', postalCodes: ['2A', '2B'] },
-    ];
+    mountains = AppConfig.mountains;
 
     constructor(
         private programsService: GncProgramsService,
