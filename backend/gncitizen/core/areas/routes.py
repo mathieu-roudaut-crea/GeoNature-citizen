@@ -838,8 +838,6 @@ def get_areas_by_program(id):
 
         if year is not None:
             areas_query = (areas_query
-                           .join(SpeciesSiteObservationModel,
-                                 SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
                            .filter(SpeciesSiteObservationModel.date.between(year + '-01-01', year + '-12-31'))
                            )
 
