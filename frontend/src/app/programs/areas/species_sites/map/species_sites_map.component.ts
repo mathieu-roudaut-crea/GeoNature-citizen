@@ -68,7 +68,7 @@ export class SpeciesSitesMapComponent extends BaseMapComponent {
                         *ngFor="let stage of data.stages"
                         [title]="
                             stage.last_obs_date !== 'None'
-                                ? 'Noté le ' +
+                                ? 'Observé le ' +
                                   (stage.last_obs_date | date: 'longDate')
                                 : stage.name
                         "

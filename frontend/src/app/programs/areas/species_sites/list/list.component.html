@@ -99,7 +99,7 @@
                         <span *ngFor="let stage of speciesSite.properties.stages"
                               [title]="
                             stage.last_obs_date !== 'None'
-                                ? 'Noté le ' +
+                                ? 'Observé le ' +
                                   (stage.last_obs_date | date: 'longDate')
                                 : stage.name
                         ">
