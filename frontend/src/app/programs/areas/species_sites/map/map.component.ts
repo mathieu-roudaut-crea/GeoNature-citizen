@@ -18,7 +18,7 @@ import {
     Geometry,
 } from 'geojson';
 import { MAP_CONFIG } from '../../../../../conf/map.config';
-import {LatLngBounds, MarkerClusterGroup} from 'leaflet';
+import { LatLngBounds, MarkerClusterGroup } from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.locatecontrol';
 import 'leaflet-gesture-handling';
@@ -111,6 +111,7 @@ export abstract class BaseMapComponent implements OnChanges {
     @Input('features') features: GNCFeatureCollection;
     @Input('program') program: GNCFeatureCollection;
     @Output() onClick: EventEmitter<L.Point> = new EventEmitter();
+    isFirstLoading = true;
     options: any;
     observationMap: L.Map;
     programMaxBounds: L.LatLngBounds;
@@ -121,10 +122,12 @@ export abstract class BaseMapComponent implements OnChanges {
         marker: L.Marker<any>;
     }[] = [];
     obsPopup: Feature;
+    openedFeature: Feature;
     openPopupAfterClose: boolean;
     resolver: ComponentFactoryResolver;
     injector: Injector;
     mapService: MapService;
+
     abstract localeId: string;
     abstract feature_id_key: string;
     abstract getPopupComponentFactory(): any;
@@ -156,6 +159,16 @@ export abstract class BaseMapComponent implements OnChanges {
             }
             if (changes.features && changes.features.currentValue) {
                 this.loadFeatures();
+                changes.features.currentValue.features.forEach((feature) => {
+                    if (
+                        this.openedFeature &&
+                        feature &&
+                        this.openedFeature.properties.id_species_site ===
+                            feature.properties.id_species_site
+                    ) {
+                        this.showPopup(feature);
+                    }
+                });
             }
         }
     }
@@ -314,22 +327,28 @@ export abstract class BaseMapComponent implements OnChanges {
             this.observationMap.addLayer(this.observationLayer);
 
             this.observationLayer.on('animationend', (_e) => {
+                if (this.openedFeature) {
+                    this.openedFeature = null;
+                }
                 if (this.obsPopup) {
                     this.openPopupAfterClose = true;
                     this.observationMap.closePopup();
                 }
             });
 
-            if (this.features.count > 0) {
-                this.observationMap.fitBounds(
-                    this.observationLayer.getBounds()
-                );
-                this.observationMap.setZoom(
-                    Math.min(this.observationMap.getZoom(), 16)
-                );
-            } else {
-                const franceCenter = L.latLng(45.6659, 2.64924);
-                this.observationMap.setView(franceCenter, 6);
+            if (this.isFirstLoading) {
+                this.isFirstLoading = false;
+                if (this.features.count > 0) {
+                    this.observationMap.fitBounds(
+                        this.observationLayer.getBounds()
+                    );
+                    this.observationMap.setZoom(
+                        Math.min(this.observationMap.getZoom(), 16)
+                    );
+                } else {
+                    const franceCenter = L.latLng(45.6659, 2.64924);
+                    this.observationMap.setView(franceCenter, 6);
+                }
             }
         }
     }
@@ -345,6 +364,7 @@ export abstract class BaseMapComponent implements OnChanges {
 
     showPopup(feature: Feature): void {
         this.obsPopup = feature;
+        this.openedFeature = feature;
         const marker = this.markers.find((marker) => {
             return (
                 marker.feature.properties[this.feature_id_key] ==
@@ -372,5 +392,6 @@ export abstract class BaseMapComponent implements OnChanges {
         this.observationMap.off();
         this.observationMap.remove();
     }
+
     canStart(): void {}
 }
