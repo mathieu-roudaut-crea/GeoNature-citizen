@@ -287,7 +287,7 @@ def get_program_species(program_id):
                    .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == Taxref.cd_nom)
                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                    .filter(AreaModel.id_program == program_id)
-                   .order_by(func.lower(Taxref.nom_complet))
+                   .order_by(func.lower(Taxref.nom_vern))
                    .all())
 
         return prepare_list(species, with_geom=False)
