@@ -107,9 +107,10 @@ export class AreasDatavizMapComponent
                 </span>
                 <span
                     *ngIf="
-                        data.linked_users &&
-                        data.linked_users.features &&
-                        data.linked_users.features.length
+                        (data.linked_users &&
+                            data.linked_users.features &&
+                            data.linked_users.features.length) ||
+                        data.creator
                     "
                 >
                     <br />
