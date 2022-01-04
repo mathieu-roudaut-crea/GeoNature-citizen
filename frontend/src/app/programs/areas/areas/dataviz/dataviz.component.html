@@ -8,7 +8,7 @@
                 <option [value]="null">
                     Tous les massifs
                 </option>
-                <option *ngFor="let mountain of mountains; let mountainIndex = index;" [value]="mountainIndex">
+                <option *ngFor="let mountain of appConfig.mountains; let mountainIndex = index;" [value]="mountainIndex">
                     {{ mountain.name }}
                 </option>
             </select>

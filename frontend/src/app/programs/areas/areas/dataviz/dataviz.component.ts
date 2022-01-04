@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
 import { AppConfig } from '../../../../../conf/app.config';
@@ -8,7 +8,7 @@ import { AppConfig } from '../../../../../conf/app.config';
     templateUrl: './dataviz.component.html',
     styleUrls: ['./dataviz.component.css'],
 })
-export class DatavizComponent implements OnInit {
+export class DatavizComponent implements AfterViewInit {
     appConfig = AppConfig;
 
     areas;
@@ -28,9 +28,7 @@ export class DatavizComponent implements OnInit {
     statistics = {};
 
     program_id;
-    loading = false;
-
-    mountains = AppConfig.mountains;
+    loading = true;
 
     constructor(
         private programsService: GncProgramsService,
@@ -39,10 +37,6 @@ export class DatavizComponent implements OnInit {
         this.route.params.subscribe(
             (params) => (this.program_id = params['id'])
         );
-    }
-
-    ngOnInit(): void {
-        this.loading = true;
     }
 
     ngAfterViewInit(): void {
@@ -107,7 +101,7 @@ export class DatavizComponent implements OnInit {
                     : null,
             postal_codes:
                 this.selectedMountain && this.selectedMountain !== 'null'
-                    ? this.mountains[this.selectedMountain].postalCodes
+                    ? this.appConfig.mountains[this.selectedMountain].postalCodes
                     : null,
             year:
                 this.selectedYear && this.selectedYear !== 'null'

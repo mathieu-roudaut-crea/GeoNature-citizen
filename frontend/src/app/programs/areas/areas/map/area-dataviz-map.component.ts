@@ -57,22 +57,6 @@ export class AreasDatavizMapComponent
 
     ngOnInit() {
         this.options.OBSERVATION_LAYER = () => L.featureGroup();
-
-        this.areaService.newSpeciesSiteCreated.subscribe((speciesSite) => {
-            this.observationMap.addLayer(
-                L.geoJSON(speciesSite, {
-                    pointToLayer: (_feature, latlng): L.Marker => {
-                        return L.marker(latlng, {
-                            icon: L.icon({
-                                iconUrl: MAP_CONFIG.SPECIES_SITE_POINTER,
-                                iconSize: [48, 48],
-                                iconAnchor: [24, 48],
-                            }),
-                        });
-                    },
-                })
-            );
-        });
     }
 
     getPopupComponentFactory(): any {
