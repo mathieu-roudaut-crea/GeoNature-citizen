@@ -39,13 +39,16 @@ export class AppComponent implements OnInit {
 
         if (window.parent && window.parent.postMessage) {
             const username = localStorage.getItem('username');
+            const accessToken = localStorage.getItem('access_token');
             let options = {
                 type: 'notLoggedIn',
                 username: null,
+                accessToken: null,
             };
             if (username) {
                 options = {
                     username: username,
+                    accessToken: accessToken,
                     type: 'loggedIn',
                 };
             }

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
 import { AppConfig } from '../../../../../conf/app.config';
@@ -70,6 +70,7 @@ export class DatavizComponent implements AfterViewInit {
         this.selectedYear = event.target.value;
         this.getStatisticsFromFilters();
     }
+
     onChangeObserversCategoryFilter(event) {
         this.selectedObserversCategory = event.target.value;
         this.getStatisticsFromFilters();
@@ -90,6 +91,11 @@ export class DatavizComponent implements AfterViewInit {
             .then((response) => {
                 this.areas = response;
                 this.loading = false;
+            })
+            .catch(() => {
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
             });
     }
 
@@ -101,7 +107,8 @@ export class DatavizComponent implements AfterViewInit {
                     : null,
             postal_codes:
                 this.selectedMountain && this.selectedMountain !== 'null'
-                    ? this.appConfig.mountains[this.selectedMountain].postalCodes
+                    ? this.appConfig.mountains[this.selectedMountain]
+                          .postalCodes
                     : null,
             year:
                 this.selectedYear && this.selectedYear !== 'null'
