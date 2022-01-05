@@ -71,7 +71,7 @@ export class AreasDatavizMapComponent
     template: `
         <ng-container>
             <p>
-                <b>{{ data.name }}</b>
+                <b class="notranslate">{{ data.name }}</b>
                 <span
                     *ngIf="
                         data.creator &&
