@@ -488,24 +488,28 @@ export abstract class BaseMapComponent implements OnChanges {
     }
 
     loadFeatures(): void {
-        if (this.features) {
-            if (this.features.count === 1) {
-                this.markerToggle = false;
-            }
-
-            this.updateGeoJson();
-
-            if (this.features.count > 0) {
+        if (!this.features) {
+            return;
+        }
+        if (this.features.count === 1) {
+            this.markerToggle = false;
+        }
+        this.updateGeoJson();
+        if (this.features.count > 0) {
+            setTimeout(() => {
                 this.observationMap.fitBounds(
                     this.observationLayer.getBounds()
                 );
-                this.observationMap.setZoom(
-                    Math.min(this.observationMap.getZoom(), 15)
-                );
-            } else {
-                const franceCenter = L.latLng(45.6659, 2.64924);
-                this.observationMap.setView(franceCenter, 6);
-            }
+                setTimeout(() => {
+                    const newZoom = Math.min(this.observationMap.getZoom(), 15);
+                    if (newZoom !== this.observationMap.getZoom()) {
+                        this.observationMap.setZoom(newZoom);
+                    }
+                }, 200);
+            }, 200);
+        } else {
+            const franceCenter = L.latLng(45.6659, 2.64924);
+            this.observationMap.setView(franceCenter, 6);
         }
     }
 
