@@ -84,6 +84,7 @@ export class AreasDatavizMapComponent
                     (<a
                         *ngIf="data.creator.properties.email"
                         href="mailto:{{ data.creator.properties.email }}"
+                        class="notranslate"
                         >{{ data.creator.properties.email }}</a
                     >)
                     <br *ngIf="data.creator.properties.phone" />
@@ -120,7 +121,7 @@ export class AreasDatavizMapComponent
                             >
                                 <span class="profile-pic"> </span>
                             </span>
-                            <span>
+                            <span class="notranslate">
                                 {{ data.creator.properties.username }}
                             </span>
                             <span
@@ -156,7 +157,7 @@ export class AreasDatavizMapComponent
                             >
                                 <span class="profile-pic"> </span>
                             </span>
-                            <span>{{ user.properties.username }}</span>
+                            <span class="notranslate">{{ user.properties.username }}</span>
                             <span
                                 >Incrit le
                                 {{
