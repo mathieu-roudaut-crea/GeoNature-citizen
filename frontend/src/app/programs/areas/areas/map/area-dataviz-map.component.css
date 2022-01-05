@@ -30,6 +30,10 @@
 .leaflet-popup-content .avatar-wrapper .profile-pic {
     font-style: normal;
     box-shadow: none;
+    cursor: initial;
+}
+.leaflet-popup-content .avatar-wrapper:hover .profile-pic {
+    opacity: 1;
 }
 
 .leaflet-popup-content .avatar-wrapper .profile-pic::after {
