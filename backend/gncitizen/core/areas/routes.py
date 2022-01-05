@@ -1004,7 +1004,7 @@ def get_species_sites_by_program(id):
             species_site["properties"]["stages"] = []
             stages = (
                 db.session.query(SpeciesStageModel, func.max(SpeciesSiteObservationModel.id_species_site_observation),
-                                 func.max(SpeciesSiteObservationModel.timestamp_create),
+                                 func.max(SpeciesSiteObservationModel.date),
                                  func.count(SpeciesSiteObservationModel.id_species_site_observation))
                     .outerjoin(StagesStepModel,
                                and_(StagesStepModel.id_species_stage == SpeciesStageModel.id_species_stage,
