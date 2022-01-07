@@ -164,7 +164,7 @@ export class AreasDatavizMapComponent
                                 user.properties.username
                             }}</span>
                             <span
-                                >Incrit le
+                                >Inscrit le
                                 {{
                                     user.properties.timestamp_create.substring(
                                         0,
