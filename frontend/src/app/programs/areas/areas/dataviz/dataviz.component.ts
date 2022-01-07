@@ -39,7 +39,7 @@ export class DatavizComponent implements AfterViewInit {
         );
     }
 
-    ngAfterViewInit(): void {
+    async ngAfterViewInit() {
         this.programsService
             .getProgramSpecies(this.program_id)
             .toPromise()
@@ -53,30 +53,30 @@ export class DatavizComponent implements AfterViewInit {
                 this.years = response.years;
             });
 
-        this.getStatisticsFromFilters();
+        await this.getStatisticsFromFilters();
     }
 
-    onChangeMountainFilter(event) {
+    async onChangeMountainFilter(event) {
         this.selectedMountain = event.target.value;
-        this.getStatisticsFromFilters();
+        await this.getStatisticsFromFilters();
     }
 
-    onChangeSpeciesFilter(event) {
+    async onChangeSpeciesFilter(event) {
         this.selectedSpecies = event.target.value;
-        this.getStatisticsFromFilters();
+        await this.getStatisticsFromFilters();
     }
 
-    onChangeYearsFilter(event) {
+    async onChangeYearsFilter(event) {
         this.selectedYear = event.target.value;
-        this.getStatisticsFromFilters();
+        await this.getStatisticsFromFilters();
     }
 
-    onChangeObserversCategoryFilter(event) {
+    async onChangeObserversCategoryFilter(event) {
         this.selectedObserversCategory = event.target.value;
-        this.getStatisticsFromFilters();
+        await this.getStatisticsFromFilters();
     }
 
-    getStatisticsFromFilters() {
+    async getStatisticsFromFilters() {
         this.loading = true;
         this.programsService
             .getProgramStatistics(this.program_id, this.getFilters())
@@ -85,7 +85,7 @@ export class DatavizComponent implements AfterViewInit {
                 this.statistics = response;
             });
 
-        this.programsService
+        await this.programsService
             .getProgramAreas(this.program_id, this.getFilters())
             .toPromise()
             .then((response) => {
