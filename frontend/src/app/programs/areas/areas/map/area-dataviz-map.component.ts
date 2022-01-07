@@ -71,7 +71,6 @@ export class AreasDatavizMapComponent
     template: `
         <ng-container>
             <p>
-                <b class="notranslate">{{ data.name }}</b>
                 <span
                     *ngIf="
                         data.creator &&
@@ -79,17 +78,21 @@ export class AreasDatavizMapComponent
                         data.creator.properties.is_relay
                     "
                 >
+                    <b class="title">Relai local de Phénoclim: </b>
+                    <b class="title notranslate">{{ data.creator.properties.organism }}</b>
                     <br *ngIf="data.creator.properties.organism" />
-                    {{ data.creator.properties.organism }}
-                    (<a
+                    <a
                         *ngIf="data.creator.properties.email"
                         href="mailto:{{ data.creator.properties.email }}"
                         class="notranslate"
                         >{{ data.creator.properties.email }}</a
-                    >)
-                    <br *ngIf="data.creator.properties.phone" />
+                    >
+                    <br *ngIf="data.creator.properties.email" />
                     {{ data.creator.properties.phone }}
+                    <br *ngIf="data.creator.properties.phone" />
                 </span>
+                <b class="title">Zone d'observation : </b>
+                <b class="title notranslate">{{ data.name }}</b>
                 <span
                     *ngIf="
                         (data.linked_users &&
@@ -125,7 +128,7 @@ export class AreasDatavizMapComponent
                                 {{ data.creator.properties.username }}
                             </span>
                             <span
-                                >Incrit le
+                                >Inscrit le
                                 {{
                                     data.creator.properties.timestamp_create.substring(
                                         0,
@@ -157,7 +160,9 @@ export class AreasDatavizMapComponent
                             >
                                 <span class="profile-pic"> </span>
                             </span>
-                            <span class="notranslate">{{ user.properties.username }}</span>
+                            <span class="notranslate">{{
+                                user.properties.username
+                            }}</span>
                             <span
                                 >Incrit le
                                 {{

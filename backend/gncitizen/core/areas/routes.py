@@ -894,7 +894,7 @@ def get_areas_observers(id):
             .first()
     )
 
-    response["creator"] = format_anon_user(creator, ['email', 'phone'] if creator.is_relay else [])
+    response["creator"] = format_anon_user(creator, ['email', 'phone', 'organism'] if creator.is_relay else [])
 
     if creator is not None:
         relay_observers = (UserModel.query

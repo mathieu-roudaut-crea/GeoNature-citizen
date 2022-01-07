@@ -5,8 +5,9 @@
 .leaflet-popup-content p {
     width: 100%;
 }
-.leaflet-popup-content p > b {
-    font-size: 20px;
+.leaflet-popup-content .title {
+    color: var(--default-font-color);
+    font-size: 17px;
 }
 
 .leaflet-popup-content .participants .linked-user-container {
@@ -20,8 +21,8 @@
 }
 .leaflet-popup-content .participants .linked-user-container img,
 .leaflet-popup-content .avatar-wrapper {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     margin: 0;
     margin-right: 4px;
     box-shadow: none;
@@ -37,7 +38,7 @@
 }
 
 .leaflet-popup-content .avatar-wrapper .profile-pic::after {
-    font-size: 22px;
+    font-size: 35px;
 }
 
 
