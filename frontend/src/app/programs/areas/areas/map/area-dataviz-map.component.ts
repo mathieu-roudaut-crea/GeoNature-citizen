@@ -79,7 +79,9 @@ export class AreasDatavizMapComponent
                     "
                 >
                     <b class="title">Relai local de Phénoclim: </b>
-                    <b class="title notranslate">{{ data.creator.properties.organism }}</b>
+                    <b class="title notranslate">
+                        {{ data.creator.properties.organism }}
+                    </b>
                     <br *ngIf="data.creator.properties.organism" />
                     <a
                         *ngIf="data.creator.properties.email"
@@ -90,6 +92,7 @@ export class AreasDatavizMapComponent
                     <br *ngIf="data.creator.properties.email" />
                     {{ data.creator.properties.phone }}
                     <br *ngIf="data.creator.properties.phone" />
+                    <br />
                 </span>
                 <b class="title">Zone d'observation : </b>
                 <b class="title notranslate">{{ data.name }}</b>

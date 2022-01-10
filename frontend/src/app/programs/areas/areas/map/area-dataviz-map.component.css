@@ -28,6 +28,7 @@
     margin: 0;
     margin-right: 4px;
     box-shadow: none;
+    border-radius: 25px;
 }
 
 .leaflet-popup-content .avatar-wrapper .profile-pic {
@@ -42,7 +43,6 @@
 .leaflet-popup-content .avatar-wrapper .profile-pic::after {
     font-size: 35px;
 }
-
 
 .leaflet-popup-content-wrapper {
     opacity: 0.8;
