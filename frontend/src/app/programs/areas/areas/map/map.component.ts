@@ -540,7 +540,6 @@ export abstract class BaseMapComponent implements OnChanges {
                 icon: conf.AREA_MARKER_ICON(),
             });
         }
-        console.log('SHOW POPUP');
         L.popup()
             .setLatLng(visibleParent.getLatLng())
             .setContent(this.getPopupContent(feature))
