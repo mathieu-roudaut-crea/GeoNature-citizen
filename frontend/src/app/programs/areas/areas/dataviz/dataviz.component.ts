@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
 import { AppConfig } from '../../../../../conf/app.config';
@@ -56,24 +56,24 @@ export class DatavizComponent implements AfterViewInit {
         await this.getStatisticsFromFilters();
     }
 
-    async onChangeMountainFilter(event) {
+    onChangeMountainFilter(event): void {
         this.selectedMountain = event.target.value;
-        await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeSpeciesFilter(event) {
+    onChangeSpeciesFilter(event): void {
         this.selectedSpecies = event.target.value;
-        await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeYearsFilter(event) {
+    onChangeYearsFilter(event): void {
         this.selectedYear = event.target.value;
-        await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeObserversCategoryFilter(event) {
+    onChangeObserversCategoryFilter(event): void {
         this.selectedObserversCategory = event.target.value;
-        await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
     async getStatisticsFromFilters() {
@@ -89,13 +89,13 @@ export class DatavizComponent implements AfterViewInit {
             .getProgramAreas(this.program_id, this.getFilters())
             .toPromise()
             .then((response) => {
+                if (!response) {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
+                }
                 this.areas = response;
                 this.loading = false;
-            })
-            .catch(() => {
-                setTimeout(() => {
-                    location.reload();
-                }, 500);
             });
     }
 
