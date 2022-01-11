@@ -169,11 +169,16 @@ export class UserDashboardComponent implements OnInit {
     }
 
     areaFilterChange(areaId = 0) {
+        if (this.selectedAreaId == areaId) {
+            return;
+        }
+
         if (areaId > 0) {
             this.selectedAreaId = areaId;
         } else if (this.selectedAreaId > 0) {
             areaId = this.selectedAreaId;
         }
+
         this.userService
             .getAdminSpeciesSites(areaId)
             .pipe(tap((speciesSites) => speciesSites))

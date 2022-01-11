@@ -336,7 +336,6 @@ export abstract class BaseMapComponent implements OnChanges {
                             .getAreaObservers(feature.properties.id_area)
                             .toPromise()
                             .then((response) => {
-                                console.log('obs  response ', response);
                                 const popup = event.target.getPopup();
 
                                 const feature = event.target.feature;
