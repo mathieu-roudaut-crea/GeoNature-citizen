@@ -398,13 +398,18 @@ export abstract class BaseMapComponent implements OnChanges {
                     feature: _feature,
                     marker: marker,
                 });
+
+                marker.setZIndexOffset(
+                    _feature.properties.creator_is_relay ? 1000 : -1000
+                );
+
                 return marker;
             },
         };
 
-        const data = JSON.parse(JSON.stringify(this.features));
+        const areasData = JSON.parse(JSON.stringify(this.features));
         if (this.markerToggle) {
-            data.features = data.features.map((feature) => {
+            areasData.features = areasData.features.map((feature) => {
                 if (feature.geometry.type === 'Polygon') {
                     feature.geometry = <Point>{
                         type: 'Point',
@@ -415,7 +420,8 @@ export abstract class BaseMapComponent implements OnChanges {
                 return feature;
             });
         }
-        this.observationLayer.addLayer(L.geoJSON(data, layerOptions));
+
+        this.observationLayer.addLayer(L.geoJSON(areasData, layerOptions));
         this.observationMap.addLayer(this.observationLayer);
     }
 
