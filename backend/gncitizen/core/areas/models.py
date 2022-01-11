@@ -53,8 +53,8 @@ class AreasAccessModel(TimestampMixinModel, db.Model):
     __tablename__ = "t_areas_access"
     __table_args__ = {"schema": "gnc_areas"}
     id_areas_access = db.Column(db.Integer, primary_key=True, unique=True)
-    id_user = db.Column(db.Integer, db.ForeignKey(UserModel.id_user), nullable=False)
-    id_area = db.Column(db.Integer, db.ForeignKey(AreaModel.id_area), nullable=False)
+    id_user = db.Column(db.Integer, db.ForeignKey(UserModel.id_user, ondelete="CASCADE"), nullable=False)
+    id_area = db.Column(db.Integer, db.ForeignKey(AreaModel.id_area, ondelete="CASCADE"), nullable=False)
 
 @serializable
 @geoserializable
