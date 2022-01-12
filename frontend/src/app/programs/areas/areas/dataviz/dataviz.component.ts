@@ -92,7 +92,7 @@ export class DatavizComponent implements AfterViewInit {
                 if (!response) {
                     setTimeout(() => {
                         location.reload();
-                    }, 500);
+                    }, 2000);
                 }
                 this.areas = response;
                 this.loading = false;

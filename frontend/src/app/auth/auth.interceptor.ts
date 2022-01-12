@@ -84,10 +84,6 @@ export class AuthInterceptor implements HttpInterceptor {
                 })
             );
         } else {
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-
             return this.token$.pipe(
                 filter((token: string | null) => !!token),
                 tap((token) => console.debug(token)),
