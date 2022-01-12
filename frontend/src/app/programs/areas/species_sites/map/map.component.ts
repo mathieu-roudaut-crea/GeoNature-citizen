@@ -110,6 +110,7 @@ export abstract class BaseMapComponent implements OnChanges {
     @ViewChild('map', { static: true }) map: ElementRef;
     @Input('features') features: GNCFeatureCollection;
     @Input('program') program: GNCFeatureCollection;
+    @Input('updateOnNextLoad') updateOnNextLoad = false;
     @Output() onClick: EventEmitter<L.Point> = new EventEmitter();
     isFirstLoading = true;
     options: any;
@@ -336,7 +337,8 @@ export abstract class BaseMapComponent implements OnChanges {
                 }
             });
 
-            if (this.isFirstLoading) {
+            console.log('this.updateOnNextLoad', this.updateOnNextLoad);
+            if (this.isFirstLoading || this.updateOnNextLoad) {
                 this.isFirstLoading = false;
                 if (this.features.count > 0) {
                     this.observationMap.fitBounds(

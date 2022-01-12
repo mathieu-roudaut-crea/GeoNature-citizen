@@ -41,6 +41,7 @@ export class SpeciesSitesComponent
     title = 'SpeciesSites';
     @Input('speciesSites') speciesSites: FeatureCollection;
     @Input('userDashboard') userDashboard = false;
+    @Input('updateMapOnNextLoad') updateMapOnNextLoad = false;
     @Input('inputAreas') inputAreas;
     @Input('admin') admin = false;
     @Output() areaFilterChange = new EventEmitter();

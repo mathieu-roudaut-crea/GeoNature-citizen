@@ -54,6 +54,7 @@ export class UserDashboardComponent implements OnInit {
     adminSpeciesSites: any;
     adminSpeciesSitesObs: any;
     adminObservers: any;
+    updateMapOnNextLoad = false;
 
     loading = false;
     rows: any = [];
@@ -179,18 +180,21 @@ export class UserDashboardComponent implements OnInit {
             areaId = this.selectedAreaId;
         }
 
+        this.updateMapOnNextLoad = true;
         this.userService
             .getAdminSpeciesSites(areaId)
             .pipe(tap((speciesSites) => speciesSites))
-            .subscribe((speciesSites) => {
-                this.adminSpeciesSites = speciesSites;
-                this.adminSpeciesSites.features.forEach((site) => {
-                    const coords: Point = new Point(
+            .subscribe((speciesSites: any) => {
+                speciesSites.features.forEach((site) => {
+                    site.properties.coords = new Point(
                         site.geometry.coordinates[0],
                         site.geometry.coordinates[1]
                     );
-                    site.properties.coords = coords;
                 });
+                this.adminSpeciesSites = speciesSites;
+                setTimeout(() => {
+                    this.updateMapOnNextLoad = false;
+                }, 500);
             });
     }
 
