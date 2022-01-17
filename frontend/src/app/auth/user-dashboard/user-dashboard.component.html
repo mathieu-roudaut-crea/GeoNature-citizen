@@ -335,12 +335,6 @@
         </button>
     </div>
     <div class="modal-body">
-        <ngb-alert
-            *ngIf="errorMessage"
-            type="danger"
-            (close)="errorMessage = null"
-        >{{ errorMessage }}
-        </ngb-alert>
         <form
             [formGroup]="userForm"
             (ngSubmit)="userForm.valid && onUpdatePersonalData(userForm.value)"
@@ -769,7 +763,7 @@
     </div>
 </ng-template>
 
-<div *ngIf="loading">
+<div *ngIf="requestsInProgress > 0">
     <div id="form-loading">
         <div class="loading-text">
             <h4>Chargement en cours...</h4>

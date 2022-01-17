@@ -88,12 +88,6 @@
         </button>
     </div>
     <div class="modal-body">
-        <ngb-alert
-            *ngIf="errorMessage"
-            type="danger"
-            (close)="errorMessage = null"
-        >{{ errorMessage }}
-        </ngb-alert>
         <form
             [formGroup]="userForm"
             (ngSubmit)="userForm.valid && onUpdateUserData(userForm.value)"

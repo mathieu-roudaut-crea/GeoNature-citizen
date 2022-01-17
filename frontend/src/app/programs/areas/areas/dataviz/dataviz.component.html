@@ -75,7 +75,7 @@
         ></app-areas-dataviz-map>
     </div>
 
-    <div *ngIf="loading">
+    <div *ngIf="requestsInProgress > 0">
         <div id="loading-container">
             <div class="loading-text">
                 <h4>Chargement en cours...</h4>

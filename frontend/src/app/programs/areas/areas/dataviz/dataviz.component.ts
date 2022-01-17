@@ -2,6 +2,7 @@ import { AfterViewInit, Component } from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
 import { AppConfig } from '../../../../../conf/app.config';
+import { FeatureCollection } from 'geojson';
 
 @Component({
     selector: 'app-areas-dataviz',
@@ -28,7 +29,7 @@ export class DatavizComponent implements AfterViewInit {
     statistics = {};
 
     program_id;
-    loading = true;
+    requestsInProgress = 0;
 
     constructor(
         private programsService: GncProgramsService,
@@ -39,7 +40,7 @@ export class DatavizComponent implements AfterViewInit {
         );
     }
 
-    async ngAfterViewInit() {
+    async ngAfterViewInit(): Promise<FeatureCollection> {
         this.programsService
             .getProgramSpecies(this.program_id)
             .toPromise()
@@ -53,53 +54,68 @@ export class DatavizComponent implements AfterViewInit {
                 this.years = response.years;
             });
 
-        await this.getStatisticsFromFilters();
+        return await this.getStatisticsFromFilters();
     }
 
-    onChangeMountainFilter(event): void {
-        this.selectedMountain = event.target.value;
-        this.getStatisticsFromFilters();
+    async onChangeMountainFilter(event: Event): Promise<FeatureCollection> {
+        const input = event.target as HTMLInputElement;
+        this.selectedMountain = input.value;
+        return await this.getStatisticsFromFilters();
     }
 
-    onChangeSpeciesFilter(event): void {
-        this.selectedSpecies = event.target.value;
-        this.getStatisticsFromFilters();
+    async onChangeSpeciesFilter(event: Event): Promise<FeatureCollection> {
+        const input = event.target as HTMLInputElement;
+        this.selectedSpecies = input.value;
+        return await this.getStatisticsFromFilters();
     }
 
-    onChangeYearsFilter(event): void {
-        this.selectedYear = event.target.value;
-        this.getStatisticsFromFilters();
+    async onChangeYearsFilter(event: Event): Promise<FeatureCollection> {
+        const input = event.target as HTMLInputElement;
+        this.selectedYear = input.value;
+        return await this.getStatisticsFromFilters();
     }
 
-    onChangeObserversCategoryFilter(event): void {
-        this.selectedObserversCategory = event.target.value;
-        this.getStatisticsFromFilters();
+    async onChangeObserversCategoryFilter(
+        event: Event
+    ): Promise<FeatureCollection> {
+        const input = event.target as HTMLInputElement;
+        this.selectedObserversCategory = input.value;
+        return await this.getStatisticsFromFilters();
     }
 
-    async getStatisticsFromFilters() {
-        this.loading = true;
+    async getStatisticsFromFilters(): Promise<FeatureCollection> {
+        this.requestsInProgress++;
         this.programsService
             .getProgramStatistics(this.program_id, this.getFilters())
             .toPromise()
             .then((response) => {
+                this.requestsInProgress--;
                 this.statistics = response;
             });
 
-        await this.programsService
+        this.requestsInProgress++;
+        return await this.programsService
             .getProgramAreas(this.program_id, this.getFilters())
             .toPromise()
             .then((response) => {
+                this.requestsInProgress--;
                 if (!response) {
                     setTimeout(() => {
                         location.reload();
                     }, 2000);
                 }
                 this.areas = response;
-                this.loading = false;
+                return response;
             });
     }
 
-    getFilters() {
+    getFilters(): {
+        species: string;
+        postal_codes: string[];
+        year: string;
+        observers_category: string;
+        'all-data': boolean;
+    } {
         return {
             species:
                 this.selectedSpecies && this.selectedSpecies !== 'null'

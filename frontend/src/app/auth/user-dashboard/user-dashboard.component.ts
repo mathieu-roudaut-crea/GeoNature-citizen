@@ -56,7 +56,7 @@ export class UserDashboardComponent implements OnInit {
     adminObservers: any;
     updateMapOnNextLoad = false;
 
-    loading = false;
+    requestsInProgress = 0;
     rows: any = [];
     obsToExport: any = [];
     userForm: FormGroup;
@@ -181,10 +181,13 @@ export class UserDashboardComponent implements OnInit {
         }
 
         this.updateMapOnNextLoad = true;
+
+        this.requestsInProgress++;
         this.userService
             .getAdminSpeciesSites(areaId)
             .pipe(tap((speciesSites) => speciesSites))
             .subscribe((speciesSites: any) => {
+                this.requestsInProgress--;
                 speciesSites.features.forEach((site) => {
                     site.properties.coords = new Point(
                         site.geometry.coordinates[0],
@@ -226,7 +229,7 @@ export class UserDashboardComponent implements OnInit {
     }
 
     getData() {
-        this.loading = true;
+        this.requestsInProgress++;
 
         this.getAdminData();
 
@@ -264,7 +267,7 @@ export class UserDashboardComponent implements OnInit {
             data.push(badgeCategories);
         }
         forkJoin(data).subscribe((data: any) => {
-            this.loading = false;
+            this.requestsInProgress--;
 
             if (data.length <= 1) {
                 this.observations = data[0].features;
@@ -352,7 +355,9 @@ export class UserDashboardComponent implements OnInit {
         adminData.push(adminAreas);
         adminData.push(adminObservers);
 
+        this.requestsInProgress++;
         forkJoin(adminData).subscribe((data: any) => {
+            this.requestsInProgress--;
             if (data.length > 1) {
                 this.adminAreas = data[0];
                 this.adminObservers = data[1];
@@ -496,10 +501,10 @@ export class UserDashboardComponent implements OnInit {
     }
 
     onEditInfos(content): void {
-        this.loading = true;
+        this.requestsInProgress++;
 
         this.userService.getPersonalInfo().subscribe((data) => {
-            this.loading = false;
+            this.requestsInProgress--;
             this.personalInfo = data;
             this.initForm();
             this.modalRef = this.modalService.open(content, {
@@ -527,9 +532,9 @@ export class UserDashboardComponent implements OnInit {
             ? 1
             : 0;
 
-        this.loading = true;
+        this.requestsInProgress++;
         this.userService.updatePersonalData(userForm).subscribe((user: any) => {
-            this.loading = false;
+            this.requestsInProgress--;
             localStorage.setItem('userAvatar', user.features.avatar);
             this.modalRef.close();
         });
