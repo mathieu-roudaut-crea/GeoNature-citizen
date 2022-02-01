@@ -81,7 +81,7 @@
                                     "with": "src/environments/environment.prod.ts"
                                 }
                             ],
-                            "baseHref": "/fr/",
+                            "baseHref": "/citizen/fr/",
                             "i18nFile": "src/i18n/messages.fr.xlf",
                             "i18nFormat": "xlf",
                             "i18nLocale": "fr",
@@ -95,7 +95,7 @@
                             "extractCss": true,
                             "namedChunks": false,
                             "aot": true,
-                            
+
                             "extractLicenses": true,
                             "vendorChunk": false,
                             "buildOptimizer": true,
@@ -105,7 +105,7 @@
                                     "with": "src/environments/environment.prod.ts"
                                 }
                             ],
-                            "baseHref": "/en/",
+                            "baseHref": "/citizen/en/",
                             "i18nFile": "src/i18n/messages.en.xlf",
                             "i18nFormat": "xlf",
                             "i18nLocale": "en",

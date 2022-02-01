@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Bootstrap4FrameworkComponent } from '@ajsf/bootstrap4';
 
-/* Custom framework component for angular6-json-schema-form */
+/* Custom framework component for angular6-json-schema-observation_form */
 @Component({
     selector: 'app-framework',
     templateUrl: './framework.component.html',

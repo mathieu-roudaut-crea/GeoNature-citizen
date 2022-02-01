@@ -14,6 +14,7 @@ import { RegisterComponent } from '../../../../../auth/register/register.compone
 import { LoginComponent } from '../../../../../auth/login/login.component';
 import { AppConfig } from '../../../../../../conf/app.config';
 import { AuthService } from '../../../../../auth/auth.service';
+import { ModalsTopbarService } from '../../../../../core/topbar/modalTopbar.service';
 
 @Component({
     templateUrl: './onboard.component.html',
@@ -31,29 +32,24 @@ export class OnboardComponent implements IFlowComponent, OnInit {
     @ViewChild('LoginComponent', { static: true }) LoginComponent: ElementRef;
 
     constructor(
-        private modalService: NgbModal,
+        private modalService: ModalsTopbarService,
         private authService: AuthService,
         private route: ActivatedRoute
     ) {}
 
     ngOnInit() {
-        this.authService.authorized$.subscribe((value) => {
-            if (value) {
-                this.timeout = setTimeout(() => this.data.next(), 0);
-            }
-            if (AppConfig.signup === 'never') {
-                this.data.next();
-            }
-        });
+        this.verifyAuthorization();
     }
 
-    // ngOnInit() {
-    //   // Skip login/register step if already logged in
-    //   let username = localStorage.getItem("username");
-    //   if (username) {
-    //     this.data.next()
-    //   }
-    // }
+    verifyAuthorization() {
+        const token = this.authService.getAccessToken();
+        if (
+            AppConfig.signup === 'never' ||
+            (token && this.authService.tokenExpiration(token) > 1)
+        ) {
+            return this.data.next();
+        }
+    }
 
     // Actions
     register() {
@@ -62,7 +58,7 @@ export class OnboardComponent implements IFlowComponent, OnInit {
         });
         this.RegistrationModalRef.result.then((_) => {
             this.authService.isLoggedIn().subscribe(
-                (value) => value!!,
+                (value) => value!,
                 (reason) => {
                     console.debug('registration dismissed:', reason);
                 }

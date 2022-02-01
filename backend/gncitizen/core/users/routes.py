@@ -7,6 +7,18 @@ from email.mime.text import MIMEText
 
 import flask
 import requests
+import uuid
+import smtplib
+import base64
+import requests
+import hashlib
+import datetime
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+from server import db, jwt
+
 from flask import Blueprint, current_app, request
 from flask_jwt_extended import (
     create_access_token,
@@ -15,11 +27,14 @@ from flask_jwt_extended import (
     get_jwt_identity,
     jwt_required,
 )
+
 from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
-from utils_flask_sqla.response import json_resp
+
+from utils_flask_sqla.response import json_resp, json_resp_accept_empty_list
 
 from gncitizen.core.observations.models import ObservationModel
+from gncitizen.core.areas.models import AreasAccessModel
 from gncitizen.utils.env import MEDIA_DIR
 from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.jwt import admin_required, get_user_if_exists
@@ -68,6 +83,24 @@ def registration():
             username:
               type: string
               example: user1
+            organism:
+              type: string
+            function:
+              type: string
+            country:
+              type: string
+            postal_code:
+              type: string
+            want_newsletter:
+              type: boolean
+            is_relay:
+              type: boolean
+            linked_relay_id:
+              type: int
+            made_known_relay_id:
+              type: int
+            category:
+              type: string
             email:
               type: string
             password:
@@ -120,6 +153,7 @@ def registration():
 
         # Protection against admin creation from API
         datas_to_save["admin"] = False
+        datas_to_save["is_relay"] = False
         if "extention" in request_datas and "avatar" in request_datas:
             extention = request_datas["extention"]
             imgdata = base64.b64decode(
@@ -166,8 +200,25 @@ def registration():
             else:
                 raise GeonatureApiError(e)
 
-        access_token = create_access_token(identity=newuser.username)
-        refresh_token = create_refresh_token(identity=newuser.username)
+        mailchimp_api_key = current_app.config.get("MAILCHIMP_API_KEY", None)
+        if newuser.want_newsletter and mailchimp_api_key is not None:
+            try:
+                client = MailchimpMarketing.Client()
+                client.set_config({
+                    "api_key": mailchimp_api_key,
+                    "server": "us12"
+                })
+
+                response = client.lists.add_list_member(
+                    current_app.config.get("MAILCHIMP_LIST_ID", ""),
+                    {"email_address": newuser.email, "status": "subscribed"}
+                )
+                print(response)
+            except ApiClientError as error:
+                print("Error: {}".format(error.text))
+
+        access_token = create_access_token(identity=newuser.email)
+        refresh_token = create_refresh_token(identity=newuser.email)
 
         # save user avatar
         if "extention" in request_datas and "avatar" in request_datas:
@@ -185,7 +236,7 @@ def registration():
                         newuser.username
                     ),
                 )
-                confirm_user_email(newuser, with_confirm_link=False)
+                confirm_user_email(newuser, with_confirm_link=False, language=request_datas.get("language", ""))
             else:
                 message = (
                     """Félicitations, l'utilisateur "{}" a été créé.  \r\n
@@ -197,16 +248,19 @@ def registration():
         except Exception as e:
             return {"message mail failed": str(e)}, 500
 
+        response = {
+            "message": message,
+            "username": newuser.username,
+            "active": newuser.active,
+            "userAvatar": newuser.avatar,
+        }
+
+        if newuser.active:
+            response["access_token"] = access_token
+            response["refresh_token"] = refresh_token
+
         # send confirm mail
-        return (
-            {
-                "message": message,
-                "username": newuser.username,
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-            },
-            200,
-        )
+        return response, 200
     except Exception as e:
         current_app.logger.critical("grab all: %s", str(e))
         return {"message": str(e)}, 500
@@ -268,6 +322,9 @@ def login():
                 {"message": "Votre compte n'a pas été activé"},
                 400,
             )
+
+        email = current_user.email
+
         if UserModel.verify_hash(password, current_user.password):
             access_token = create_access_token(identity=identifier)
             refresh_token = create_refresh_token(identity=identifier)
@@ -372,9 +429,58 @@ def get_allusers():
       200:
         description: list all users
     """
+    # allusers = UserModel.return_all()
     allusers = UserModel.return_all()
     return allusers, 200
 
+@users_api.route("/relays", methods=["GET"])
+@json_resp_accept_empty_list
+def get_relays():
+    """list all relays
+    ---
+    tags:
+      - Relays
+    summary: List all relays
+    produces:
+      - application/json
+    responses:
+      200:
+        description: list all relays
+    """
+    return UserModel.return_relays(), 200
+
+@users_api.route("/user/<int:id>/info", methods=["GET", "PATCH"])
+@json_resp
+@jwt_required()
+def selected_user(id):
+    """get or patch user model (only if admin)
+    ---
+    tags:
+      - Authentication
+    produces:
+      - application/json
+    responses:
+      200:
+        description: selected user model
+    """
+    try:
+        current_user_email = get_jwt_identity()
+        current_user = UserModel.query.filter_by(email=current_user_email).one()
+        if current_user.admin:
+            user = UserModel.query.filter_by(id_user=id).one()
+            return get_or_patch_user(user)
+        else:
+            return (
+                {"message": "Forbidden"},
+                403,
+            )
+    except Exception as e:
+        # raise GeonatureApiError(e)
+        current_app.logger.error("AUTH ERROR:", str(e))
+        return (
+            {"message": str(e)},
+            400,
+        )
 
 @users_api.route("/user/info", methods=["GET", "PATCH"])
 @json_resp
@@ -393,6 +499,18 @@ def logged_user():
     """
     try:
         user = get_user_if_exists()
+        return get_or_patch_user(user)
+    except Exception as e:
+        # raise GeonatureApiError(e)
+        current_app.logger.error("AUTH ERROR:", str(e))
+        return (
+            {"message": str(e)},
+            400,
+        )
+
+
+def get_or_patch_user(user):
+    try:
         if flask.request.method == "GET":
             # base stats, to enhance as we go
             result = user.as_secured_dict(True)
@@ -403,6 +521,10 @@ def logged_user():
                 .filter(ObservationModel.id_role == user.id_user)
                 .one()[0]
             }
+            result['areas_access'] = []
+            areas_access = AreasAccessModel.query.filter(AreasAccessModel.id_user == user.id_user).all()
+            for area_access in areas_access:
+                result['areas_access'].append(area_access.id_area)
 
             return (
                 {"message": "Vos données personelles", "features": result},
@@ -415,6 +537,13 @@ def logged_user():
                 "[logged_user] Update current user personnal data"
             )
             request_data = dict(request.get_json())
+            if "areas_access" in request_data:
+                AreasAccessModel.query.filter(AreasAccessModel.id_user == user.id_user).delete()
+                for area_id in request_data["areas_access"]:
+                    new_area_access = AreasAccessModel(id_user=user.id_user, id_area=area_id)
+                    db.session.add(new_area_access)
+                db.session.commit()
+
             if "extention" in request_data and "avatar" in request_data:
                 extention = request_data["extention"]
                 imgdata = base64.b64decode(
@@ -424,18 +553,10 @@ def logged_user():
                 )
                 filename = "avatar_" + user.username + "." + extention
                 request_data["avatar"] = filename
-                if os.path.exists(
-                    os.path.join(
-                        str(MEDIA_DIR),
-                        str(user.as_secured_dict(True)["avatar"]),
-                    )
-                ):
-                    os.remove(
-                        os.path.join(
-                            str(MEDIA_DIR),
-                            str(user.as_secured_dict(True)["avatar"]),
-                        )
-                    )
+
+                avatar_path = os.path.join(str(MEDIA_DIR), str(user.as_secured_dict(True)["avatar"]))
+                if os.path.exists(avatar_path):
+                    os.remove(avatar_path)
                 try:
                     handler = open(
                         os.path.join(str(MEDIA_DIR), str(filename)), "wb+"
@@ -460,6 +581,30 @@ def logged_user():
                     request_data["newPassword"]
                 )
             user.admin = is_admin
+
+            mailchimp_api_key = current_app.config.get("MAILCHIMP_API_KEY", None)
+            if mailchimp_api_key is not None:
+                try:
+                    client = MailchimpMarketing.Client()
+                    client.set_config({
+                        "api_key": mailchimp_api_key,
+                        "server": "us12"
+                    })
+
+                    if user.want_newsletter:
+                        client.lists.add_list_member(
+                            current_app.config.get("MAILCHIMP_LIST_ID", ""),
+                            {"email_address": user.email, "status": "subscribed"}
+                        )
+                    else:
+                        client.lists.delete_list_member(
+                            current_app.config.get("MAILCHIMP_LIST_ID", ""),
+                            hashlib.md5(user.email.encode('utf-8')).hexdigest()
+                        )
+
+                except ApiClientError as error:
+                    print("Mailchimp Error: {}".format(error.text))
+
             user.update()
             return (
                 {
@@ -532,6 +677,7 @@ def delete_user():
 def reset_user_password():
     request_datas = dict(request.get_json())
     email = request_datas["email"]
+    # username = request_datas["username"]
 
     try:
         user = UserModel.query.filter_by(email=email).one()
@@ -588,7 +734,7 @@ def reset_user_password():
 def confirm_email(token):
     try:
         email = confirm_token(token)
-    except Exception:
+    except:
         return (
             {"message": "The confirmation link is invalid or has expired."},
             404,

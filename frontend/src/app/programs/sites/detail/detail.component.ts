@@ -14,7 +14,7 @@ import {
     selector: 'app-site-detail',
     templateUrl: '../../base/detail/detail.component.html',
     styleUrls: [
-        './../../observations/obs.component.css', // for form modal only
+        './../../observations/obs.component.css', // for observation_form modal only
         '../../base/detail/detail.component.css',
     ],
     encapsulation: ViewEncapsulation.None,
@@ -23,6 +23,7 @@ export class SiteDetailComponent
     extends BaseDetailComponent
     implements AfterViewInit
 {
+    location;
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,

@@ -30,7 +30,7 @@ export class AuthService {
     constructor(private http: HttpClient, private router: Router) {}
 
     login(user: LoginUser): Observable<LoginPayload> {
-        let url = `${AppConfig.API_ENDPOINT}/login`;
+        const url = `${AppConfig.API_ENDPOINT}/login`;
         return this.http
             .post<LoginPayload>(url, user, { headers: this.headers })
             .pipe(
@@ -44,11 +44,17 @@ export class AuthService {
     }
 
     register(user: RegisterUser): Observable<any> {
-        let url: string = `${AppConfig.API_ENDPOINT}/registration`;
-        return this.http.post(url, user).pipe(
+        const url = `${AppConfig.API_ENDPOINT}/registration`;
+
+        const select = <HTMLInputElement>(
+            document.getElementsByClassName('goog-te-combo')[0]
+        );
+        const postData = select ? { ...user, language: select.value } : user;
+
+        return this.http.post(url, postData).pipe(
             map((user) => {
-                if (user) {
-                    //this.authenticate(user);
+                if (user['active']) {
+                    this.authenticate(user);
                 }
                 return user;
             })
@@ -62,16 +68,24 @@ export class AuthService {
         this.authenticated$.next(true);
         localStorage.setItem('username', user.username);
         localStorage.setItem('userAvatar', user.userAvatar);
+
+        window.parent.postMessage(
+            {
+                username: user.username,
+                type: 'loggedIn',
+            },
+            '*'
+        );
     }
 
     logout(): Promise<any> {
-        let url: string = `${AppConfig.API_ENDPOINT}/logout`;
+        const url = `${AppConfig.API_ENDPOINT}/logout`;
         this.authorized$.next(false);
         return this.http
             .post<LogoutPayload>(url, { headers: this.headers })
             .pipe(
                 catchError((error) => {
-                    console.error(`[logout] error "${error}"`);
+                    console.error(`[logout] error`, error);
                     localStorage.removeItem('access_token');
                     // localStorage.removeItem("refresh_token");
                     this.authenticated$.next(false);
@@ -79,16 +93,25 @@ export class AuthService {
                     return this.router.navigateByUrl('/home');
                 })
             )
-            .toPromise();
+            .toPromise()
+            .then(() => {
+                localStorage.clear();
+                window.parent.postMessage(
+                    {
+                        type: 'logout',
+                    },
+                    '*'
+                );
+            });
     }
 
     ensureAuthorized(): Observable<LoginUser> {
-        let url: string = `${AppConfig.API_ENDPOINT}/user/info`;
+        const url = `${AppConfig.API_ENDPOINT}/user/info`;
         return this.http.get<LoginUser>(url, { headers: this.headers });
     }
 
     performTokenRefresh(): Observable<TokenRefresh> {
-        const url: string = `${AppConfig.API_ENDPOINT}/token_refresh`;
+        const url = `${AppConfig.API_ENDPOINT}/token_refresh`;
         const refresh_token = this.getRefreshToken();
         const headers = this.headers.set(
             'Authorization',
@@ -100,7 +123,7 @@ export class AuthService {
     }
 
     selfDeleteAccount(_access_token): Promise<any> {
-        let url: string = `${AppConfig.API_ENDPOINT}/user/delete`;
+        const url = `${AppConfig.API_ENDPOINT}/user/delete`;
         return this.http.delete(url, { headers: this.headers }).toPromise();
     }
 
@@ -116,7 +139,7 @@ export class AuthService {
         return localStorage.getItem('access_token');
     }
 
-    private hasRefreshToken(): boolean {
+    public hasRefreshToken(): boolean {
         return !!localStorage.getItem('refresh_token');
     }
 
@@ -149,7 +172,7 @@ export class AuthService {
     }
 
     confirmEmail(token): Observable<any> {
-        let url: string = `${AppConfig.API_ENDPOINT}/user/confirmEmail/${token}`;
+        const url = `${AppConfig.API_ENDPOINT}/user/confirmEmail/${token}`;
         return this.http.get(url);
     }
 }

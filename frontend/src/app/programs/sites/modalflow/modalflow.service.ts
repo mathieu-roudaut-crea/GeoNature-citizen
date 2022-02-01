@@ -31,7 +31,7 @@ export class SiteModalFlowService extends ModalFlowService {
         }
         if (!init_data.updateData) {
             items.push(new FlowItem(VisitStepComponent));
-        } // else user only edits the site and do not attach visit
+        } // else user only edits the area and do not attach species_site
         // items.push(new FlowItem(RewardComponent, {service: this}));
         return items;
     }

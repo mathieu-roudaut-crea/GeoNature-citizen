@@ -11,7 +11,7 @@ export const AppConfig = {
         DISPLAY_SIDEBAR: true,
         DISPLAY_STATS: true,
         DISPLAY_BADGES: true,
-        NEW_OBS_FORM_MODAL_VERSION: true
+        NEW_OBS_FORM_MODAL_VERSION: true,
     },
     META: {
       keywords: 'biodiversite enquetes participatif observations',
@@ -70,5 +70,66 @@ export const AppConfig = {
     program_list_observers_names: true,
     program_list_sort: "-timestamp_create",
     details_espece_url: "<url_inpn_or_atlas>/cd_nom/", // !! gardez bien le cd_nom/ dans l'url
-    registration_message : "Vous inscrire vous permet de gérer vos observations"
+    registration_message : "Vous inscrire vous permet de gérer vos observations",
+    categoriesEnum: Object.freeze({
+        individual: 'Particulier',
+        school: 'Etablissement scolaire',
+        professional: 'Professionnel de la nature',
+        education: 'Organisme d’éducation à l’environnement',
+        other: 'Autre',
+    }),
+    imageUpload: {
+        maxHeight: 1440,
+        maxWidth: 1440,
+        quality: 0.9,
+    },
+    validationStates: [
+        { key: 'valid', label: 'Valide', color: 'green' },
+        { key: 'to_verify', label: 'A vérifier', color: 'orange' },
+        { key: 'corrected', label: 'Corrigé', color: 'green' },
+        { key: 'error', label: 'En erreur', color: 'red' },
+    ],
+    mountains: [
+        {
+            name: 'Alpes',
+            postalCodes: [
+                '74',
+                '73',
+                '38',
+                '05',
+                '06',
+                '04',
+                '84',
+                '26',
+                '13',
+                '83',
+                'CH',
+                'IT',
+            ],
+        },
+        { name: 'Jura', postalCodes: ['01', '39', '25'] },
+        {
+            name: 'Massif Central',
+            postalCodes: [
+                '42',
+                '43',
+                '63',
+                '15',
+                '07',
+                '12',
+                '03',
+                '48',
+                '30',
+                '23',
+                '19',
+                '36',
+            ],
+        },
+        {
+            name: 'Pyrénées',
+            postalCodes: ['64', '65', '31', '09', '11', '66', 'ES', 'AD'],
+        },
+        { name: 'Vosges', postalCodes: ['88', '57', '67', '68', '70', '54'] },
+        { name: 'Corse', postalCodes: ['2A', '2B'] },
+    ],
 }

@@ -5,9 +5,13 @@ from email.mime.text import MIMEText
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 
-
 def send_user_email(
-    subject: str, to: str, plain_message: str = None, html_message: str = None
+    subject: str,
+    to: str,
+    plain_message: str = None,
+    html_message: str = None,
+    with_confirm_link = True,
+    language = ""
 ):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -95,7 +99,7 @@ def confirm_user_email(newuser, with_confirm_link=True):
     except Exception as e:
         current_app.logger.warning("send confirm_email failled. %s", str(e))
         return {
-            "message": """ send confirm_email failled: "{}".""".format(str(e))
+            "message": """ send confirm_email failed: "{}".""".format(str(e))
         }
 
 

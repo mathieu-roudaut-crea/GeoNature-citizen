@@ -1,7 +1,9 @@
 import * as L from 'leaflet';
 import { AppConfig } from '../../../../conf/app.config';
+import { UserService } from '../../../auth/user-dashboard/user.service.service';
 
 declare let $: any;
+declare let window: any;
 
 export const markerIcon = L.icon({
     iconUrl: 'assets/pointer-blue2.png',
@@ -19,6 +21,12 @@ export abstract class BaseDetailComponent {
     obs: any;
     site_id: any;
     site: any;
+    area_id: any;
+    area: any;
+    species_site_id: any;
+    speciesSite: any;
+    admin = false;
+    userService: UserService;
 
     showPhoto(photo) {
         console.log('opening photo:');

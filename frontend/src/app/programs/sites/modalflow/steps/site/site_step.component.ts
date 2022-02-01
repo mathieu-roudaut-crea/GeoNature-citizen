@@ -20,7 +20,7 @@ export class SiteStepComponent implements IFlowComponent {
         resp = this.form.onFormSubmit();
         console.debug('committed action > data:', this.data);
         // Wait for resolution of http promise "resp"
-        // to get new created site's id and pass it to next step as extra_data
+        // to get new created area's id and pass it to next step as extra_data
         let that = this;
         resp.then(function (result) {
             if (result.features) {

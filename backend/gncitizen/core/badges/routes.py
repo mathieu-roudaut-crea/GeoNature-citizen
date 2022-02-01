@@ -63,9 +63,10 @@ def get_rewards(id):
     user = UserModel.query.filter(UserModel.id_user == id).one()
     result = user.as_secured_dict(True)
     user_date_create = result["timestamp_create"]
-    user_date_create = datetime.strptime(
-        user_date_create, "%Y-%m-%dT%H:%M:%S.%f"
-    )
+    try:
+        user_date_create = datetime.strptime(user_date_create, "%Y-%m-%dT%H:%M:%S.%f")
+    except:
+        user_date_create = datetime.strptime(user_date_create, "%Y-%m-%dT%H:%M:%S")
 
     for reward in rewards:
 

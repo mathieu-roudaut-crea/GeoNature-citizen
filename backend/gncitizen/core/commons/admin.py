@@ -97,7 +97,6 @@ class UserView(ModelView):
         "password",
     ]
 
-
 def get_geom_file_path(obj, file_data):
     return "geometries/{}".format(file_data.filename)
 
