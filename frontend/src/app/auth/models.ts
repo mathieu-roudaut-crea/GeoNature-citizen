@@ -2,13 +2,35 @@ export class RegisterUser {
     username?: string;
     password?: string;
     email?: string;
-    name?: string;
-    surname?: string;
+    name?: string = '';
+    surname?: string = '';
     avatar?: string | ArrayBuffer;
     extention?: string;
     captchaToken?: string;
+    category: string;
+    organism?: string;
+    function?: string;
+    country: string;
+    postal_code: string;
+    want_newsletter: boolean;
+    is_relay: boolean;
+    linked_relay_id?: number = null;
 
-    constructor() {}
+    birth_year: number;
+    gender: string;
+    comments: string;
+
+    constructor() {
+        this.category = null;
+        this.country = null;
+        this.want_newsletter = false;
+        this.is_relay = false;
+    }
+}
+
+export interface Relay {
+    id: number;
+    name: string;
 }
 
 export interface LoginUser {

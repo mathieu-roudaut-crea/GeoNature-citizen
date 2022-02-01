@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from passlib.hash import pbkdf2_sha256 as sha256
+from passlib.context import CryptContext
+
 from sqlalchemy.ext.declarative import declared_attr
 from utils_flask_sqla_geo.serializers import geoserializable, serializable
 
@@ -10,7 +12,8 @@ from gncitizen.core.commons.models import (
     TModules,
 )
 from server import db
-
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
 
 class RevokedTokenModel(db.Model):
     __tablename__ = "t_revoked_tokens"
@@ -45,10 +48,23 @@ class UserModel(TimestampMixinModel, db.Model):
     password = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     phone = db.Column(db.String(15))
-    organism = db.Column(db.String(100))
+    organism = db.Column(db.String(150))
     avatar = db.Column(db.String())
     active = db.Column(db.Boolean, default=False)
     admin = db.Column(db.Boolean, default=False)
+
+    # CREA custom fields
+    category = db.Column(db.String(100))
+    function = db.Column(db.String(100))
+    country = db.Column(db.String(2))
+    postal_code = db.Column(db.String(10))
+    want_newsletter = db.Column(db.Boolean, default=False)
+    is_relay = db.Column(db.Boolean, default=False)
+    linked_relay_id = db.Column(db.Integer, db.ForeignKey('gnc_core.t_users.id_user', ondelete="SET NULL"))
+    linked_relay = relationship("UserModel", foreign_keys='UserModel.linked_relay_id', remote_side=[id_user])
+    birth_year = db.Column(db.Integer)
+    gender = db.Column(db.String(100))
+    comments = db.Column(db.Text)
 
     def save_to_db(self):
         db.session.add(self)
@@ -76,6 +92,17 @@ class UserModel(TimestampMixinModel, db.Model):
             "timestamp_update": self.timestamp_update.isoformat()
             if self.timestamp_update
             else None,
+
+            "function": self.function,
+            "country": self.country,
+            "postal_code": self.postal_code,
+            "want_newsletter": self.want_newsletter,
+            "is_relay": self.is_relay,
+            "linked_relay_id": self.linked_relay_id,
+            "birth_year": self.birth_year,
+            "gender": self.gender,
+            "comments": self.comments,
+            "category": self.category,
         }
 
     @staticmethod
@@ -84,7 +111,8 @@ class UserModel(TimestampMixinModel, db.Model):
 
     @staticmethod
     def verify_hash(password, hash):
-        return sha256.verify(password, hash)
+        pwd_context = CryptContext(default="pbkdf2_sha256", schemes=["django_pbkdf2_sha256", "pbkdf2_sha256"])
+        return pwd_context.verify(password, hash)
 
     @classmethod
     def find_by_username(cls, username):
@@ -105,14 +133,20 @@ class UserModel(TimestampMixinModel, db.Model):
             "users": list(map(lambda x: to_json(x), UserModel.query.all()))
         }
 
-    # @classmethod
-    # def delete_all(cls):
-    #     try:
-    #         num_rows_deleted = db.session.query(cls).delete()
-    #         db.session.commit()
-    #         return {'message': '{} row(s) deleted'.format(num_rows_deleted)}
-    #     except:
-    #         return {'message': 'Something went wrong'}
+    @classmethod
+    def return_relays(cls):
+        def to_json(x):
+            return {
+                "id": x.id_user,
+                "name": x.organism,
+            }
+
+        relays_list = (UserModel.query
+                        .filter(UserModel.is_relay == True)
+                        .filter(UserModel.active == True)
+                        .order_by(UserModel.organism.asc())
+                        .all())
+        return list(map(lambda x: to_json(x), relays_list))
 
 
 class GroupsModel(db.Model):

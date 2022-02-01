@@ -32,6 +32,10 @@
     >
         <div class="navbar-nav mr-auto"></div>
         <div>
+            <div
+                [ngClass]="displayTopbar ? '' : 'hidden'">
+                <div id="google_translate_element"></div>
+            </div>
             <form class="form-inline mt-2 mt-md-0">
                 <ul
                     *ngIf="programs$ | async; let _programs"

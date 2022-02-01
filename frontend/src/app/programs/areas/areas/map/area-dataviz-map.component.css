@@ -1,0 +1,49 @@
+.leaflet-popup-content {
+    max-height: initial !important;
+    padding: 10px;
+}
+.leaflet-popup-content p {
+    width: 100%;
+}
+.leaflet-popup-content .title {
+    color: var(--default-font-color);
+    font-size: 17px;
+}
+
+.leaflet-popup-content .participants .linked-user-container {
+    display: flex;
+    align-items: center;
+    margin: 4px 0;
+    overflow-x: auto;
+}
+.leaflet-popup-content .participants .linked-user-container span:last-child {
+    margin-left: auto;
+    text-align: right;
+}
+.leaflet-popup-content .participants .linked-user-container img,
+.leaflet-popup-content .avatar-wrapper {
+    width: 50px;
+    min-width: 50px;
+    height: 50px;
+    margin: 0;
+    margin-right: 4px;
+    box-shadow: none;
+    border-radius: 25px;
+}
+
+.leaflet-popup-content .avatar-wrapper .profile-pic {
+    font-style: normal;
+    box-shadow: none;
+    cursor: initial;
+}
+.leaflet-popup-content .avatar-wrapper:hover .profile-pic {
+    opacity: 1;
+}
+
+.leaflet-popup-content .avatar-wrapper .profile-pic::after {
+    font-size: 35px;
+}
+
+.leaflet-popup-content-wrapper {
+    opacity: 0.8;
+}

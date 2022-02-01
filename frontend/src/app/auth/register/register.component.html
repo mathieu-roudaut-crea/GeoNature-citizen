@@ -14,7 +14,7 @@
         *ngIf="errorMessage && !successMessage"
         type="danger"
         (close)="errorMessage = null"
-        >{{ errorMessage }}
+    >{{ errorMessage }}
     </ngb-alert>
     <p *ngIf="successMessage">{{ successMessage }}</p>
 
@@ -38,6 +38,7 @@
                     *ngIf="userAvatar"
                     class="profile-pic"
                     src="{{ userAvatar }}"
+                    alt="user avatar"
                 />
                 <div class="upload-button" (click)="fileToUpload.click()">
                     <i class="fa fa-arrow-circle-up" aria-hidden="true"></i>
@@ -59,7 +60,7 @@
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"
-                                ><i class="fa fa-user"></i
+                            ><i class="fa fa-user"></i
                             ></span>
                         </div>
                         <input
@@ -83,7 +84,7 @@
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"
-                                ><i class="fa fa-envelope"></i
+                            ><i class="fa fa-envelope"></i
                             ></span>
                         </div>
                         <input
@@ -98,7 +99,71 @@
                             autocomplete="email"
                             [ngModelOptions]="{ updateOn: 'blur' }"
                             required
-                            pattern="^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+                            pattern="^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="category" i18n="Your category@@yourCategoryLabel">Votre catégorie</label>
+                    <div class="input-group">
+                        <select
+                            id="category"
+                            name="category"
+                            class="form-control rounded-0"
+                            (change)="onChangeCategory()"
+                            [(ngModel)]="user.category"
+                            #category="ngModel"
+                            required
+                        >
+                            <option value=""></option>
+                            <option *ngFor="let category of AppConfig.categoriesEnum | keyvalue" [value]="category.key">{{category.value}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 col-sm-12" *ngIf="user.category !== 'individual'">
+                <div class="form-group">
+                    <label for="organism" i18n="Your organism@@yourOrganismLabel">Votre organisme</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="organism"
+                            name="organism"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Enter your organism"
+                            placeholder="Entrez votre organisme"
+                            [(ngModel)]="user.organism"
+                            #organism="ngModel"
+                            autocomplete="function"
+                            [required]="user.category !== 'individual'"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12" [class.col-md-6]="user.category !== 'individual'">
+                <div class="form-group">
+                    <label for="function" i18n="Your function@@yourFunctionLabel">
+                        Profession actuelle ou passée (si en retraite)
+                    </label>
+                    <i ngbTooltip="Ces informations sont anonymisées et utilisées uniquement dans le cadre de recherches en sociologie sur les sciences participatives et dans le respect de la politique de confidentialité des données." class="fa fa-question-circle ml-1" placement="top"></i>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="function"
+                            name="function"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Enter your function"
+                            placeholder="Entrez votre profession"
+                            [(ngModel)]="user.function"
+                            #function="ngModel"
+                            autocomplete="function"
+                            required
                         />
                     </div>
                 </div>
@@ -107,39 +172,176 @@
         <div class="form-row">
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label for="name" i18n="your first name@@yourFirstNameLabel">Votre prénom</label>
-                    <input
-                        type="text"
-                        class="form-control rounded-0"
-                        id="fname"
-                        name="fname"
-                        i18n-placeholder="your first name@@yourFirstNameLabel"
-                        placeholder="Entrez votre prénom"
-                        [(ngModel)]="user.name"
-                        #fname="ngModel"
-                        autocomplete="fname"
-                        required
-                    />
+                    <label for="country" i18n="Your country@@yourCountryLabel">Votre pays</label>
+                    <div class="input-group">
+                        <select
+                            id="country"
+                            name="country"
+                            class="form-control rounded-0"
+                            [(ngModel)]="user.country"
+                            #country="ngModel"
+                            required
+                        >
+                            <option value=""></option>
+                            <option value="FR">France</option>
+                            <option value="CH">Suisse</option>
+                            <option value="IT">Italie</option>
+                            <option value="ES">Espagne</option>
+                            <option value="AD">Andorre</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label for="surname" i18n="your last name label@@yourLastNameLabel">Votre nom</label>
-                    <input
-                        type="text"
-                        class="form-control rounded-0"
-                        id="surname"
-                        name="surname"
-                        i18n-placeholder="Enter your last name@@yourLastNameInput"
-                        placeholder="Entrez votre nom"
-                        [(ngModel)]="user.surname"
-                        #surname="ngModel"
-                        autocomplete="lname"
-                        required
-                    />
+                    <label for="postal_code" i18n="Your postal code@@yourPostalCodeLabel">Votre code postal</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="postal_code"
+                            name="postal_code"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Enter your postal code"
+                            placeholder="Entrez votre code postal"
+                            [(ngModel)]="user.postal_code"
+                            #postal_code="ngModel"
+                            autocomplete="postal_code"
+                            required
+                            pattern="(^((([0-8]\d)|(9[0-8]))\d{2,3})$)|(^(AD[1-7]00)$)|(^(CH-[1-8]\d{2,3})$)|(^(I-[1-8]\d{4})$)"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="form-row">
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="birth_year" i18n="Your birth year@@yourBirthYearLabel">
+                        Année de naissance
+                    </label>
+                    <i ngbTooltip="Ces informations sont anonymisées et utilisées uniquement dans le cadre de recherches en sociologie sur les sciences participatives et dans le respect de la politique de confidentialité des données." class="fa fa-question-circle ml-1" placement="top"></i>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="birth_year"
+                            name="birth_year"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Enter your birth year"
+                            placeholder="Entrez votre année de naissance"
+                            [(ngModel)]="user.birth_year"
+                            #birth_year="ngModel"
+                            autocomplete="birth_year"
+                            required
+                            pattern="(^(19\d{2}|20[0-2]\d)$)"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="gender_type" i18n="Your gender@@yourGenderLabel">
+                        Votre genre
+                    </label>
+                    <i ngbTooltip="Ces informations sont anonymisées et utilisées uniquement dans le cadre de recherches en sociologie sur les sciences participatives et dans le respect de la politique de confidentialité des données." class="fa fa-question-circle ml-1" placement="top"></i>
+                    <div class="input-group">
+                        <select
+                            id="gender_type"
+                            name="gender_type"
+                            class="form-control rounded-0"
+                            [(ngModel)]="genderType"
+                            (change)="onChangeGenreType()"
+                            required
+                        >
+                            <option value=""></option>
+                            <option value="0">Homme</option>
+                            <option value="1">Femme</option>
+                            <option value="2">Je m'identifie comme...</option>
+                        </select>
+                        <input
+                            [hidden]="genderType !== '2'"
+                            [required]="genderType=== '2'"
+                            type="text"
+                            id="gender"
+                            name="gender"
+                            class="form-control rounded-0"
+                            i18n-placeholder="Your gender"
+                            placeholder="Votre genre"
+                            autocomplete="gender"
+                            [(ngModel)]="user.gender"
+                            #gender="ngModel"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="comments" i18n="comments@@comments">
+                        Commentaires libres
+                    </label>
+                    <div class="input-group">
+                        <textarea
+                            type="text"
+                            id="comments"
+                            name="comments"
+                            class="form-control rounded-0"
+                            i18n-placeholder="comment_placeholder"
+                            [(ngModel)]="user.comments"
+                            placeholder="Qu'est-ce qui vous amène à vous inscrire ?"
+                            autocomplete="comments"
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row" *ngIf="user.category === 'individual' || user.category === 'school'">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label for="linked_relay_id" i18n="Linked relay@@linkedRelayLabel">
+                        Grâce à quel organisme avez-vous connu Phénoclim?
+                    </label>
+                    <i ngbTooltip="En choisissant un organisme, vous acceptez que le CREA Mont-Blanc partage vos observations et votre email avec l’organisme relai de Phénoclim sélectionné, dans le respect de la politique de confidentialité des données. Votre relai pourra vous faire part des actualités locales en lien avec le projet Phénoclim et vous contacter ponctuellement en début de saison d’observation." class="fa fa-question-circle ml-1" placement="top"></i>
+                    <div class="input-group">
+                        <select
+                            id="linked_relay_id"
+                            name="linked_relay_id"
+                            class="form-control rounded-0"
+                            [(ngModel)]="user.linked_relay_id"
+                            #linked_relay_id="ngModel"
+                            required
+                        >
+                            <option value=""></option>
+                            <option value="0">Aucun</option>
+                            <option *ngFor="let relay of relaysList" [ngValue]="relay.id">{{relay.name}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <input
+                        type="checkbox"
+                        id="want_newsletter"
+                        name="want_newsletter"
+                        #want_newsletter="ngModel"
+                        [(ngModel)]="user.want_newsletter"
+                        i18n="I Accept@@iAcceptIntro"
+                    />
+                    <label
+                        for="want_newsletter"
+                        class="checkbox-label"
+                        i18n="Want newsletter?@@want_newsletter"
+                    >
+                        J'accepte de recevoir les newsletters
+                    </label>
+                </div>
+            </div>
+        </div>
+
         <ngb-alert
             [dismissible]="false"
             type="danger"
@@ -167,14 +369,13 @@
                         #password="ngModel"
                         autocomplete="new-password"
                         required
-                        #password="ngModel"
                     />
                 </div>
             </div>
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label for="confirm-password" i18n
-                        >Confirmez votre mot de passe</label
+                    >Confirmez votre mot de passe</label
                     >
                     <input
                         type="password"
@@ -212,10 +413,11 @@
                 />
                 J'accepte les
                 <a
+                    class="tos-link"
                     target="_blank"
                     href="{{ AppConfig['termsOfUse'][localeId] }}"
                     i18n="Use condition@@conditionsOfUse"
-                    >conditions d&apos;utilisation</a
+                >conditions d&apos;utilisation</a
                 >
             </span>
         </div>
@@ -240,7 +442,7 @@
         class="btn btn-outline-primary rounded-0"
         [disabled]="registerForm?.invalid"
         expand="block"
-        (click)="activeModal.dismiss('Cross click')"
+        (click)="activeModal.close('registered')"
         i18n="close auth modal@@closeModal"
     >
         Fermer
