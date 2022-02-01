@@ -2,15 +2,15 @@
 
 from passlib.hash import pbkdf2_sha256 as sha256
 from passlib.context import CryptContext
+from sqlalchemy.ext.declarative import declared_attr
+from utils_flask_sqla_geo.serializers import geoserializable, serializable
 
 from gncitizen.core.commons.models import (
-    TModules,
     ProgramsModel,
     TimestampMixinModel,
+    TModules,
 )
-from gncitizen.utils.sqlalchemy import serializable
 from server import db
-from sqlalchemy.ext.declarative import declared_attr
 
 
 class RevokedTokenModel(db.Model):
@@ -85,8 +85,7 @@ class UserModel(TimestampMixinModel, db.Model):
 
     @staticmethod
     def verify_hash(password, hash):
-        pwd_context = CryptContext(default="pbkdf2_sha256", schemes=["django_pbkdf2_sha256", "pbkdf2_sha256"])
-        return pwd_context.verify(password, hash)
+        return sha256.verify(password, hash)
 
     @classmethod
     def find_by_username(cls, username):
@@ -104,6 +103,16 @@ class UserModel(TimestampMixinModel, db.Model):
             }
 
         return {"users": list(map(lambda x: to_json(x), UserModel.query.all()))}
+
+    # @classmethod
+    # def delete_all(cls):
+    #     try:
+    #         num_rows_deleted = db.session.query(cls).delete()
+    #         db.session.commit()
+    #         return {'message': '{} row(s) deleted'.format(num_rows_deleted)}
+    #     except:
+    #         return {'message': 'Something went wrong'}
+
 
 class GroupsModel(db.Model):
     """Table des groupes d'utilisateurs"""
