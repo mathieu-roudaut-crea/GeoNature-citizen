@@ -15,7 +15,7 @@ from gncitizen.core.commons.models import (
     MediaModel,
 )
 from gncitizen.core.users.models import ObserverMixinModel, UserModel
-from gncitizen.utils.sqlalchemy import serializable, geoserializable
+from utils_flask_sqla_geo.serializers import geoserializable, serializable
 from server import db
 from gncitizen.core.commons.models import ProgramsModel
 

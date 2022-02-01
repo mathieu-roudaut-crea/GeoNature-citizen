@@ -247,9 +247,7 @@ export abstract class BaseMapComponent implements OnChanges {
                         this.options.PROGRAM_AREA_STYLE(_feature),
                 }).addTo(this.observationMap);
                 programBounds = this.programArea.getBounds();
-                console.debug('programBounds', programBounds);
                 this.observationMap.fitBounds(programBounds);
-                // this.observationMap.setMaxBounds(programBounds);
             }
 
             this.newObsMarker = null;

@@ -33,7 +33,6 @@ from sqlalchemy.exc import IntegrityError
 
 from utils_flask_sqla.response import json_resp, json_resp_accept_empty_list
 
-from gncitizen.utils.sqlalchemy import json_resp
 from gncitizen.core.observations.models import ObservationModel
 from gncitizen.core.areas.models import AreasAccessModel
 from gncitizen.utils.env import MEDIA_DIR

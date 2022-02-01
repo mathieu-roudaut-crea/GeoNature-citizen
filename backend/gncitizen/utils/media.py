@@ -117,8 +117,7 @@ def save_upload_files(
                 )
 
                 current_app.logger.debug(
-                    "[save_upload_files] newfilename
-                        : {}".format(new_filename)
+                    "[save_upload_files] newfilename : {}".format(new_filename)
                 )
 
                 img_data = base64.b64decode(
@@ -143,51 +142,51 @@ def save_upload_files(
                 # Save media filename to Database
                 try:
                     newmedia = MediaModel(filename=new_filename)
-                        current_app.logger.debug(
-                            "[save_upload_files] newmedia {}".format(newmedia)
-                        )
-                        db.session.add(newmedia)
-                        db.session.commit()
-                        id_media = newmedia.id_media
-                        current_app.logger.debug(
-                            "[save_upload_files] id_media : ".format(
-                                str(id_media)
-                            )
-                        )
-                        # return id_media
-                    except Exception as e:
-                        current_app.logger.debug(
-                            "[save_upload_files] ERROR MEDIAMODEL: {}".format(
-                                e
-                            )
-                        )
-                        raise GeonatureApiError(e)
-                    # Save id_media in matching table
-                    try:
-                        newmatch = matching_model(
-                            id_media=id_media, id_data_source=id_data_source
-                        )
-                        db.session.add(newmatch)
-                        db.session.commit()
-                        id_match = newmatch.id_match
-                        current_app.logger.debug(
-                            "[save_upload_files] id_match {}".format(id_match)
-                        )
-                    except Exception as e:
-                        current_app.logger.debug(
-                            "[save_upload_files] ERROR MATCH MEDIA: {}".format(
-                                e
-                            )
-                        )
-                        raise GeonatureApiError(e)
-
-                    # log
                     current_app.logger.debug(
-                        "[save_upload_files] Fichier {} enregistré".format(
-                            new_filename
+                        "[save_upload_files] newmedia {}".format(newmedia)
+                    )
+                    db.session.add(newmedia)
+                    db.session.commit()
+                    id_media = newmedia.id_media
+                    current_app.logger.debug(
+                        "[save_upload_files] id_media : ".format(
+                            str(id_media)
                         )
                     )
-                    files.append(new_filename)
+                    # return id_media
+                except Exception as e:
+                    current_app.logger.debug(
+                        "[save_upload_files] ERROR MEDIAMODEL: {}".format(
+                            e
+                        )
+                    )
+                    raise GeonatureApiError(e)
+                # Save id_media in matching table
+                try:
+                    newmatch = matching_model(
+                        id_media=id_media, id_data_source=id_data_source
+                    )
+                    db.session.add(newmatch)
+                    db.session.commit()
+                    id_match = newmatch.id_match
+                    current_app.logger.debug(
+                        "[save_upload_files] id_match {}".format(id_match)
+                    )
+                except Exception as e:
+                    current_app.logger.debug(
+                        "[save_upload_files] ERROR MATCH MEDIA: {}".format(
+                            e
+                        )
+                    )
+                    raise GeonatureApiError(e)
+
+                # log
+                current_app.logger.debug(
+                    "[save_upload_files] Fichier {} enregistré".format(
+                        new_filename
+                    )
+                )
+                files.append(new_filename)
 
     except Exception as e:
         current_app.logger.debug(

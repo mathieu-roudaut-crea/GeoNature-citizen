@@ -19,6 +19,8 @@ from shapely.geometry import asShape, Point
 from geoalchemy2.shape import from_shape, to_shape
 from geojson import FeatureCollection
 from utils_flask_sqla_geo.utilsgeometry import circle_from_point
+from utils_flask_sqla_geo.generic import get_geojson_feature
+from utils_flask_sqla.response import json_resp
 
 from gncitizen.core.ref_geo.models import LAreas
 from gncitizen.core.users.models import UserModel
@@ -27,11 +29,10 @@ from gncitizen.core.commons.models import ProgramsModel, MediaModel
 from gncitizen.utils.errors import GeonatureApiError
 from gncitizen.utils.jwt import get_id_role_if_exists
 from gncitizen.utils.media import save_upload_files
-from gncitizen.utils.sqlalchemy import get_geojson_feature, json_resp
 from gncitizen.utils.taxonomy import get_specie_from_cd_nom, mkTaxonRepository
 from gncitizen.utils.geo import get_municipality_id_from_wkb
 
-areas_api = Blueprint("areas", __name__)
+areas_api = Blueprint("def send_user_eareas", __name__)
 
 
 def format_entity(data, with_geom=True, fields=None):

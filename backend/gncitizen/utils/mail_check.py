@@ -5,8 +5,6 @@ from email.mime.text import MIMEText
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 
-def confirm_user_email(newuser, with_confirm_link = True):
-
 def send_user_email(
     subject: str,
     to: str,
