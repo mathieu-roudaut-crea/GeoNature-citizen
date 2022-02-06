@@ -17,7 +17,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql import extract
 from shapely.geometry import asShape, Point
 from geoalchemy2.shape import from_shape, to_shape
-from geojson import FeatureCollection
+from geojson import FeatureCollection, Feature
 from utils_flask_sqla_geo.utilsgeometry import circle_from_point
 from utils_flask_sqla_geo.generic import get_geojson_feature
 from utils_flask_sqla.response import json_resp
@@ -35,9 +35,13 @@ from gncitizen.utils.geo import get_municipality_id_from_wkb
 areas_api = Blueprint("def send_user_eareas", __name__)
 
 
-def format_entity(data, with_geom=True, fields=None):
+def format_entity(data, with_geom=True, fields=None, with_centroid=False):
     if with_geom:
-        feature = get_geojson_feature(data.geom)
+        if with_centroid:
+            geometry = to_shape(data.geom).centroid
+            feature = Feature(geometry=geometry, properties={})
+        else:
+            feature = get_geojson_feature(data.geom)
     else:
         feature = {"properties": {}}
     data_dict = data.as_dict(True)
@@ -49,10 +53,10 @@ def format_entity(data, with_geom=True, fields=None):
     return feature
 
 
-def prepare_list(data, with_geom=True, maximum_count=0, fields=None):
+def prepare_list(data, with_geom=True, maximum_count=0, fields=None, with_centroid=False):
     features = []
     for element in data:
-        formatted = format_entity(element, with_geom, fields=fields)
+        formatted = format_entity(element, with_geom, fields=fields, with_centroid=with_centroid)
         features.append(formatted)
     features_data = FeatureCollection(features)
     features_data["count"] = len(features)
@@ -865,7 +869,7 @@ def get_areas_by_program(id):
         areas = areas_query.order_by(func.lower(AreaModel.name)).group_by(AreaModel.id_area).all()
 
         fields = ['id_area', 'name', 'id_role'] if request.args.get('all-data', None) is not None else None
-        formatted_list = prepare_list(list(map(lambda area: area[0], areas)), fields=fields)
+        formatted_list = prepare_list(list(map(lambda area: area[0], areas)), fields=fields, with_centroid=(request.args.get('all-data', None) is not None))
 
         for area in formatted_list.features:
             area["properties"]["has_edit_access"] = has_edit_access
