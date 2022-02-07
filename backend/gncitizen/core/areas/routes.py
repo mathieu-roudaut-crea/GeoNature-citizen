@@ -321,7 +321,7 @@ def get_program_statistics(program_id):
                            .outerjoin(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
                            .join(AreaModel, or_(UserModel.id_user == AreaModel.id_role,
                                                 AreasAccessModel.id_area == AreaModel.id_area))
-                           .join(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                           .outerjoin(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                            .filter(AreaModel.id_program == program_id)
                            )
         observations_query = (SpeciesSiteObservationModel.query
