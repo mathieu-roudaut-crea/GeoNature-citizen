@@ -40,7 +40,7 @@ export class DatavizComponent implements AfterViewInit {
         );
     }
 
-    async ngAfterViewInit(): Promise<FeatureCollection> {
+    ngAfterViewInit(): void {
         this.programsService
             .getProgramSpecies(this.program_id)
             .toPromise()
@@ -54,36 +54,34 @@ export class DatavizComponent implements AfterViewInit {
                 this.years = response.years;
             });
 
-        return this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeMountainFilter(event: Event): Promise<FeatureCollection> {
+    onChangeMountainFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedMountain = input.value;
-        return this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeSpeciesFilter(event: Event): Promise<FeatureCollection> {
+    onChangeSpeciesFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedSpecies = input.value;
-        return this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeYearsFilter(event: Event): Promise<FeatureCollection> {
+    onChangeYearsFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedYear = input.value;
-        return this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeObserversCategoryFilter(
-        event: Event
-    ): Promise<FeatureCollection> {
+    onChangeObserversCategoryFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedObserversCategory = input.value;
-        return this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async getStatisticsFromFilters(): Promise<FeatureCollection> {
+    getStatisticsFromFilters(): void {
         this.requestsInProgress++;
         this.programsService
             .getProgramStatistics(this.program_id, this.getFilters())
@@ -94,18 +92,19 @@ export class DatavizComponent implements AfterViewInit {
             });
 
         this.requestsInProgress++;
-        return this.programsService
+        this.programsService
             .getProgramAreas(this.program_id, this.getFilters())
-            .toPromise()
-            .then((response) => {
-                this.requestsInProgress--;
-                if (!response) {
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                }
-                this.areas = response;
-                return response;
+            .subscribe({
+                next: (response) => {
+                    this.requestsInProgress--;
+                    if (!response) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    }
+                    this.areas = response;
+                    return response;
+                },
             });
     }
 
