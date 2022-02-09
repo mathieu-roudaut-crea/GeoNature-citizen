@@ -1,8 +1,8 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, Inject, PLATFORM_ID } from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
 import { AppConfig } from '../../../../../conf/app.config';
-import { FeatureCollection } from 'geojson';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
     selector: 'app-areas-dataviz',
@@ -30,17 +30,23 @@ export class DatavizComponent implements AfterViewInit {
 
     program_id;
     requestsInProgress = 0;
+    isBrowser: boolean;
 
     constructor(
         private programsService: GncProgramsService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        @Inject(PLATFORM_ID) platformId: any
     ) {
+        this.isBrowser = isPlatformBrowser(platformId);
         this.route.params.subscribe(
             (params) => (this.program_id = params['id'])
         );
     }
 
     ngAfterViewInit(): void {
+        if (!this.isBrowser) {
+            return;
+        }
         this.programsService
             .getProgramSpecies(this.program_id)
             .toPromise()
@@ -94,17 +100,11 @@ export class DatavizComponent implements AfterViewInit {
         this.requestsInProgress++;
         this.programsService
             .getProgramAreas(this.program_id, this.getFilters())
-            .subscribe({
-                next: (response) => {
-                    this.requestsInProgress--;
-                    if (!response) {
-                        setTimeout(() => {
-                            location.reload();
-                        }, 2000);
-                    }
-                    this.areas = response;
-                    return response;
-                },
+            .toPromise()
+            .then((response) => {
+                this.requestsInProgress--;
+                this.areas = response;
+                return response;
             });
     }
 
