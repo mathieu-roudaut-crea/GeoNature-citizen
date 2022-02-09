@@ -54,25 +54,25 @@ export class DatavizComponent implements AfterViewInit {
                 this.years = response.years;
             });
 
-        return await this.getStatisticsFromFilters();
+        return this.getStatisticsFromFilters();
     }
 
     async onChangeMountainFilter(event: Event): Promise<FeatureCollection> {
         const input = event.target as HTMLInputElement;
         this.selectedMountain = input.value;
-        return await this.getStatisticsFromFilters();
+        return this.getStatisticsFromFilters();
     }
 
     async onChangeSpeciesFilter(event: Event): Promise<FeatureCollection> {
         const input = event.target as HTMLInputElement;
         this.selectedSpecies = input.value;
-        return await this.getStatisticsFromFilters();
+        return this.getStatisticsFromFilters();
     }
 
     async onChangeYearsFilter(event: Event): Promise<FeatureCollection> {
         const input = event.target as HTMLInputElement;
         this.selectedYear = input.value;
-        return await this.getStatisticsFromFilters();
+        return this.getStatisticsFromFilters();
     }
 
     async onChangeObserversCategoryFilter(
@@ -80,7 +80,7 @@ export class DatavizComponent implements AfterViewInit {
     ): Promise<FeatureCollection> {
         const input = event.target as HTMLInputElement;
         this.selectedObserversCategory = input.value;
-        return await this.getStatisticsFromFilters();
+        return this.getStatisticsFromFilters();
     }
 
     async getStatisticsFromFilters(): Promise<FeatureCollection> {
@@ -94,7 +94,7 @@ export class DatavizComponent implements AfterViewInit {
             });
 
         this.requestsInProgress++;
-        return await this.programsService
+        return this.programsService
             .getProgramAreas(this.program_id, this.getFilters())
             .toPromise()
             .then((response) => {
