@@ -314,14 +314,18 @@ def get_program_statistics(program_id):
     """
     try:
         areas_query = (AreaModel.query
-                       .outerjoin(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                       .join(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                       .join(SpeciesSiteObservationModel,
+                             SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
                        .filter(AreaModel.id_program == program_id)
                        )
         observers_query = (UserModel.query
                            .outerjoin(AreasAccessModel, AreasAccessModel.id_user == UserModel.id_user)
                            .join(AreaModel, or_(UserModel.id_user == AreaModel.id_role,
                                                 AreasAccessModel.id_area == AreaModel.id_area))
-                           .outerjoin(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                           .join(SpeciesSiteModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                           .join(SpeciesSiteObservationModel,
+                                 SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
                            .filter(AreaModel.id_program == program_id)
                            )
         observations_query = (SpeciesSiteObservationModel.query
@@ -334,13 +338,9 @@ def get_program_statistics(program_id):
         year = request.args.get('year', None)
         if year is not None:
             areas_query = (areas_query
-                           .join(SpeciesSiteObservationModel,
-                                 SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
                            .filter(SpeciesSiteObservationModel.date.between(year + '-01-01', year + '-12-31'))
                            )
             observers_query = (observers_query
-                               .join(SpeciesSiteObservationModel,
-                                     SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
                                .filter(SpeciesSiteObservationModel.date.between(year + '-01-01', year + '-12-31'))
                                )
             observations_query = (observations_query
@@ -429,14 +429,14 @@ def get_program_years(program_id):
     """
     try:
         years_results = (db.session.query(extract('year', SpeciesSiteObservationModel.date))
-                       .select_from(SpeciesSiteObservationModel)
-                       .join(SpeciesSiteModel,
-                             SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
-                       .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                       .filter(AreaModel.id_program == program_id)
-                       .order_by(SpeciesSiteObservationModel.date.desc())
-                       .all()
-                       )
+                         .select_from(SpeciesSiteObservationModel)
+                         .join(SpeciesSiteModel,
+                               SpeciesSiteObservationModel.id_species_site == SpeciesSiteModel.id_species_site)
+                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                         .filter(AreaModel.id_program == program_id)
+                         .order_by(SpeciesSiteObservationModel.date.desc())
+                         .all()
+                         )
 
         years = []
         for year in years_results:
@@ -817,14 +817,26 @@ def get_areas_by_program(id):
     """
     try:
         areas_query = (
-            db.session.query(AreaModel, func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)), func.bool_and(UserModel.is_relay))
-                .outerjoin(SpeciesSiteModel,
-                           AreaModel.id_area == SpeciesSiteModel.id_area)
-                .outerjoin(SpeciesSiteObservationModel,
-                           SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+            db.session.query(AreaModel, func.count(distinct(SpeciesSiteObservationModel.id_species_site_observation)),
+                             func.bool_and(UserModel.is_relay))
                 .outerjoin(UserModel, UserModel.id_user == AreaModel.id_role)
                 .filter(AreaModel.id_program == id)
         )
+
+        if request.args.get('all-data', None):
+            areas_query = (areas_query
+                           .join(SpeciesSiteModel,
+                                      AreaModel.id_area == SpeciesSiteModel.id_area)
+                           .join(SpeciesSiteObservationModel,
+                                      SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                           )
+        else:
+            areas_query = (areas_query
+                           .outerjoin(SpeciesSiteModel,
+                                      AreaModel.id_area == SpeciesSiteModel.id_area)
+                           .outerjoin(SpeciesSiteObservationModel,
+                                      SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                           )
 
         has_edit_access = False
         program = ProgramsModel.query.get(id)
@@ -869,7 +881,8 @@ def get_areas_by_program(id):
         areas = areas_query.order_by(func.lower(AreaModel.name)).group_by(AreaModel.id_area).all()
 
         fields = ['id_area', 'name', 'id_role'] if request.args.get('all-data', None) is not None else None
-        formatted_list = prepare_list(list(map(lambda area: area[0], areas)), fields=fields, with_centroid=(request.args.get('all-data', None) is not None))
+        formatted_list = prepare_list(list(map(lambda area: area[0], areas)), fields=fields,
+                                      with_centroid=(request.args.get('all-data', None) is not None))
 
         for area in formatted_list.features:
             area["properties"]["has_edit_access"] = has_edit_access
