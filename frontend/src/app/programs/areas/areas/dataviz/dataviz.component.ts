@@ -1,8 +1,8 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, Inject, PLATFORM_ID } from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
 import { AppConfig } from '../../../../../conf/app.config';
-import { FeatureCollection } from 'geojson';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
     selector: 'app-areas-dataviz',
@@ -30,17 +30,23 @@ export class DatavizComponent implements AfterViewInit {
 
     program_id;
     requestsInProgress = 0;
+    isBrowser: boolean;
 
     constructor(
         private programsService: GncProgramsService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        @Inject(PLATFORM_ID) platformId: any
     ) {
+        this.isBrowser = isPlatformBrowser(platformId);
         this.route.params.subscribe(
             (params) => (this.program_id = params['id'])
         );
     }
 
-    async ngAfterViewInit(): Promise<FeatureCollection> {
+    ngAfterViewInit(): void {
+        if (!this.isBrowser) {
+            return;
+        }
         this.programsService
             .getProgramSpecies(this.program_id)
             .toPromise()
@@ -54,36 +60,34 @@ export class DatavizComponent implements AfterViewInit {
                 this.years = response.years;
             });
 
-        return await this.getStatisticsFromFilters();
+        return this.getStatisticsFromFilters();
     }
 
-    async onChangeMountainFilter(event: Event): Promise<FeatureCollection> {
+    onChangeMountainFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedMountain = input.value;
-        return await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeSpeciesFilter(event: Event): Promise<FeatureCollection> {
+    onChangeSpeciesFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedSpecies = input.value;
-        return await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeYearsFilter(event: Event): Promise<FeatureCollection> {
+    onChangeYearsFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedYear = input.value;
-        return await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async onChangeObserversCategoryFilter(
-        event: Event
-    ): Promise<FeatureCollection> {
+    onChangeObserversCategoryFilter(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.selectedObserversCategory = input.value;
-        return await this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
-    async getStatisticsFromFilters(): Promise<FeatureCollection> {
+    getStatisticsFromFilters(): void {
         this.requestsInProgress++;
         this.programsService
             .getProgramStatistics(this.program_id, this.getFilters())
@@ -94,7 +98,7 @@ export class DatavizComponent implements AfterViewInit {
             });
 
         this.requestsInProgress++;
-        return await this.programsService
+        this.programsService
             .getProgramAreas(this.program_id, this.getFilters())
             .toPromise()
             .then((response) => {
