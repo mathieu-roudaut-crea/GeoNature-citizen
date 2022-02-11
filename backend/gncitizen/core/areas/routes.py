@@ -1329,7 +1329,9 @@ def post_area():
 def update_area():
     try:
         current_user_email = get_jwt_identity()
-        current_user = UserModel.query.filter_by(email=current_user_email).one()
+        current_user = UserModel.query.filter_by(email=current_user_email).first()
+        if current_user is None:
+            current_user = UserModel.query.filter_by(username=current_user_email).one()
 
         update_data = dict(request.get_json())
         area = AreaModel.query.filter_by(id_area=update_data.get("id_area", 0))
@@ -1391,7 +1393,10 @@ def update_area():
 @jwt_required()
 def delete_area(area_id):
     current_user_email = get_jwt_identity()
-    current_user = UserModel.query.filter_by(email=current_user_email).one()
+    current_user = UserModel.query.filter_by(email=current_user_email).first()
+    if current_user is None:
+        current_user = UserModel.query.filter_by(username=current_user_email).one()
+
     try:
         area = (
             db.session.query(AreaModel, UserModel)
@@ -1646,7 +1651,9 @@ def post_species_site():
 def update_species_site():
     try:
         current_user_email = get_jwt_identity()
-        current_user = UserModel.query.filter_by(email=current_user_email).one()
+        current_user = UserModel.query.filter_by(email=current_user_email).first()
+        if current_user is None:
+            current_user = UserModel.query.filter_by(username=current_user_email).one()
 
         update_data = request.form
         species_site = SpeciesSiteModel.query.filter_by(id_species_site=update_data.get("id_species_site", 0))
@@ -1740,7 +1747,9 @@ def update_species_site():
 @jwt_required()
 def delete_species_site(species_site_id):
     current_user_email = get_jwt_identity()
-    current_user = UserModel.query.filter_by(email=current_user_email).one()
+    current_user = UserModel.query.filter_by(email=current_user_email).first()
+    if current_user is None:
+        current_user = UserModel.query.filter_by(username=current_user_email).one()
     try:
         species_site = (
             db.session.query(SpeciesSiteModel, UserModel)
@@ -1846,7 +1855,9 @@ def post_observation(species_site_id):
 def update_observation():
     try:
         current_user_email = get_jwt_identity()
-        current_user = UserModel.query.filter_by(email=current_user_email).one()
+        current_user = UserModel.query.filter_by(email=current_user_email).first()
+        if current_user is None:
+            current_user = UserModel.query.filter_by(username=current_user_email).one()
 
         update_data = request.form
 
@@ -1926,7 +1937,9 @@ def update_observation():
 @jwt_required()
 def delete_observation(observation_id):
     current_user_email = get_jwt_identity()
-    current_user = UserModel.query.filter_by(email=current_user_email).one()
+    current_user = UserModel.query.filter_by(email=current_user_email).first()
+    if current_user is None:
+        current_user = UserModel.query.filter_by(username=current_user_email).one()
     try:
         observation = (
             db.session.query(SpeciesSiteObservationModel, UserModel)
@@ -1974,11 +1987,11 @@ def get_observation(pk):
 @areas_api.route("/export/<int:user_id>", methods=["GET"])
 @jwt_required()
 def export_areas_xls(user_id):
-    current_user_email = get_jwt_identity()
+    current_user_identifier = get_jwt_identity()
 
     try:
         current_user = UserModel.query.get(user_id)
-        if current_user_email != current_user.email:
+        if current_user_identifier != current_user.email and current_user_identifier != current_user.username:
             return ("unauthorized"), 403
 
         filter_by_user = True

@@ -465,7 +465,10 @@ def selected_user(id):
     """
     try:
         current_user_email = get_jwt_identity()
-        current_user = UserModel.query.filter_by(email=current_user_email).one()
+        current_user = UserModel.query.filter_by(email=current_user_email).first()
+        if current_user is None:
+            current_user = UserModel.query.filter_by(username=current_user_email).one()
+
         if current_user.admin:
             user = UserModel.query.filter_by(id_user=id).one()
             return get_or_patch_user(user)
