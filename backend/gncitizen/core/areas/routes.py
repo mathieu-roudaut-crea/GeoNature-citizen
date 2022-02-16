@@ -2252,6 +2252,7 @@ def export_areas_xls(user_id):
                 {"col_name": "Profession", "getter": lambda s: s.function},
                 {"col_name": "Catégorie", "getter": lambda s: s.category},
                 {"col_name": "Date d'inscription", "getter": lambda s: s.timestamp_create, "style": date_style},
+                {"col_name": "Commentaires", "getter": lambda s: s.comments},
             ]
 
             if current_user.admin:
