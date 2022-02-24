@@ -26,7 +26,7 @@ def send_user_email(
     if plain_message:
         plain_msg = MIMEText(
             plain_message,
-            "html",
+            "plain",
         )
         msg.attach(plain_msg)
 
