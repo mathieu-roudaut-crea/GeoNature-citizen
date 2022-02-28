@@ -244,7 +244,7 @@ def registration():
                         newuser.username
                     ),
                 )
-                confirm_user_email(newuser)
+                confirm_user_email(newuser, language=request_datas.get("language", ""))
         except Exception as e:
             return {"message mail failed": str(e)}, 500
 

@@ -9,16 +9,14 @@ def send_user_email(
     subject: str,
     to: str,
     plain_message: str = None,
-    html_message: str = None,
-    with_confirm_link = True,
-    language = ""
+    html_message: str = None
 ):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = current_app.config["MAIL"]["MAIL_AUTH_LOGIN"]
     msg["To"] = to
     plain_msg = MIMEText(
-        html_message,
+        plain_message,
         "plain",
     )
     msg.attach(plain_msg)
@@ -68,11 +66,15 @@ def send_user_email(
         return {"message": """ send email failled: "{}".""".format(str(e))}
 
 
-def confirm_user_email(newuser, with_confirm_link=True):
+def confirm_user_email(newuser, with_confirm_link=True, language=""):
 
     token = generate_confirmation_token(newuser.email)
     subject = current_app.config["CONFIRM_EMAIL"]["SUBJECT"]
     to = newuser.email
+
+    language = language.upper()
+    if current_app.config["CONFIRM_EMAIL"].get("SUBJECT_" + language, None):
+        subject = current_app.config["CONFIRM_EMAIL"]["SUBJECT_" + language]
 
     # Check URL_APPLICATION:
     url_application = current_app.config["URL_APPLICATION"]
@@ -80,15 +82,16 @@ def confirm_user_email(newuser, with_confirm_link=True):
         url_application = url_application
     else:
         url_application = url_application + "/"
-    print("url_application", url_application)
+
     activate_url = url_application + "confirmEmail/" + token
 
     # Record the MIME  text/html.
     template = current_app.config["CONFIRM_EMAIL"]["HTML_TEMPLATE"]
     if not with_confirm_link:
-        template = current_app.config["CONFIRM_EMAIL"][
-            "NO_VALIDATION_HTML_TEMPLATE"
-        ]
+        template = current_app.config["CONFIRM_EMAIL"]["NO_VALIDATION_HTML_TEMPLATE"]
+        if current_app.config["CONFIRM_EMAIL"].get("NO_VALIDATION_HTML_TEMPLATE_" + language, None):
+            template = current_app.config["CONFIRM_EMAIL"]["NO_VALIDATION_HTML_TEMPLATE_" + language]
+
     try:
         send_user_email(
             subject,
