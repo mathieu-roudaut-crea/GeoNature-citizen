@@ -1673,7 +1673,7 @@ def update_species_site():
             return ("unauthorized"), 403
 
         update_species_site = {}
-        for prop in ["name"]:
+        for prop in ["name", "cd_nom"]:
             update_species_site[prop] = update_data[prop]
 
         try:
