@@ -1,1 +1,15 @@
-<div>test</div>
+<div>dataviz 1 - mes observations</div>
+
+<div class="species-filters" *ngIf="speciesList && speciesList.features">
+    <select
+        name="species"
+        (change)="onChangeSpeciesFilter($event)"
+    >
+        <option [value]="null">
+            Toutes les espèces
+        </option>
+        <option *ngFor="let species of speciesList.features" [value]="species.properties.cd_nom">
+            {{ species.properties.nom_vern }}
+        </option>
+    </select>
+</div>

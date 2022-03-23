@@ -300,6 +300,34 @@ def get_program_species(program_id):
         return {"error_message": str(e)}, 400
 
 
+@areas_api.route("program/<int:program_id>/user_species", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_program_user_species(program_id):
+    """Get all species in user's area
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all species
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        species = (Taxref.query
+                   .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == Taxref.cd_nom)
+                   .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                   .join(AreasAccessModel, AreaModel.id_area == AreasAccessModel.id_area)
+                   .filter(AreaModel.id_program == program_id)
+                   .filter(AreasAccessModel.id_user == user_id)
+                   .order_by(func.lower(Taxref.nom_vern))
+                   .all())
+
+        return prepare_list(species, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
 @areas_api.route("program/<int:program_id>/statistics", methods=["GET"])
 @json_resp
 def get_program_statistics(program_id):
