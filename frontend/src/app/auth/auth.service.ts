@@ -82,14 +82,31 @@ export class AuthService {
         const url = `${AppConfig.API_ENDPOINT}/logout`;
         this.authorized$.next(false);
         return this.http
-            .post<LogoutPayload>(url, { headers: this.headers })
+            .post<LogoutPayload>(
+                url,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.getAccessToken()}`,
+                    },
+                }
+            )
             .pipe(
                 catchError((error) => {
                     console.error(`[logout] error`, error);
                     localStorage.removeItem('access_token');
-                    // localStorage.removeItem("refresh_token");
+                    localStorage.removeItem('refresh_token');
                     this.authenticated$.next(false);
                     // localStorage.removeItem("username");
+
+                    localStorage.clear();
+                    window.parent.postMessage(
+                        {
+                            type: 'logout',
+                        },
+                        '*'
+                    );
+
                     return this.router.navigateByUrl('/home');
                 })
             )
