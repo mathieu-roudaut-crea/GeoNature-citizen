@@ -2,6 +2,7 @@
   font-family: "Klavika";
   src: url("/citizen/fr/assets/police_dataviz/Klavika-Regular.otf") format("opentype");
 }
+
 @font-face {
   font-family: "Klavika-Bold";
   src: url("/citizen/fr/assets/police_dataviz/Klavika-Bold.otf") format("opentype")
@@ -11,20 +12,21 @@
   font-family: "Klavika" !important;
 }
 
-h1, h2 {
+h1,
+h2 {
   color: #000;
   font-family: "Klavika-Bold" !important;
   font-weight: bold;
 }
 
 table,
-tr{
-box-shadow: inset 0px 0px 0px 15px #fff;
-background: #e6e6e6;
+tr {
+  box-shadow: inset 0px 0px 0px 13px #fff;
+  background: #e6e6e6;
 }
 
 .cell:last-child {
-    border-right: 0px !important;
+  border-right: 0px !important;
 }
 
 .cell:last-child::before {
@@ -32,8 +34,13 @@ background: #e6e6e6;
 }
 
 .cell {
-  border-right: dotted 2px #000;
+  min-width: 10px;
+  max-width: 83px;
   text-align: center;
+}
+
+.cell:nth-child(11n+1) {
+  border-right: dotted 2px #000;
 }
 
 .first {
@@ -44,18 +51,18 @@ background: #e6e6e6;
 }
 
 tfoot tr .cell {
-  color : #000;
+  color: #000;
   text-align: center;
-  font-weight : bold;
+  font-weight: bold;
   position: relative;
   border-right: dotted 2px #000;
 }
 
 tfoot tr .cell:last-child {
-    border-right: 0px !important;
+  border-right: 0px !important;
 }
 
-tfoot tr .cell:before{
+tfoot tr .cell:before {
   position: absolute;
   content: ' ';
   height: 10px;
@@ -64,6 +71,12 @@ tfoot tr .cell:before{
   background: #000;
   right: -6px;
   bottom: 0px;
+}
+
+.filter {
+  display: flex;
+  max-width: 400px;
+  flex-wrap: wrap;
 }
 
 .individues {
@@ -83,9 +96,9 @@ tfoot tr .cell:before{
   padding: 20px;
   margin: 20px;
   border-radius: 10px;
-  box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.44);
-  -webkit-box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.44);
-  -moz-box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.44);
+  box-shadow: 0px 0px 14px 2px rgba(0, 0, 0, 0.44);
+  -webkit-box-shadow: 0px 0px 14px 2px rgba(0, 0, 0, 0.44);
+  -moz-box-shadow: 0px 0px 14px 2px rgba(0, 0, 0, 0.44);
 }
 
 #listIndiv {
@@ -135,45 +148,56 @@ tfoot tr .cell:before{
 }
 
 @-webkit-keyframes fadeIn {
-  from {opacity: 0;} 
-  to {opacity: 1;}
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity:1 ;}
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 input[type="radio"].selecteur {
   display: none;
 }
-input[type="radio"].selecteur + label {
+
+input[type="radio"].selecteur+label {
   padding: 2px 20px;
   border-radius: 25px;
   border: solid 2px #218a7c;
   color: #000;
 }
-input[type="radio"].selecteur:checked + label {
+
+input[type="radio"].selecteur:checked+label {
   background: #218a7c;
   color: #fff;
   font-weight: bold;
 }
 
-h1 span, h2 span{
-color : #218a7c;
+h1 span,
+h2 span {
+  color: #218a7c;
 }
 
-ul.individues li{
-position: relative;
-padding : 0px 10px 0px 25px;
+ul.individues li {
+  position: relative;
+  padding: 0px 10px 0px 25px;
 }
 
-ul.individues li span{
-width: 20px;
-height: 20px;
-padding: 0px 5px;
-margin-right: 10px;
-padding : 0px 6px;
+ul.individues li span {
+  width: 20px;
+  height: 20px;
+  padding: 0px 5px;
+  margin-right: 10px;
+  padding: 0px 6px;
 }
-
-

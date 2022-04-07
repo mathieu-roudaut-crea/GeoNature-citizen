@@ -3,8 +3,8 @@
         <h1>Sélectionner <span>...</span></h1>
 
         <h2><span>...</span> Une zone d'observation</h2>
-        <div *ngIf="areas && areas.features" formGroup="filtersForm">
-            <form>
+        <div *ngIf="areas && areas.features">
+            <form class="filter">
                 <div *ngFor="let areas of areas.features">
                     <input type="radio" [value]="areas.properties.id_area" [id]="areas.properties.id_area"
                         [name]="areas.properties.name" (change)="onChangeAreasFilter($event)"
@@ -15,7 +15,7 @@
         </div>
         <h2><span>...</span> Une espèce</h2>
         <div *ngIf="species && species.features">
-            <form>
+            <form class="filter">
                 <div *ngFor="let species of species.features">
                     <input type="radio" [value]="species.properties.cd_nom" [id]="species.properties.cd_nom"
                         [name]="species.properties.nom_complet" (change)="onChangeSpeciesFilter($event)"
@@ -26,7 +26,7 @@
         </div>
         <h2><span>...</span> Un stade phénologique</h2>
         <div *ngIf="stages && stages.features">
-            <form>
+            <form class="filter">
                 <div *ngFor="let stages of stages.features">
                     <input type="radio" [value]="stages.properties.id_species_stage"
                         [id]="stages.properties.id_species_stage" [name]="stages.properties.name"
@@ -52,7 +52,7 @@
                     <td class="first">{{years.year}}</td>
                     <td *ngFor="let months of years.months" class="cell">
                         <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
-                            <img [src]="d.src" [ngStyle]="{'filter': d.transfo, 'width': '60px' }"
+                            <img [src]="d.src" [ngStyle]="{'filter': d.transfo, 'width': '40px' }"
                                 (mouseenter)="over($event)" (mouseout)="out($event)">
                             <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
                                 <div style="font-weight: bold;">{{d.date}}</div>
@@ -65,7 +65,7 @@
             <tfoot>
                 <tr>
                     <td></td>
-                    <td *ngFor="let month of months" class="cell">{{Months[month]}}</td>
+                    <td *ngFor="let month of months" class="cell" colspan="11">{{Months[month]}}</td>
                 </tr>
             </tfoot>
         </table>

@@ -29,6 +29,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
     individues= [];
     years;
     months;
+    weeks;
     dataTable= [];
     title = 'Areas';
     @Input('areas') areas: FeatureCollection;
@@ -116,22 +117,8 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
             if (this.userDashboard) {
                 return;
             }
-
-            this.programs = data.programs;
-            this.program = this.programs.find(
-                (p) => p.id_program == this.program_id
-            );
-
-            this.programService
-                .getProgram(this.program_id)
-                .subscribe((program) => (this.programFeature = program));
-
             this.loadData();
-        });
-        this.areaService.newAreaCreated.subscribe(this.loadData.bind(this));
-        this.areaService.areaEdited.subscribe(this.loadData.bind(this));
-        this.areaService.areaDeleted.subscribe(this.loadData.bind(this));
-        
+        });        
     }
 
     ngAfterViewInit(): void {
@@ -143,6 +130,27 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
             .map(e => e.properties.date.split("-")[1])
         temp = temp.filter((c, index) => temp.indexOf(c) === index);
         return temp.sort();
+    }
+
+    extractWeek(listObs) {
+        let temp = listObs
+            .map(e => e.properties.date.split("-")[1])
+        temp = temp.filter((c, index) => temp.indexOf(c) === index);
+        const weeks = []
+        temp.forEach(m => {
+            weeks.push(`${m}-01`)
+            weeks.push(`${m}-04`)
+            weeks.push(`${m}-07`)
+            weeks.push(`${m}-10`)
+            weeks.push(`${m}-13`)
+            weeks.push(`${m}-16`)
+            weeks.push(`${m}-19`)
+            weeks.push(`${m}-22`)
+            weeks.push(`${m}-25`)
+            weeks.push(`${m}-28`)
+            weeks.push(`${m}-30`)
+        })
+        return weeks.sort();
     }
 
     extractYear(listObs) {
@@ -203,13 +211,15 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
         })
         this.years = this.extractYear(listObs.features)
         this.months = this.extractMonth(listObs.features)
+        this.weeks = this.extractWeek(listObs.features)
         this.individues = this.extractIndividu(listObs.features)
         this.dataTable = this.years.map(y => {
-            const ms = this.months.map(m => {
+            const ms = this.weeks.map((m,i) => {
                 const dataOfMonth = []
-                let date_case = `${y}-${m}`
+                let date_min = `${y}-${m}`
+                let date_max = `${y}-${this.weeks[i+1]}`
                 listObs.features.forEach(obs => {
-                    if (obs.properties.date.includes(date_case)) {
+                    if (obs.properties.date.localeCompare(date_min)>=0 && obs.properties.date.localeCompare(date_max)<0) {
                         const good_indiv = this.individues.filter(indiv => indiv.name === obs.properties.species_site.name)[0]
                         dataOfMonth.push({id:obs.properties.id_species_site_observation,
                                           date: obs.properties.date,
