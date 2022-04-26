@@ -69,6 +69,8 @@ import { SiteService } from './programs/sites/sites.service';
 
 import { AreasComponent } from './programs/areas/areas.component';
 import { DatavizComponent } from './programs/areas/areas/dataviz/dataviz.component';
+import { DatavizMyObsComponent } from './programs/areas/areas/dataviz-myobs/dataviz-myobs.component';
+import { DatavizAllObsComponent } from './programs/areas/areas/dataviz-allobs/dataviz-allobs.component';
 import { AreaDetailComponent } from './programs/areas/areas/detail/detail.component';
 import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
 import { SpeciesSitesObsComponent } from './programs/areas/observations/observations.component';
@@ -152,6 +154,8 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         ObserversListComponent,
         AdminObserversComponent,
         DatavizComponent,
+        DatavizMyObsComponent,
+        DatavizAllObsComponent,
         AreaFormComponent,
         AreasListComponent,
         SpeciesSitesListComponent,

@@ -330,6 +330,36 @@ export class GncProgramsService implements OnInit {
             );
     }
 
+    getUserSpecies(program_id): Observable<any> {
+        return this.http
+            .get<any>(`${this.URL}/areas/program/${program_id}/user_species`);
+    }
+
+
+    getUserObs(): Observable<any> {
+        return this.http
+            .get<any>(`${this.URL}/areas/program/1/observations/`);
+
+    }
+
+    getCurrentUserAreaSpecies(area_id) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/${area_id}/species`
+        );
+    }
+
+    getCurrentUserAreaSpeciesStages(area_id, cd_nom) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/${area_id}/species/${cd_nom}/stages`
+        );
+    }
+
+    getStageObservations(area_id, stage_id) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/${area_id}/stage/${stage_id}/observations`
+        );
+    }
+
     private handleError<T>(operation = 'operation', result?: T) {
         return (error: any): Observable<T> => {
             // API errors are caught within the interceptor and handled by our

@@ -235,6 +235,94 @@ def get_species_site_jsonschema_by_program(pk):
     except Exception as e:
         return {"error_message": str(e)}, 400
 
+@areas_api.route("/<int:area_id>/species", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_user_area_species(area_id):
+    """Get all species in user's area
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all species
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        species = (Taxref.query
+                 .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == Taxref.cd_nom)
+                 .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                 .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id)
+                 .order_by(func.lower(Taxref.nom_complet))
+                 .all())
+
+        return prepare_list(species, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/<int:area_id>/species/<int:cd_nom>/stages", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_user_area_species_stages(area_id, cd_nom):
+    """Get all species in user's area
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all species
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        stages = (SpeciesStageModel.query
+                 .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
+                 .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                 .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesSiteModel.cd_nom == cd_nom)
+                 .order_by(func.lower(SpeciesStageModel.name))
+                 .all())
+
+        return prepare_list(stages, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("/<int:area_id>/stage/<int:stage_id>/observations", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_user_area_stage_observations(area_id, stage_id):
+    """Get all stage's observations for specified area
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        # observations = (SpeciesSiteObservationModel.query
+        #          .join(StagesStepModel, SpeciesSiteObservationModel.id_stages_step == StagesStepModel.id_stages_step)
+        #          .join(SpeciesStageModel, SpeciesStageModel.id_species_stage == StagesStepModel.id_species_stage)
+        #          .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
+        #          .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+        #          .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesStageModel.id_species_stage == stage_id)
+        #          .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
+        #          .all())
+
+        observations = (SpeciesSiteObservationModel.query
+                        .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+                        .join(StagesStepModel, SpeciesSiteObservationModel.id_stages_step == StagesStepModel.id_stages_step)
+                        .join(SpeciesStageModel, SpeciesStageModel.id_species_stage == StagesStepModel.id_species_stage)
+                        .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                        .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesStageModel.id_species_stage == stage_id)
+                        .order_by(SpeciesSiteObservationModel.date.asc())
+                        .all())
+
+        return prepare_list(observations, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
 
 @areas_api.route("/current_user", methods=["GET"])
 @json_resp
@@ -292,6 +380,34 @@ def get_program_species(program_id):
                    .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == Taxref.cd_nom)
                    .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
                    .filter(AreaModel.id_program == program_id)
+                   .order_by(func.lower(Taxref.nom_vern))
+                   .all())
+
+        return prepare_list(species, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+
+@areas_api.route("program/<int:program_id>/user_species", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_program_user_species(program_id):
+    """Get all species in user's area
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all species
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        species = (Taxref.query
+                   .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == Taxref.cd_nom)
+                   .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+                   .join(AreasAccessModel, AreaModel.id_area == AreasAccessModel.id_area)
+                   .filter(AreaModel.id_program == program_id)
+                   .filter(AreasAccessModel.id_user == user_id)
                    .order_by(func.lower(Taxref.nom_vern))
                    .all())
 

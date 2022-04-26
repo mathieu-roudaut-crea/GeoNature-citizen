@@ -60,7 +60,7 @@ export class DatavizComponent implements AfterViewInit {
                 this.years = response.years;
             });
 
-        return this.getStatisticsFromFilters();
+        this.getStatisticsFromFilters();
     }
 
     onChangeMountainFilter(event: Event): void {
@@ -103,11 +103,6 @@ export class DatavizComponent implements AfterViewInit {
             .toPromise()
             .then((response) => {
                 this.requestsInProgress--;
-                if (!response) {
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                }
                 this.areas = response;
                 return response;
             });
