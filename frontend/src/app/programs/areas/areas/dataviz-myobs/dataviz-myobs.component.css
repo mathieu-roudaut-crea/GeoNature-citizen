@@ -39,7 +39,7 @@ tr {
   text-align: center;
 }
 
-.cell:nth-child(11n+1) {
+.cell:nth-child(30n+1) {
   border-right: dotted 2px #000;
 }
 

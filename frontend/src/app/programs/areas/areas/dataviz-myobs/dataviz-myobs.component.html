@@ -51,10 +51,14 @@
                 <tr *ngFor="let years of dataTable">
                     <td class="first">{{years.year}}</td>
                     <td *ngFor="let months of years.months" class="cell">
-                        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
+                        <div *ngFor="let d of months.data; let i = index" class="popup"
+                            (click)="displayPopup($event, d)" [ngStyle]="{'position':i==months.data.length-1 ? 'relative' :'absolute',
+                                        'paddingLeft':i===months.data.length-1 ? '0px' : (i+1)*12+'px',
+                                        'zIndex': months.data.length===2 ? 0 : i%2!==0 ? 0 : i+1 }">
                             <img [src]="d.src" [ngStyle]="{'filter': d.transfo, 'width': '40px' }"
                                 (mouseenter)="over($event)" (mouseout)="out($event)">
-                            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
+                            <span class="popuptext" *ngIf="d.displayPopup"
+                                [ngStyle]="{'backgroundColor': d.color, 'zIndex':5 }">
                                 <div style="font-weight: bold;">{{d.date}}</div>
                                 <div>{{d.obs_name}}</div>
                             </span>
@@ -65,7 +69,7 @@
             <tfoot>
                 <tr>
                     <td></td>
-                    <td *ngFor="let month of months" class="cell" colspan="11">{{Months[month]}}</td>
+                    <td *ngFor="let month of months" class="cell" colspan="30">{{Months[month]}}</td>
                 </tr>
             </tfoot>
         </table>
