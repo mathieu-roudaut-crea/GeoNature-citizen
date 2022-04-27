@@ -1,0 +1,142 @@
+<div class="areas-container vertical" style="flex-wrap: wrap;">
+    <div class="dataviz-filter">
+
+        <div class="comparer">
+
+            <h1>Comparer </h1>
+
+            <div>
+                <button type="radio" class="selecteur" (click)="onSetSpecies($event, speciesModal)"> 2 espèces </button>
+            </div>
+            <div>
+                <button type="radio" class="selecteur" (click)="onSetYears()"> 2 années </button>
+            </div>
+            <div>
+                <button type="radio" class="selecteur" (click)="onSetStages()"> 2 stades </button>
+            </div> 
+            <div>
+                <button type="radio" class="selecteur"> 2 massifs </button>
+            </div>
+
+        </div>
+
+        <ng-template #speciesModal>
+            <div *ngIf="species && species.features">
+                    <div *ngFor="let species of speciesList">
+                        <input 
+                            type="checkbox" 
+                            [value]="species.species.cd_nom" 
+                            [id]="species.species.cd_nom"
+                            [name]="species.species.nom_complet" 
+                            (change)="check_species_number(species)"
+                            [(ngModel)]="species.isChecked"
+                            class="selectSpecies"
+                            [checked]="species.isChecked"
+                            [disabled]="!species.isChecked && checkSpeciesNumber>1">
+                        <label [for]="species.species.cd_nom">{{ species.species.nom_complet }}</label>
+                    </div>
+            </div>    
+        </ng-template>
+
+        <!--
+        <ng-template #yearsModal>
+            <div *ngIf="years">
+                    <div *ngFor="let year of years.years">
+                        <input 
+                            type="checkbox" 
+                            [value]="year" 
+                            [id]="year"
+                            [name]="year" 
+                            (change)="check_years_number(year)"
+                            [(ngModel)]="species.isChecked"
+                            class="selectSpecies"
+                            [checked]="species.isChecked"
+                            [disabled]="!species.isChecked && checkSpeciesNumber>1">
+                        <label [for]="species.species.cd_nom">{{ species.species.nom_complet }}</label>
+                    </div>
+            </div>    
+        </ng-template>
+
+        <form>
+            <div *ngFor="let year of years.years">
+                <input type="radio" [value]="year" [id]="year" [name]="year" (change)="onChangeYearFilter($event)"
+                    [(ngModel)]="selectedYear" class="selecteur">
+                <label [for]="year">{{ year }}</label>
+            </div>
+        </form>
+    -->
+        <!--
+        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
+            {{Deux espèces}}
+            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
+                <div style="font-weight: bold;">{{d.date}}</div>
+                <div>{{d.obs_name}}</div>
+            </span>
+        </div>
+
+        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
+            {{Deux stades}}
+            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
+                <div style="font-weight: bold;">{{d.date}}</div>
+                <div>{{d.obs_name}}</div>
+            </span>
+        </div>
+
+        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
+            {{Deux espèces}}
+            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
+                <div style="font-weight: bold;">{{d.date}}</div>
+                <div>{{d.obs_name}}</div>
+            </span>
+        </div>
+
+        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
+            {{Deux espèces}}
+            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
+                <div style="font-weight: bold;">{{d.date}}</div>
+                <div>{{d.obs_name}}</div>
+            </span>
+        </div>
+        
+
+        <h1>Filtrer </h1>
+        <div *ngIf="species && species.features">
+            <select>
+                <option *ngFor="let species of species.features" [ngValue]="species.properties.cd_nom">
+                    {{species.properties.nom_complet}}</option>
+            </select>
+             
+        </div>
+
+        <div *ngIf="years">
+            <select>
+                <option *ngFor="let year of years.years" [ngValue]="year">
+                    {{year}}</option>
+            </select>
+             <form>
+                <div *ngFor="let year of years.years">
+                    <input type="radio" [value]="year" [id]="year" [name]="year" (change)="onChangeYearFilter($event)"
+                        [(ngModel)]="selectedYear" class="selecteur">
+                    <label [for]="year">{{ year }}</label>
+                </div>
+            </form>
+        </div>
+
+        <div *ngIf="appConfig.mountains">
+            <select>
+                <option *ngFor="let mountain of appConfig.mountains" [ngValue]="mountain.name">
+                    {{mountain.name}}</option>
+            </select>
+            <form>
+                <div *ngFor="let mountain of appConfig.mountains">
+                    <input type="radio" [value]="mountain.name" [id]="mountain.name" [name]="mountain.name"
+                        (change)="onChangeYearFilter($event)" [(ngModel)]="selectedMountain" class="selecteur">
+                    <label [for]="mountain.name">{{ mountain.name }}</label>
+                </div>
+            </form>
+        </div> -->
+
+    </div>
+
+
+</div>
