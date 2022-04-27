@@ -261,6 +261,27 @@ def get_user_area_species(area_id):
         return {"error_message": str(e)}, 400
 
 
+@areas_api.route("/<int:area_id>/stages", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_user_area_stages(area_id):
+    """Get all stages in user's area
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all species
+    """
+    try:
+        user_id = get_id_role_if_exists()
+        stages = (SpeciesStageModel.query
+                 .all())
+
+        return prepare_list(stages, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
 @areas_api.route("/<int:area_id>/species/<int:cd_nom>/stages", methods=["GET"])
 @json_resp
 @jwt_required()

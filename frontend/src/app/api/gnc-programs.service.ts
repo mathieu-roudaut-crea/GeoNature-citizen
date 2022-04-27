@@ -206,6 +206,12 @@ export class GncProgramsService implements OnInit {
         );
     }
 
+    getProgramStages(programId) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/${programId}/stages`
+        );
+    }
+
     getProgramYears(programId) {
         return this.http.get<YearsResponse>(
             `${AppConfig.API_ENDPOINT}/areas/program/${programId}/years`
