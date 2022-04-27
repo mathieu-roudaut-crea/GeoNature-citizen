@@ -9,7 +9,7 @@
                 <button type="radio" class="selecteur" (click)="onSetSpecies($event, speciesModal)"> 2 espèces </button>
             </div>
             <div>
-                <button type="radio" class="selecteur" (click)="onSetYears()"> 2 années </button>
+                <button type="radio" class="selecteur" (click)="onSetYears($event, yearsModal)"> 2 années </button>
             </div>
             <div>
                 <button type="radio" class="selecteur" (click)="onSetStages()"> 2 stades </button>
@@ -38,33 +38,24 @@
             </div>    
         </ng-template>
 
-        <!--
         <ng-template #yearsModal>
             <div *ngIf="years">
-                    <div *ngFor="let year of years.years">
+                    <div *ngFor="let year of yearsList">
                         <input 
                             type="checkbox" 
-                            [value]="year" 
-                            [id]="year"
-                            [name]="year" 
+                            [value]="year.year" 
+                            [id]="year.year"
+                            [name]="year.year" 
                             (change)="check_years_number(year)"
-                            [(ngModel)]="species.isChecked"
-                            class="selectSpecies"
-                            [checked]="species.isChecked"
-                            [disabled]="!species.isChecked && checkSpeciesNumber>1">
-                        <label [for]="species.species.cd_nom">{{ species.species.nom_complet }}</label>
+                            [(ngModel)]="year.isChecked"
+                            class="selectYears"
+                            [checked]="year.isChecked"
+                            [disabled]="!year.isChecked && checkYearsNumber>1">
+                        <label [for]="year.year">{{ year.year }}</label>
                     </div>
             </div>    
         </ng-template>
 
-        <form>
-            <div *ngFor="let year of years.years">
-                <input type="radio" [value]="year" [id]="year" [name]="year" (change)="onChangeYearFilter($event)"
-                    [(ngModel)]="selectedYear" class="selecteur">
-                <label [for]="year">{{ year }}</label>
-            </div>
-        </form>
-    -->
         <!--
         <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
             {{Deux espèces}}

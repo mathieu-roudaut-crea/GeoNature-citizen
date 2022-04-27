@@ -27,7 +27,9 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	@Input('years') years: any;
 	@Input('userDashboard') userDashboard = false;
 	public speciesList = [];
+	public yearsList = [];
 	public checkSpeciesNumber = 0;
+	public checkYearsNumber = 0;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -102,36 +104,36 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		}
 	}
 
-	onSetYears() {
-		this.get_years();
+	check_years_number(item) {
+		if (item.isChecked) {
+			this.checkYearsNumber++;
+		} else {
+			this.checkYearsNumber--;
+		}
 	}
 
-	onSetStages() {
-		this.get_stages();
+	onSetYears(event, modal) {
+		this.set_years_list()
+		this.modalService.open(
+			modal, {
+                size: 'lg',
+                windowClass: 'add-obs-modal',
+                centered: true,
+            });
 	}
 
 	set_species_list() {
+		this.speciesList = [];
 		for (let sp of this.species.features) {
 			this.speciesList.push({'species': sp.properties, 'isChecked': false})
 		}
 	}
 
-	get_years() {
-		this.programService
-			.getProgramYears(this.program_id)
-			.toPromise()
-			.then((years:any) => {
-				this.years = years;
-				console.log(this.years);
-			});
-	}
-
-	get_stages() {
-		console.log('test');
-	}
-
-	onChangeSpecies(val) {
-		console.log(val);
+	set_years_list() {
+		this.yearsList = [];
+		for (let y of this.years.years) {
+			this.yearsList.push({'year': y, 'isChecked': false})
+		}
 	}
 
 }
