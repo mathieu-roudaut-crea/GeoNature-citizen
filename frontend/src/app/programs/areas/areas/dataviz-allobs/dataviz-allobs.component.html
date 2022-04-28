@@ -12,10 +12,10 @@
                 <button type="radio" class="selecteur" (click)="onSetYears($event, yearsModal)"> 2 années </button>
             </div>
             <div>
-                <button type="radio" class="selecteur" (click)="onSetStages()"> 2 stades </button>
+                <button type="radio" class="selecteur" (click)="onSetStages($event, stagesModal)"> 2 stades </button>
             </div> 
             <div>
-                <button type="radio" class="selecteur"> 2 massifs </button>
+                <button type="radio" class="selecteur" (click)="onSetMountains($event, mountainsModal)"> 2 massifs </button>
             </div>
 
         </div>
@@ -52,6 +52,42 @@
                             [checked]="year.isChecked"
                             [disabled]="!year.isChecked && checkYearsNumber>1">
                         <label [for]="year.year">{{ year.year }}</label>
+                    </div>
+            </div>    
+        </ng-template>
+
+        <ng-template #stagesModal>
+            <div *ngIf="stages && stages.features">
+                <div *ngFor="let stage of stagesList">
+                    <input 
+                        type="checkbox" 
+                        [value]="stage.stage.id_species_stage" 
+                        [id]="stage.stage.id_species_stage"
+                        [name]="stage.stage.name" 
+                        (change)="check_stages_number(stage)"
+                        [(ngModel)]="stage.isChecked"
+                        class="selectStages"
+                        [checked]="stage.isChecked"
+                        [disabled]="!stage.isChecked && checkStagesNumber>1">
+                    <label [for]="stage.stage.id_species_stage">{{ stage.stage.name }}</label>
+                </div>
+        </div>    
+        </ng-template>
+
+        <ng-template #mountainsModal>
+            <div *ngIf="mountains">
+                    <div *ngFor="let mountain of mountains">
+                        <input 
+                            type="checkbox" 
+                            [value]="mountain.name" 
+                            [id]="mountain.name"
+                            [name]="mountain.name" 
+                            (change)="check_mountains_number(mountain)"
+                            [(ngModel)]="mountain.isChecked"
+                            class="selectMountains"
+                            [checked]="mountain.isChecked"
+                            [disabled]="!mountain.isChecked && checkMountainsNumber>1">
+                        <label [for]="mountain.name">{{ mountain.name }}</label>
                     </div>
             </div>    
         </ng-template>

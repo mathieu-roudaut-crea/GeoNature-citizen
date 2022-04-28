@@ -8,7 +8,6 @@ import { AreaService } from '../../areas.service';
 import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
 import { Program } from '../../../../programs/programs.models';
 import { AppConfig } from '../../../../../conf/app.config';
-import { FormGroup, FormBuilder } from "@angular/forms";
 
 
 @Component({
@@ -19,17 +18,20 @@ import { FormGroup, FormBuilder } from "@angular/forms";
 export class DatavizAllObsComponent extends ProgramBaseComponent implements OnInit {
 	appConfig = AppConfig;
 
-	selectedSpecies;
-	selectedYear;
 	program_id;
 	@Input('species') species: any;
 	@Input('stages') stages: any;
 	@Input('years') years: any;
 	@Input('userDashboard') userDashboard = false;
+	public mountains: any;
 	public speciesList = [];
 	public yearsList = [];
+	public stagesList = [];
+	public mountainsList = [];
 	public checkSpeciesNumber = 0;
 	public checkYearsNumber = 0;
+	public checkStagesNumber = 0;
+	public checkMountainsNumber = 0;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -37,8 +39,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		public flowService: AreaModalFlowService,
 		public areaService: AreaService,
 		protected modalService: ModalsTopbarService,
-		authService: AuthService,
-		private fb: FormBuilder
+		authService: AuthService
 	) {
 		super(authService);
 		this.route.params.subscribe(
@@ -63,6 +64,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			return;
 		}
 		console.log(this.appConfig.mountains)
+		this.mountains = this.appConfig.mountains
 		this.programService
 			.getProgramSpecies(this.program_id)
 			.subscribe((species) => {
@@ -87,7 +89,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	}
 
 	onSetSpecies(event, modal) {
-		this.set_species_list()
+		this.set_species_list();
 		this.modalService.open(
 			modal, {
                 size: 'lg',
@@ -112,8 +114,45 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		}
 	}
 
+	check_stages_number(item) {
+		if (item.isChecked) {
+			this.checkStagesNumber++;
+		} else {
+			this.checkStagesNumber--;
+		}
+	}
+
+	check_mountains_number(item) {
+		if (item.isChecked) {
+			this.checkMountainsNumber++;
+		} else {
+			this.checkMountainsNumber--;
+		}
+	}
+
 	onSetYears(event, modal) {
-		this.set_years_list()
+		this.set_years_list();
+		this.modalService.open(
+			modal, {
+                size: 'lg',
+                windowClass: 'add-obs-modal',
+                centered: true,
+            });
+	}
+
+	onSetStages(event, modal) {
+		this.set_stages_list();
+		console.log(this.stagesList);
+		this.modalService.open(
+			modal, {
+                size: 'lg',
+                windowClass: 'add-obs-modal',
+                centered: true,
+            });
+	}
+
+	onSetMountains(event, modal) {
+		this.set_mountains_list();
 		this.modalService.open(
 			modal, {
                 size: 'lg',
@@ -133,6 +172,27 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.yearsList = [];
 		for (let y of this.years.years) {
 			this.yearsList.push({'year': y, 'isChecked': false})
+		}
+	}
+
+	set_stages_list() {
+		this.stagesList = [];
+		for (let stage of this.stages.features) {
+			//console.log(stage);
+			let index = this.stagesList.findIndex(x => {
+				x.stage.id_species_stage == stage.properties.id_species_stage
+			});
+			console.log(stage.properties.name);
+			console.log(index);
+			index === -1 ? this.stagesList.push({'stage': stage.properties, 'isChecked': false}) : console.log('existe déjà');
+			//index === -1 ? console.log('existe pas') : console.log('existe déjà');
+		}
+	}
+
+	set_mountains_list() {
+		this.mountainsList = []
+		for (let mountain of this.mountains) {
+			this.mountainsList.push({'mountain': mountain.name, 'isChecked': false})
 		}
 	}
 
