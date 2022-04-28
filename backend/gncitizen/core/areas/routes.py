@@ -282,30 +282,31 @@ def get_user_area_stages(area_id):
     except Exception as e:
         return {"error_message": str(e)}, 400
 
-@areas_api.route("/<int:area_id>/species/<int:cd_nom>/stages", methods=["GET"])
-@json_resp
-@jwt_required()
-def get_user_area_species_stages(area_id, cd_nom):
-    """Get all species in user's area
-    ---
-    tags:
-      - Areas (External module)
-    responses:
-      200:
-        description: List of all species
-    """
-    try:
-        user_id = get_id_role_if_exists()
-        stages = (SpeciesStageModel.query
-                 .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
-                 .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                 .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesSiteModel.cd_nom == cd_nom)
-                 .order_by(func.lower(SpeciesStageModel.name))
-                 .all())
-
-        return prepare_list(stages, with_geom=False)
-    except Exception as e:
-        return {"error_message": str(e)}, 400
+        
+#@areas_api.route("/<int:area_id>/species/<int:cd_nom>/stages", methods=["GET"])
+#@json_resp
+#@jwt_required()
+#def get_user_area_species_stages(area_id, cd_nom):
+#    """Get all species in user's area
+#    ---
+#    tags:
+#      - Areas (External module)
+#    responses:
+#      200:
+#        description: List of all species
+#    """
+#    try:
+#        user_id = get_id_role_if_exists()
+#        stages = (SpeciesStageModel.query
+#                 .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
+#                 .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
+#                 .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesSiteModel.cd_nom == cd_nom)
+#                 .order_by(func.lower(SpeciesStageModel.name))
+#                 .all())
+#
+#        return prepare_list(stages, with_geom=False)
+#    except Exception as e:
+#        return {"error_message": str(e)}, 400
 
 
 @areas_api.route("/<int:area_id>/stage/<int:stage_id>/observations", methods=["GET"])
