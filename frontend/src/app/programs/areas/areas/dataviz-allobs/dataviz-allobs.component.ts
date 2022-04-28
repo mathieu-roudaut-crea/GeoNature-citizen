@@ -8,6 +8,8 @@ import { AreaService } from '../../areas.service';
 import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
 import { Program } from '../../../../programs/programs.models';
 import { AppConfig } from '../../../../../conf/app.config';
+import { FormGroup, FormBuilder, FormArray, Validators, FormControl } from "@angular/forms";
+
 
 
 @Component({
@@ -32,6 +34,19 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	public checkYearsNumber = 0;
 	public checkStagesNumber = 0;
 	public checkMountainsNumber = 0;
+	public datavizForm: FormGroup;
+	public control: FormArray;
+	public isSpeciesCompared: Boolean = false;
+	//public isSpeciesFiltered: Boolean = false;
+	//public disableSpeciesFilter: Boolean = false;
+	//public disableMountainFilter: Boolean = false;
+	//public disableYearsFilter: Boolean = false;
+	//public disableStagesFilter: Boolean = false;
+	public selectedSpeciesList = []
+	public selectedYearsList = []
+	public selectedStagesList = []
+	public selectedMountainsList = []
+
 
 	constructor(
 		private route: ActivatedRoute,
@@ -39,6 +54,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		public flowService: AreaModalFlowService,
 		public areaService: AreaService,
 		protected modalService: ModalsTopbarService,
+		private fb: FormBuilder,
 		authService: AuthService
 	) {
 		super(authService);
@@ -56,7 +72,17 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 				return;
 			}
 			this.loadData();
-		});  
+		});
+		this.initForm();  
+	}
+
+	initForm(): void {
+		this.datavizForm = this.fb.group({
+		  species: [null],
+		  years: [null],
+		  stages: [null],
+		  mountains: [null]
+		});
 	}
 
 	loadData() {
@@ -88,6 +114,62 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			});
 	}
 
+	check_species_number(item) {
+		this.selectedYearsList = []
+		this.selectedStagesList = []
+		this.selectedMountainsList = []
+		if (item.isChecked) {
+			this.checkSpeciesNumber++;
+			this.selectedSpeciesList.push(item.species.cd_nom);
+		} else {
+			this.checkSpeciesNumber--;
+			this.selectedSpeciesList = this.selectedSpeciesList.filter(obj =>obj !== item.species.cd_nom);
+		}
+		console.log(this.selectedSpeciesList);
+	}
+
+	check_years_number(item) {
+		this.selectedSpeciesList = []
+		this.selectedStagesList = []
+		this.selectedMountainsList = []
+		if (item.isChecked) {
+			this.checkYearsNumber++;
+			this.selectedYearsList.push(item.year);
+		} else {
+			this.checkYearsNumber--;
+			this.selectedYearsList = this.selectedYearsList.filter(obj =>obj !== item.year);
+		}
+		console.log(this.selectedYearsList);
+	}
+
+	check_stages_number(item) {
+		this.selectedSpeciesList = []
+		this.selectedYearsList = []
+		this.selectedMountainsList = []
+		if (item.isChecked) {
+			this.checkStagesNumber++;
+			this.selectedStagesList.push(item.stage.id_species_stage);
+		} else {
+			this.checkStagesNumber--;
+			this.selectedStagesList = this.selectedStagesList.filter(obj =>obj !== item.stage.id_species_stage);
+		}
+		console.log(this.selectedStagesList);
+	}
+
+	check_mountains_number(item) {
+		this.selectedSpeciesList = []
+		this.selectedYearsList = []
+		this.selectedStagesList = []
+		if (item.isChecked) {
+			this.checkMountainsNumber++;
+			this.selectedMountainsList.push(item.name);
+		} else {
+			this.checkMountainsNumber--;
+			this.selectedMountainsList = this.selectedMountainsList.filter(obj =>obj !== item.name);
+		}
+		console.log(this.selectedMountainsList);
+	}
+
 	onSetSpecies(event, modal) {
 		this.set_species_list();
 		this.modalService.open(
@@ -96,38 +178,6 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
                 windowClass: 'add-obs-modal',
                 centered: true,
             });
-	}
-
-	check_species_number(item) {
-		if (item.isChecked) {
-			this.checkSpeciesNumber++;
-		} else {
-			this.checkSpeciesNumber--;
-		}
-	}
-
-	check_years_number(item) {
-		if (item.isChecked) {
-			this.checkYearsNumber++;
-		} else {
-			this.checkYearsNumber--;
-		}
-	}
-
-	check_stages_number(item) {
-		if (item.isChecked) {
-			this.checkStagesNumber++;
-		} else {
-			this.checkStagesNumber--;
-		}
-	}
-
-	check_mountains_number(item) {
-		if (item.isChecked) {
-			this.checkMountainsNumber++;
-		} else {
-			this.checkMountainsNumber--;
-		}
 	}
 
 	onSetYears(event, modal) {
@@ -142,7 +192,6 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 
 	onSetStages(event, modal) {
 		this.set_stages_list();
-		console.log(this.stagesList);
 		this.modalService.open(
 			modal, {
                 size: 'lg',
@@ -178,14 +227,10 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	set_stages_list() {
 		this.stagesList = [];
 		for (let stage of this.stages.features) {
-			//console.log(stage);
 			let index = this.stagesList.findIndex(x => {
 				x.stage.id_species_stage == stage.properties.id_species_stage
 			});
-			console.log(stage.properties.name);
-			console.log(index);
 			index === -1 ? this.stagesList.push({'stage': stage.properties, 'isChecked': false}) : console.log('existe déjà');
-			//index === -1 ? console.log('existe pas') : console.log('existe déjà');
 		}
 	}
 
@@ -194,6 +239,30 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		for (let mountain of this.mountains) {
 			this.mountainsList.push({'mountain': mountain.name, 'isChecked': false})
 		}
+	}
+
+	onSpeciesSelect(event) {
+		this.selectedSpeciesList = []
+		this.selectedSpeciesList.push(event.target.value);
+		console.log(this.selectedSpeciesList);
+	}
+
+	onYearsSelect(event) {
+		this.selectedYearsList = []
+		this.selectedYearsList.push(event.target.value);
+		console.log(this.selectedYearsList);
+	}
+
+	onStagesSelect(event) {
+		this.selectedStagesList = []
+		this.selectedStagesList.push(event.target.value);
+		console.log(this.selectedStagesList);
+	}
+
+	onMountainsSelect(event) {
+		this.selectedMountainsList = []
+		this.selectedMountainsList.push(event.target.value);
+		console.log(this.selectedMountainsList);
 	}
 
 }

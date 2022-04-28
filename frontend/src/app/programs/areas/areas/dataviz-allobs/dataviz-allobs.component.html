@@ -92,6 +92,69 @@
             </div>    
         </ng-template>
 
+        <div class="filtrer">
+
+            <h1>Filtrer </h1>
+
+            <div class="form-group">
+                <div *ngIf="species && species.features">
+                    <select
+                        class="form-control"
+                        [formControl]="datavizForm.controls.species"
+                        (click)="onSpeciesSelect($event)"
+                        >
+                        <option value="" disabled [selected]=true>Espèces</option>
+                        <option *ngFor="let species of species.features" [value]="species.properties.cd_nom">
+                            {{species.properties.nom_complet}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div *ngIf="years">
+                    <select
+                        class="form-control"
+                        [formControl]="datavizForm.controls.years"
+                        (click)="onYearsSelect($event)"
+                        >
+                        <option value="" disabled [selected]=true>Années</option>
+                        <option *ngFor="let year of years.years" [value]="year">
+                            {{year}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div *ngIf="stages">
+                    <select
+                        class="form-control"
+                        [formControl]="datavizForm.controls.stages"
+                        (click)="onStagesSelect($event)"
+                        >
+                        <option value="" disabled [selected]=true>Stades</option>
+                        <option *ngFor="let stage of stages.features" [value]="stage.properties.id_species_stage">
+                            {{stage.properties.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div *ngIf="mountains">
+                    <select
+                        class="form-control"
+                        [formControl]="datavizForm.controls.mountains"
+                        (click)="onMountainsSelect($event)"
+                        >
+                        <option value="" disabled [selected]=true>Massifs</option>
+                        <option *ngFor="let mountain of mountains" [value]="mountain.name">
+                            {{mountain.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+
         <!--
         <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
             {{Deux espèces}}
@@ -126,7 +189,7 @@
         </div>
         
 
-        <h1>Filtrer </h1>
+        
         <div *ngIf="species && species.features">
             <select>
                 <option *ngFor="let species of species.features" [ngValue]="species.properties.cd_nom">

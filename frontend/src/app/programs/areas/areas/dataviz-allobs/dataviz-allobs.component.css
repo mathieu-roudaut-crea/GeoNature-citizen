@@ -152,6 +152,12 @@ button[type="radio"].selecteur {
   color: #000;
 }
 
+select {
+  padding: 2px 20px;
+  border: solid 2px #218a7c;
+  color: #000;
+}
+
 .selectSpecies {
   padding: 2px 20px;
   border-radius: 25px;
