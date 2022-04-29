@@ -76,3 +76,6 @@ La première version de ce projet est le fruit d'une démarche mutualisée entre
 
 Il constitue l'une des briques du projet GeoNature, porté par les [Parcs nationaux de France](http://www.parcsnationaux.fr/fr) et bénéficie de l'appui technique du [Parc national des Ecrins](http://www.ecrins-parcnational.fr/).
 
+Plus d'information https://natural-solutions-world ou https://www.natural-solutions.eu/
+
+
