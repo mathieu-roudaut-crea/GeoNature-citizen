@@ -6,7 +6,6 @@ import { HomeComponent } from './home/home.component';
 import { ObsComponent } from './programs/observations/obs.component';
 import { SitesComponent } from './programs/sites/sites.component';
 import { DatavizComponent } from './programs/areas/areas/dataviz/dataviz.component';
-import { DatavizMyObsComponent } from './programs/areas/areas/dataviz-myobs/dataviz-myobs.component';
 import { DatavizAllObsComponent } from './programs/areas/areas/dataviz-allobs/dataviz-allobs.component';
 import { AreasComponent } from './programs/areas/areas.component';
 import { SpeciesSitesComponent } from './programs/areas/species_sites/species_sites.component';
@@ -73,11 +72,6 @@ const appRoutes: Routes = [
     {
         path: 'programs/:id/areas/dataviz',
         component: DatavizComponent,
-        resolve: { programs: ProgramsResolve },
-    },
-    {
-        path: 'programs/:id/areas/dataviz-myobs',
-        component: DatavizMyObsComponent,
         resolve: { programs: ProgramsResolve },
     },
     {
