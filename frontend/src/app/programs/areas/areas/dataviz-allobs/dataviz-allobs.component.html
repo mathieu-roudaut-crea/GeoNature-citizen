@@ -5,17 +5,37 @@
 
             <h1>Comparer </h1>
 
-            <div>
+            <div class="form-group">
                 <button type="radio" class="selecteur" (click)="onSetSpecies($event, speciesModal)"> 2 espèces </button>
+                <div class="showSelection">
+                    <div *ngFor="let species of onData.species">
+                        <span *ngIf="comparedType=='species'"> {{species}} </span>
+                    </div>
+                </div>
             </div>
-            <div>
+            <div class="form-group">
                 <button type="radio" class="selecteur" (click)="onSetYears($event, yearsModal)"> 2 années </button>
+                <div class="showSelection">
+                    <div *ngFor="let year of onData.years">
+                        <span *ngIf="comparedType=='years'"> {{year}} </span>
+                    </div>
+                </div>
             </div>
-            <div>
+            <div class="form-group">
                 <button type="radio" class="selecteur" (click)="onSetStages($event, stagesModal)"> 2 stades </button>
+                <div class="showSelection">
+                    <div *ngFor="let stage of onData.stages">
+                        <span *ngIf="comparedType=='stages'"> {{stage}} </span>
+                    </div>
+                </div>
             </div> 
-            <div>
+            <div class="form-group">
                 <button type="radio" class="selecteur" (click)="onSetMountains($event, mountainsModal)"> 2 massifs </button>
+                <div class="showSelection">
+                    <div *ngFor="let mountain of onData.mountains">
+                        <span *ngIf="comparedType=='mountains'"> {{mountain}} </span>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -28,7 +48,7 @@
                             [value]="species.species.cd_nom" 
                             [id]="species.species.cd_nom"
                             [name]="species.species.nom_complet" 
-                            (change)="check_species_number(species)"
+                            (change)="check_species_number(species); checkSelection()"
                             [(ngModel)]="species.isChecked"
                             class="selectSpecies"
                             [checked]="species.isChecked"
@@ -46,7 +66,7 @@
                             [value]="year.year" 
                             [id]="year.year"
                             [name]="year.year" 
-                            (change)="check_years_number(year)"
+                            (change)="check_years_number(year); checkSelection()"
                             [(ngModel)]="year.isChecked"
                             class="selectYears"
                             [checked]="year.isChecked"
@@ -61,10 +81,10 @@
                 <div *ngFor="let stage of stagesList">
                     <input 
                         type="checkbox" 
-                        [value]="stage.stage.id_species_stage" 
+                        [value]="stage.stage.name" 
                         [id]="stage.stage.id_species_stage"
                         [name]="stage.stage.name" 
-                        (change)="check_stages_number(stage)"
+                        (change)="check_stages_number(stage); checkSelection()"
                         [(ngModel)]="stage.isChecked"
                         class="selectStages"
                         [checked]="stage.isChecked"
@@ -82,7 +102,7 @@
                             [value]="mountain.name" 
                             [id]="mountain.name"
                             [name]="mountain.name" 
-                            (change)="check_mountains_number(mountain)"
+                            (change)="check_mountains_number(mountain); checkSelection()"
                             [(ngModel)]="mountain.isChecked"
                             class="selectMountains"
                             [checked]="mountain.isChecked"
@@ -101,7 +121,7 @@
                     <select
                         class="form-control"
                         [formControl]="datavizForm.controls.species"
-                        (click)="onSpeciesSelect($event)"
+                        (click)="onSpeciesSelect($event); checkSelection()"
                         >
                         <option value="" enabled [selected]=true>Espèces</option>
                         <option *ngFor="let species of species.features" [value]="species.properties.cd_nom">
@@ -115,7 +135,7 @@
                     <select
                         class="form-control"
                         [formControl]="datavizForm.controls.years"
-                        (click)="onYearsSelect($event)"
+                        (click)="onYearsSelect($event); checkSelection()"
                         >
                         <option value="" enabled [selected]=true>Années</option>
                         <option *ngFor="let year of years.years" [value]="year">
@@ -129,11 +149,11 @@
                     <select
                         class="form-control"
                         [formControl]="datavizForm.controls.stages"
-                        (click)="onStagesSelect($event)"
+                        (click)="onStagesSelect($event); checkSelection()"
                         >
                         <option value="" enabled [selected]=true>Stades</option>
-                        <option *ngFor="let stage of stages.features" [value]="stage.properties.id_species_stage">
-                            {{stage.properties.name}}</option>
+                        <option *ngFor="let stage of stagesList" [value]="stage.stage.name">
+                            {{stage.stage.name}}</option>
                     </select>
                 </div>
             </div>
@@ -143,7 +163,7 @@
                     <select
                         class="form-control"
                         [formControl]="datavizForm.controls.mountains"
-                        (click)="onMountainsSelect($event)"
+                        (click)="onMountainsSelect($event); checkSelection()"
                         >
                         <option value="" enabled [selected]=true>Massifs</option>
                         <option *ngFor="let mountain of mountains" [value]="mountain.name">
@@ -154,79 +174,6 @@
 
         </div>
 
-
-        <!--
-        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
-            {{Deux espèces}}
-            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
-                <div style="font-weight: bold;">{{d.date}}</div>
-                <div>{{d.obs_name}}</div>
-            </span>
-        </div>
-
-        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
-            {{Deux stades}}
-            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
-                <div style="font-weight: bold;">{{d.date}}</div>
-                <div>{{d.obs_name}}</div>
-            </span>
-        </div>
-
-        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
-            {{Deux espèces}}
-            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
-                <div style="font-weight: bold;">{{d.date}}</div>
-                <div>{{d.obs_name}}</div>
-            </span>
-        </div>
-
-        <div *ngFor="let d of months.data" class="popup" (click)="displayPopup($event, d)">
-            {{Deux espèces}}
-            <span class="popuptext" *ngIf="d.displayPopup" [ngStyle]="{'backgroundColor': d.color }">
-                <div style="font-weight: bold;">{{d.date}}</div>
-                <div>{{d.obs_name}}</div>
-            </span>
-        </div>
-        
-
-        
-        <div *ngIf="species && species.features">
-            <select>
-                <option *ngFor="let species of species.features" [ngValue]="species.properties.cd_nom">
-                    {{species.properties.nom_complet}}</option>
-            </select>
-             
-        </div>
-
-        <div *ngIf="years">
-            <select>
-                <option *ngFor="let year of years.years" [ngValue]="year">
-                    {{year}}</option>
-            </select>
-             <form>
-                <div *ngFor="let year of years.years">
-                    <input type="radio" [value]="year" [id]="year" [name]="year" (change)="onChangeYearFilter($event)"
-                        [(ngModel)]="selectedYear" class="selecteur">
-                    <label [for]="year">{{ year }}</label>
-                </div>
-            </form>
-        </div>
-
-        <div *ngIf="appConfig.mountains">
-            <select>
-                <option *ngFor="let mountain of appConfig.mountains" [ngValue]="mountain.name">
-                    {{mountain.name}}</option>
-            </select>
-            <form>
-                <div *ngFor="let mountain of appConfig.mountains">
-                    <input type="radio" [value]="mountain.name" [id]="mountain.name" [name]="mountain.name"
-                        (change)="onChangeYearFilter($event)" [(ngModel)]="selectedMountain" class="selecteur">
-                    <label [for]="mountain.name">{{ mountain.name }}</label>
-                </div>
-            </form>
-        </div> -->
-
     </div>
-
 
 </div>

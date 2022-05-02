@@ -9,6 +9,7 @@ import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service
 import { Program } from '../../../../programs/programs.models';
 import { AppConfig } from '../../../../../conf/app.config';
 import { FormGroup, FormBuilder, FormArray, Validators, FormControl } from "@angular/forms";
+import { ThrowStmt } from '@angular/compiler';
 
 
 
@@ -37,15 +38,18 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	public datavizForm: FormGroup;
 	public control: FormArray;
 	public isSpeciesCompared: Boolean = false;
-	//public isSpeciesFiltered: Boolean = false;
-	//public disableSpeciesFilter: Boolean = false;
-	//public disableMountainFilter: Boolean = false;
-	//public disableYearsFilter: Boolean = false;
-	//public disableStagesFilter: Boolean = false;
-	public selectedSpeciesList = []
-	public selectedYearsList = []
-	public selectedStagesList = []
-	public selectedMountainsList = []
+	//public selectedSpeciesList = [];
+	//public selectedYearsList = [];
+	//public selectedStagesList = [];
+	//public selectedMountainsList = [];
+	public comparedItems = [];
+	public onData = {
+		species: [],
+		years: [],
+		stages: [],
+		mountains: []
+	};
+	public comparedType;
 
 
 	constructor(
@@ -83,26 +87,28 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		  stages: [null],
 		  mountains: [null]
 		});
+		this.datavizForm.disable();
 	}
 
 	loadData() {
 		if (!this.program_id) {
 			return;
 		}
-		console.log(this.appConfig.mountains)
-		this.mountains = this.appConfig.mountains
+		console.log(this.appConfig.mountains);
+		this.mountains = this.appConfig.mountains;
+		this.set_mountains_list();
 		this.programService
 			.getProgramSpecies(this.program_id)
 			.subscribe((species) => {
 				this.species = species;
-				console.log(this.species);
+				this.set_species_list();
 			});
 		this.programService
 			.getProgramYears(this.program_id)
 			.toPromise()
 			.then((years:any) => {
 				this.years = years;
-				console.log(this.years);
+				this.set_years_list();
 			});
 
 		this.programService
@@ -111,78 +117,68 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			.then((stages:any) => {
 				this.stages = stages;
 				console.log(this.stages);
+				this.set_stages_list();
 			});
 	}
 
+	checkSelection() {
+		console.log(this.onData);
+	}
+
 	check_species_number(item) {
-		this.selectedYearsList = []
-		this.selectedStagesList = []
-		this.selectedMountainsList = []
+		this.onData.years = []
+		this.onData.stages = []
+		this.onData.mountains = []
 		if (item.isChecked) {
 			this.checkSpeciesNumber++;
-			this.selectedSpeciesList.push(Number(item.species.cd_nom));
+			this.onData.species.push(String(item.species.cd_nom));
 		} else {
 			this.checkSpeciesNumber--;
-			this.selectedSpeciesList = this.selectedSpeciesList.filter(obj =>obj !== Number(item.species.cd_nom));
+			this.onData.species = this.onData.species.filter(obj =>obj !== String(item.species.cd_nom));
 		}
-		console.log(this.selectedSpeciesList);
+		if (this.checkSpeciesNumber === 2) this.modalService.close();
 	}
 
 	check_years_number(item) {
-		this.selectedSpeciesList = []
-		this.selectedStagesList = []
-		this.selectedMountainsList = []
+		this.onData.species = []
+		this.onData.stages = []
+		this.onData.mountains = []
 		if (item.isChecked) {
 			this.checkYearsNumber++;
-			this.selectedYearsList.push(item.year);
+			this.onData.years.push(String(item.year));
 		} else {
 			this.checkYearsNumber--;
-			this.selectedYearsList = this.selectedYearsList.filter(obj =>obj !== item.year);
+			this.onData.years = this.onData.years.filter(obj =>obj !== String(item.year));
 		}
-		console.log(this.selectedYearsList);
+		if (this.checkYearsNumber === 2) this.modalService.close();
 	}
 
 	check_stages_number(item) {
-		this.selectedSpeciesList = []
-		this.selectedYearsList = []
-		this.selectedMountainsList = []
+		this.onData.species = []
+		this.onData.years = []
+		this.onData.mountains = []
 		if (item.isChecked) {
 			this.checkStagesNumber++;
-			this.selectedStagesList.push(item.stage.id_species_stage);
+			this.onData.stages.push(item.stage.name);
 		} else {
 			this.checkStagesNumber--;
-			this.selectedStagesList = this.selectedStagesList.filter(obj =>obj !== item.stage.id_species_stage);
+			this.onData.stages = this.onData.stages.filter(obj =>obj !== item.stage.name);
 		}
-		console.log(this.selectedStagesList);
+		if (this.checkStagesNumber === 2) this.modalService.close();
 	}
 
 	check_mountains_number(item) {
-		this.selectedSpeciesList = []
-		this.selectedYearsList = []
-		this.selectedStagesList = []
+		this.onData.species = []
+		this.onData.years = []
+		this.onData.stages = []
 		if (item.isChecked) {
 			this.checkMountainsNumber++;
-			this.selectedMountainsList.push(item.name);
+			this.onData.mountains.push(item.name);
 		} else {
 			this.checkMountainsNumber--;
-			this.selectedMountainsList = this.selectedMountainsList.filter(obj =>obj !== item.name);
+			this.onData.mountains = this.onData.mountains.filter(obj =>obj !== item.name);
 		}
-		console.log(this.selectedMountainsList);
-	}
-
-	onSetSpecies(event, modal) {
-		this.set_species_list();
-		this.resetAll();
-		this.resetFilterDefaultValue();
-		this.disableFilter('species');
-
-		//open modal
-		this.modalService.open(
-			modal, {
-                size: 'lg',
-                windowClass: 'add-obs-modal',
-                centered: true,
-            });
+		if (this.checkMountainsNumber === 2) this.modalService.close();
 	}
 
 	disableFilter(control) {
@@ -207,10 +203,10 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	}
 
 	resetSeletedItems() {
-		this.selectedSpeciesList = [];
-		this.selectedYearsList = [];
-		this.selectedStagesList = [];
-		this.selectedMountainsList = [];
+		this.onData.species = [];
+		this.onData.years = [];
+		this.onData.stages = [];
+		this.onData.mountains = [];
 	}
 
 	resetCheckItems() {
@@ -220,11 +216,29 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.checkMountainsNumber = 0;
 	}
 
+	onSetSpecies(event, modal) {
+		this.comparedType = 'species';
+		this.resetAll();
+		this.resetFilterDefaultValue();
+		this.disableFilter('species');
+		this.comparedItems = [];
+
+		//open modal
+		this.modalService.open(
+			modal, {
+                size: 'lg',
+                windowClass: 'add-obs-modal',
+                centered: true,
+            });
+	}
+
 	onSetYears(event, modal) {
+		this.comparedType = 'years';
 		this.set_years_list();
 		this.resetAll();
 		this.resetFilterDefaultValue();
 		this.disableFilter('years');
+		this.comparedItems = [];
 
 		this.modalService.open(
 			modal, {
@@ -236,10 +250,12 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	}
 
 	onSetStages(event, modal) {
-		this.set_stages_list();
+		this.comparedType = 'stages';
 		this.resetAll();
 		this.resetFilterDefaultValue();
 		this.disableFilter('stages');
+		this.comparedItems = [];
+
 		this.modalService.open(
 			modal, {
                 size: 'lg',
@@ -249,10 +265,13 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	}
 
 	onSetMountains(event, modal) {
+		this.comparedType = 'mountains';
 		this.set_mountains_list();
 		this.resetAll();
 		this.resetFilterDefaultValue();
 		this.disableFilter('mountains');
+		this.comparedItems = [];
+
 		this.modalService.open(
 			modal, {
                 size: 'lg',
@@ -278,10 +297,8 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	set_stages_list() {
 		this.stagesList = [];
 		for (let stage of this.stages.features) {
-			let index = this.stagesList.findIndex(x => {
-				x.stage.id_species_stage == stage.properties.id_species_stage
-			});
-			index === -1 ? this.stagesList.push({'stage': stage.properties, 'isChecked': false}) : console.log('existe déjà');
+			let index = this.stagesList.map(x => x.stage.name).indexOf(stage.properties.name);
+			if (index === -1) this.stagesList.push({'stage': stage.properties, 'isChecked': false});
 		}
 	}
 
@@ -293,27 +310,23 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	}
 
 	onSpeciesSelect(event) {
-		this.selectedSpeciesList = []
-		this.selectedSpeciesList.push(Number(event.target.value));
-		console.log(this.selectedSpeciesList);
+		this.onData.species = []
+		this.onData.species.push(event.target.value);
 	}
 
 	onYearsSelect(event) {
-		this.selectedYearsList = []
-		this.selectedYearsList.push(Number(event.target.value));
-		console.log(this.selectedYearsList);
+		this.onData.years = []
+		this.onData.years.push(event.target.value);
 	}
 
 	onStagesSelect(event) {
-		this.selectedStagesList = []
-		this.selectedStagesList.push(Number(event.target.value));
-		console.log(this.selectedStagesList);
+		this.onData.stages = []
+		this.onData.stages.push(event.target.value);
 	}
 
 	onMountainsSelect(event) {
-		this.selectedMountainsList = []
-		this.selectedMountainsList.push(event.target.value);
-		console.log(this.selectedMountainsList);
+		this.onData.mountains = []
+		this.onData.mountains.push(event.target.value);
 	}
 
 }

@@ -218,6 +218,12 @@ export class GncProgramsService implements OnInit {
         );
     }
 
+    getObservationsFor2Species(cd_nom_one, cd_nom_two) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/species_one/${cd_nom_one}/species_two/${cd_nom_two}`
+        );
+    }
+
     getAreaObservers(id: number): Observable<Object> {
         return this.http.get<Object>(`${this.URL}/areas/${id}/observers`);
     }

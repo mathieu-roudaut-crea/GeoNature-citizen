@@ -150,6 +150,7 @@ button[type="radio"].selecteur {
   border-radius: 25px;
   border: solid 2px #218a7c;
   color: #000;
+  background-color: transparent;
 }
 
 select {

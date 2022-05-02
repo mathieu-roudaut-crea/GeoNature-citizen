@@ -274,10 +274,8 @@ def get_user_area_stages(area_id):
         description: List of all species
     """
     try:
-        user_id = get_id_role_if_exists()
         stages = (SpeciesStageModel.query
                  .all())
-
         return prepare_list(stages, with_geom=False)
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -323,14 +321,6 @@ def get_user_area_stage_observations(area_id, stage_id):
     """
     try:
         user_id = get_id_role_if_exists()
-        # observations = (SpeciesSiteObservationModel.query
-        #          .join(StagesStepModel, SpeciesSiteObservationModel.id_stages_step == StagesStepModel.id_stages_step)
-        #          .join(SpeciesStageModel, SpeciesStageModel.id_species_stage == StagesStepModel.id_species_stage)
-        #          .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
-        #          .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-        #          .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesStageModel.id_species_stage == stage_id)
-        #          .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
-        #          .all())
 
         observations = (SpeciesSiteObservationModel.query
                         .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
@@ -342,6 +332,49 @@ def get_user_area_stage_observations(area_id, stage_id):
                         .all())
 
         return prepare_list(observations, with_geom=False)
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+@areas_api.route("/species_one/<int:cd_nom_un>/species_two/<int:cd_nom_deux>/", methods=["GET"])
+@json_resp
+@jwt_required()
+def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux):
+    """Get all stage's observations for 2 specifics species
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        user_id = get_id_role_if_exists()
+
+        # print(SpeciesSiteObservationModel.query
+        #                 .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+        #                 .filter(or_(SpeciesSiteModel.cd_nom==cd_nom_un, SpeciesSiteModel.cd_nom==cd_nom_deux)))
+
+        # observations = (SpeciesSiteObservationModel.query
+        #                 .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
+        #                 .filter(or_(SpeciesSiteModel.cd_nom==cd_nom_un, SpeciesSiteModel.cd_nom==cd_nom_deux))
+        #                 .all())
+
+        res = db.engine.execute(f"""select gnc_areas.t_species_sites.json_data::json -> 'altitude' as altitude, 
+                                            gnc_areas.t_species_site_observations.date ,
+                                            gnc_core.t_users.username, 
+                                            ref_geo.li_municipalities.nom_com,
+                                            ref_geo.li_municipalities.insee_com 
+                                    FROM gnc_areas.t_species_site_observations 
+                                    JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user 
+                                    WHERE gnc_areas.t_species_sites.cd_nom = {cd_nom_un} OR gnc_areas.t_species_sites.cd_nom = {cd_nom_deux}""")
+
+        retour = []
+        for data in res:
+            retour.append({"altitude":data.altitude, "date":data.date, "user":data.username, "commune":data.nom_com, "insee":data.insee_com})
+
+        return retour #prepare_list(observations, with_geom=False)
     except Exception as e:
         return {"error_message": str(e)}, 400
 
