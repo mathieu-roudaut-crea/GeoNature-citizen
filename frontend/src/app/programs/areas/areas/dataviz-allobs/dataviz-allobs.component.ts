@@ -120,10 +120,10 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.selectedMountainsList = []
 		if (item.isChecked) {
 			this.checkSpeciesNumber++;
-			this.selectedSpeciesList.push(item.species.cd_nom);
+			this.selectedSpeciesList.push(Number(item.species.cd_nom));
 		} else {
 			this.checkSpeciesNumber--;
-			this.selectedSpeciesList = this.selectedSpeciesList.filter(obj =>obj !== item.species.cd_nom);
+			this.selectedSpeciesList = this.selectedSpeciesList.filter(obj =>obj !== Number(item.species.cd_nom));
 		}
 		console.log(this.selectedSpeciesList);
 	}
@@ -172,26 +172,74 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 
 	onSetSpecies(event, modal) {
 		this.set_species_list();
+		this.resetAll();
+		this.resetFilterDefaultValue();
+		this.disableFilter('species');
+
+		//open modal
 		this.modalService.open(
 			modal, {
                 size: 'lg',
                 windowClass: 'add-obs-modal',
                 centered: true,
             });
+	}
+
+	disableFilter(control) {
+		this.datavizForm.controls['species'].enable();
+		this.datavizForm.controls['years'].enable();
+		this.datavizForm.controls['stages'].enable();
+		this.datavizForm.controls['mountains'].enable();
+		this.datavizForm.controls[control].disable();
+	}
+
+	resetAll() {
+		this.resetSeletedItems();
+		this.resetCheckItems();
+		this.datavizForm.reset();
+	}
+
+	resetFilterDefaultValue() {
+		this.datavizForm.controls['species'].setValue('');
+		this.datavizForm.controls['years'].setValue('');
+		this.datavizForm.controls['stages'].setValue('');
+		this.datavizForm.controls['mountains'].setValue('');
+	}
+
+	resetSeletedItems() {
+		this.selectedSpeciesList = [];
+		this.selectedYearsList = [];
+		this.selectedStagesList = [];
+		this.selectedMountainsList = [];
+	}
+
+	resetCheckItems() {
+		this.checkSpeciesNumber = 0;
+		this.checkYearsNumber = 0;
+		this.checkStagesNumber = 0;
+		this.checkMountainsNumber = 0;
 	}
 
 	onSetYears(event, modal) {
 		this.set_years_list();
+		this.resetAll();
+		this.resetFilterDefaultValue();
+		this.disableFilter('years');
+
 		this.modalService.open(
 			modal, {
                 size: 'lg',
                 windowClass: 'add-obs-modal',
                 centered: true,
             });
+
 	}
 
 	onSetStages(event, modal) {
 		this.set_stages_list();
+		this.resetAll();
+		this.resetFilterDefaultValue();
+		this.disableFilter('stages');
 		this.modalService.open(
 			modal, {
                 size: 'lg',
@@ -202,6 +250,9 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 
 	onSetMountains(event, modal) {
 		this.set_mountains_list();
+		this.resetAll();
+		this.resetFilterDefaultValue();
+		this.disableFilter('mountains');
 		this.modalService.open(
 			modal, {
                 size: 'lg',
@@ -243,19 +294,19 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 
 	onSpeciesSelect(event) {
 		this.selectedSpeciesList = []
-		this.selectedSpeciesList.push(event.target.value);
+		this.selectedSpeciesList.push(Number(event.target.value));
 		console.log(this.selectedSpeciesList);
 	}
 
 	onYearsSelect(event) {
 		this.selectedYearsList = []
-		this.selectedYearsList.push(event.target.value);
+		this.selectedYearsList.push(Number(event.target.value));
 		console.log(this.selectedYearsList);
 	}
 
 	onStagesSelect(event) {
 		this.selectedStagesList = []
-		this.selectedStagesList.push(event.target.value);
+		this.selectedStagesList.push(Number(event.target.value));
 		console.log(this.selectedStagesList);
 	}
 

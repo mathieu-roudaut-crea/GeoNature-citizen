@@ -103,7 +103,7 @@
                         [formControl]="datavizForm.controls.species"
                         (click)="onSpeciesSelect($event)"
                         >
-                        <option value="" disabled [selected]=true>Espèces</option>
+                        <option value="" enabled [selected]=true>Espèces</option>
                         <option *ngFor="let species of species.features" [value]="species.properties.cd_nom">
                             {{species.properties.nom_complet}}</option>
                     </select>
@@ -117,7 +117,7 @@
                         [formControl]="datavizForm.controls.years"
                         (click)="onYearsSelect($event)"
                         >
-                        <option value="" disabled [selected]=true>Années</option>
+                        <option value="" enabled [selected]=true>Années</option>
                         <option *ngFor="let year of years.years" [value]="year">
                             {{year}}</option>
                     </select>
@@ -131,7 +131,7 @@
                         [formControl]="datavizForm.controls.stages"
                         (click)="onStagesSelect($event)"
                         >
-                        <option value="" disabled [selected]=true>Stades</option>
+                        <option value="" enabled [selected]=true>Stades</option>
                         <option *ngFor="let stage of stages.features" [value]="stage.properties.id_species_stage">
                             {{stage.properties.name}}</option>
                     </select>
@@ -145,7 +145,7 @@
                         [formControl]="datavizForm.controls.mountains"
                         (click)="onMountainsSelect($event)"
                         >
-                        <option value="" disabled [selected]=true>Massifs</option>
+                        <option value="" enabled [selected]=true>Massifs</option>
                         <option *ngFor="let mountain of mountains" [value]="mountain.name">
                             {{mountain.name}}</option>
                     </select>
