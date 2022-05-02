@@ -38,11 +38,6 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	public datavizForm: FormGroup;
 	public control: FormArray;
 	public isSpeciesCompared: Boolean = false;
-	//public selectedSpeciesList = [];
-	//public selectedYearsList = [];
-	//public selectedStagesList = [];
-	//public selectedMountainsList = [];
-	public comparedItems = [];
 	public onData = {
 		species: [],
 		years: [],
@@ -94,7 +89,6 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		if (!this.program_id) {
 			return;
 		}
-		console.log(this.appConfig.mountains);
 		this.mountains = this.appConfig.mountains;
 		this.set_mountains_list();
 		this.programService
@@ -116,7 +110,6 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			.toPromise()
 			.then((stages:any) => {
 				this.stages = stages;
-				console.log(this.stages);
 				this.set_stages_list();
 			});
 	}
@@ -218,10 +211,10 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 
 	onSetSpecies(event, modal) {
 		this.comparedType = 'species';
+		this.set_species_list();
 		this.resetAll();
 		this.resetFilterDefaultValue();
 		this.disableFilter('species');
-		this.comparedItems = [];
 
 		//open modal
 		this.modalService.open(
@@ -229,6 +222,8 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
                 size: 'lg',
                 windowClass: 'add-obs-modal',
                 centered: true,
+				backdrop  : 'static',
+   				keyboard  : false
             });
 	}
 
@@ -238,29 +233,32 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.resetAll();
 		this.resetFilterDefaultValue();
 		this.disableFilter('years');
-		this.comparedItems = [];
 
 		this.modalService.open(
 			modal, {
                 size: 'lg',
                 windowClass: 'add-obs-modal',
                 centered: true,
+				backdrop  : 'static',
+   				keyboard  : false
             });
 
 	}
 
 	onSetStages(event, modal) {
 		this.comparedType = 'stages';
+		this.set_stages_list();
 		this.resetAll();
 		this.resetFilterDefaultValue();
 		this.disableFilter('stages');
-		this.comparedItems = [];
 
 		this.modalService.open(
 			modal, {
                 size: 'lg',
                 windowClass: 'add-obs-modal',
                 centered: true,
+				backdrop  : 'static',
+   				keyboard  : false
             });
 	}
 
@@ -270,13 +268,14 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.resetAll();
 		this.resetFilterDefaultValue();
 		this.disableFilter('mountains');
-		this.comparedItems = [];
 
 		this.modalService.open(
 			modal, {
                 size: 'lg',
                 windowClass: 'add-obs-modal',
                 centered: true,
+				backdrop  : 'static',
+   				keyboard  : false
             });
 	}
 
@@ -305,7 +304,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	set_mountains_list() {
 		this.mountainsList = []
 		for (let mountain of this.mountains) {
-			this.mountainsList.push({'mountain': mountain.name, 'isChecked': false})
+			this.mountainsList.push({'name': mountain.name, 'isChecked': false})
 		}
 	}
 

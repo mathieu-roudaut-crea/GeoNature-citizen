@@ -96,7 +96,7 @@
 
         <ng-template #mountainsModal>
             <div *ngIf="mountains">
-                    <div *ngFor="let mountain of mountains">
+                    <div *ngFor="let mountain of mountainsList">
                         <input 
                             type="checkbox" 
                             [value]="mountain.name" 
