@@ -1,13 +1,13 @@
 import { Component, Inject, Input, OnInit, PLATFORM_ID, QueryList } from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from 'src/app/auth/auth.service';
-import { ProgramBaseComponent } from 'src/app/programs/base/program-base.component';
+import { AuthService } from '../../../../auth/auth.service';
+import { ProgramBaseComponent } from '../../../../programs/base/program-base.component';
 import { AreaModalFlowService } from '../../modalflow/modalflow.service';
 import { AreaService } from '../../areas.service';
-import { ModalsTopbarService } from 'src/app/core/topbar/modalTopbar.service';
+import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
 import { AreaModalFlowComponent } from '../../modalflow/modalflow.component';
-import { Program } from 'src/app/programs/programs.models';
+import { Program } from '../../../../programs/programs.models';
 import { FeatureCollection } from 'geojson';
 import { AppConfig } from '../../../../../conf/app.config';
 
@@ -104,24 +104,31 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
         authService: AuthService
     ) {
         super(authService);
-        // this.isBrowser = isPlatformBrowser(platformId);
-        this.route.params.subscribe(
-            (params) => (this.program_id = params['id'])
-        );
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
+        this.route.params.subscribe(
+            (params) => (this.program_id = params['id'])
+        );
     }
     ngOnInit(): void {
         this.route.data.subscribe((data: { programs: Program[] }) => {
             if (this.userDashboard) {
                 return;
             }
+            this.programs = data.programs;
+            this.program = this.programs.find(
+                (p) => p.id_program == this.program_id
+            );
+
+            this.programService
+                .getProgram(this.program_id)
+                .subscribe((program) => (this.programFeature = program));
             this.loadData();
         });        
     }
 
-    ngAfterViewInit(): void {
+    ngAfterViewInit() {
         this.verifyProgramPrivacyAndUser();
     }
 

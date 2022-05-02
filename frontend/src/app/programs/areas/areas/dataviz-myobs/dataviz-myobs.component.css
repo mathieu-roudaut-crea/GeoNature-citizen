@@ -1,11 +1,11 @@
 @font-face {
   font-family: "Klavika";
-  src: url("/citizen/fr/assets/police_dataviz/Klavika-Regular.otf") format("opentype");
+  src: url("/fr/assets/police_dataviz/Klavika-Regular.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Klavika-Bold";
-  src: url("/citizen/fr/assets/police_dataviz/Klavika-Bold.otf") format("opentype")
+  src: url("/fr/assets/police_dataviz/Klavika-Bold.otf") format("opentype")
 }
 
 .dataviz-filter {
