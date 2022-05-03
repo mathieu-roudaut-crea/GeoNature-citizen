@@ -118,6 +118,7 @@ import { Bootstrap4FrameworkModule } from '@ajsf/bootstrap4';
 import { GNCFrameworkComponent } from './programs/base/jsonform/framework/framework.component';
 import { ImageUploadModule } from 'angular2-image-upload';
 import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.component';
+import { HighchartsChartModule  } from 'highcharts-angular';
 
 @NgModule({
     imports: [
@@ -137,6 +138,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         routing,
         ImageUploadModule.forRoot(),
         Bootstrap4FrameworkModule,
+        HighchartsChartModule 
     ],
     declarations: [
         AppComponent,
@@ -210,7 +212,7 @@ import { UserSitesComponent } from './auth/user-dashboard/user-sites/user-sites.
         RewardComponent,
         AdminComponent,
         ConfirmEmailComponent,
-        UserSitesComponent,
+        UserSitesComponent
     ],
     providers: [
         AuthService,

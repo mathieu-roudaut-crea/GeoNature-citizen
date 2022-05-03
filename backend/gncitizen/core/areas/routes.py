@@ -335,10 +335,10 @@ def get_user_area_stage_observations(area_id, stage_id):
     except Exception as e:
         return {"error_message": str(e)}, 400
 
-@areas_api.route("/species_one/<int:cd_nom_un>/species_two/<int:cd_nom_deux>/", methods=["GET"])
+@areas_api.route("/species_one/<int:cd_nom_un>/species_two/<int:cd_nom_deux>/stage/<string:stage>/", methods=["GET"])
 @json_resp
 @jwt_required()
-def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux):
+def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux, stage):
     """Get all stage's observations for 2 specifics species
     ---
     tags:
@@ -348,31 +348,25 @@ def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux):
         description: List of all observations
     """
     try:
-        user_id = get_id_role_if_exists()
-
-        # print(SpeciesSiteObservationModel.query
-        #                 .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
-        #                 .filter(or_(SpeciesSiteModel.cd_nom==cd_nom_un, SpeciesSiteModel.cd_nom==cd_nom_deux)))
-
-        # observations = (SpeciesSiteObservationModel.query
-        #                 .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
-        #                 .filter(or_(SpeciesSiteModel.cd_nom==cd_nom_un, SpeciesSiteModel.cd_nom==cd_nom_deux))
-        #                 .all())
-
         res = db.engine.execute(f"""select gnc_areas.t_species_sites.json_data::json -> 'altitude' as altitude, 
                                             gnc_areas.t_species_site_observations.date ,
                                             gnc_core.t_users.username, 
                                             ref_geo.li_municipalities.nom_com,
-                                            ref_geo.li_municipalities.insee_com 
+                                            ref_geo.li_municipalities.insee_com,
+                                            gnc_areas.t_species_sites.cd_nom,
+                                            gnc_areas.t_species_stages.name 
                                     FROM gnc_areas.t_species_site_observations 
                                     JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
+                                    JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
+                                    join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
                                     join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
-                                    join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user 
-                                    WHERE gnc_areas.t_species_sites.cd_nom = {cd_nom_un} OR gnc_areas.t_species_sites.cd_nom = {cd_nom_deux}""")
+                                    join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
+                                    WHERE (gnc_areas.t_species_sites.cd_nom = {cd_nom_un} OR gnc_areas.t_species_sites.cd_nom = {cd_nom_deux})
+                                    AND gnc_areas.t_species_stages.name = '{stage}'""")
 
         retour = []
         for data in res:
-            retour.append({"altitude":data.altitude, "date":data.date, "user":data.username, "commune":data.nom_com, "insee":data.insee_com})
+            retour.append({"altitude":data.altitude, "date":data.date, "user":data.username, "commune":data.nom_com, "insee":data.insee_com, "specie":data.cd_nom, "stage":data.name})
 
         return retour #prepare_list(observations, with_geom=False)
     except Exception as e:

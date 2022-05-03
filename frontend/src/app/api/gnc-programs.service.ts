@@ -218,9 +218,9 @@ export class GncProgramsService implements OnInit {
         );
     }
 
-    getObservationsFor2Species(cd_nom_one, cd_nom_two) {
+    getObservationsFor2Species(cd_nom_one, cd_nom_two, stage) {
         return this.http.get<Object>(
-            `${AppConfig.API_ENDPOINT}/areas/species_one/${cd_nom_one}/species_two/${cd_nom_two}`
+            `${AppConfig.API_ENDPOINT}/areas/species_one/${cd_nom_one}/species_two/${cd_nom_two}/stage/${stage}`
         );
     }
 

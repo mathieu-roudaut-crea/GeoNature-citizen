@@ -10,7 +10,7 @@ import { Program } from '../../../../programs/programs.models';
 import { AppConfig } from '../../../../../conf/app.config';
 import { FormGroup, FormBuilder, FormArray, Validators, FormControl } from "@angular/forms";
 import { ThrowStmt } from '@angular/compiler';
-
+import * as Highcharts from 'highcharts';
 
 
 @Component({
@@ -26,6 +26,108 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	@Input('stages') stages: any;
 	@Input('years') years: any;
 	@Input('userDashboard') userDashboard = false;
+	public size_icon = 20;
+	public Highcharts = Highcharts;
+	public chartConstructor = "chart";
+  	public chartCallback;
+	public chartOptions = {
+    chart: {
+			  plotBackgroundImage: 'assets/dataviz2/mountain_background.png'
+			},
+			title: {
+			  text: 'Dataviz 2'
+			},
+			xAxis: {
+			  type: 'datetime',
+			  dateTimeLabelFormats: {
+				month: '%B'
+			  }
+			},
+			yAxis: {
+			  title: {
+				text: 'Altitude'
+			  },
+			  min: 0,
+			  max: 2000
+			},
+			tooltip: {
+			  headerFormat: '<b>{series.name}</b><br>',
+			  pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
+			},
+		  
+			plotOptions: {
+			  series: {
+				marker: {
+				  enabled: true
+				}
+			  }
+			},
+		  
+			colors: ['#7DA014', '#7DA014', '#7DA014'],
+		  
+			series: [],
+		  
+			responsive: {
+			  rules: [{
+				condition: {
+				  maxWidth: 500
+				},
+				chartOptions: {
+				  plotOptions: {
+					series: {
+					  marker: {
+						radius: 2.5
+					  }
+					}
+				  }
+				}
+			  }]
+			}
+  };
+	// {
+	// 		  type: "scatter",
+	// 		  name: "Winter 2014-2015",
+	// 		  data: [
+	// 			[Date.UTC(1970, 7, 25), 100],
+	// 			[Date.UTC(1970, 9, 6), 200],
+	// 			[Date.UTC(1970, 10, 20), 300],
+	// 			[Date.UTC(1970, 11, 25), 1500],
+	// 		  ],
+	// 		  marker: {
+	// 			symbol: 'url(assets/dataviz2/icon_green_circle.svg)',
+	// 			width: this.size_icon,
+	// 			height: this.size_icon
+	// 		  }
+	// 		}, {
+	// 		  type: "scatter",
+	// 		  name: "Winter 2014-2015",
+	// 		  data: [
+	// 			[Date.UTC(1970, 10, 25), 200],
+	// 			[Date.UTC(1970, 11, 6), 300],
+	// 			[Date.UTC(1970, 11, 20), 600],
+	// 			[Date.UTC(1970, 11, 25), 1000],
+	// 		  ],
+	// 		  marker: {
+	// 			symbol: 'url(assets/dataviz2/icon_green_circles.svg)',
+	// 			width: this.size_icon,
+	// 			height: this.size_icon
+	// 		  }
+	// 		}, {
+	// 		  type: "scatter",
+	// 		  name: "Winter 2015-2016",
+	// 		  data: [
+	// 			[Date.UTC(1970, 10, 9), 200],
+	// 			[Date.UTC(1970, 10, 15), 300],
+	// 			[Date.UTC(1970, 10, 20), 500],
+	// 			[Date.UTC(1970, 10, 25), 400],
+	// 			[Date.UTC(1970, 10, 30), 1000],
+	// 		  ],
+	// 		  marker: {
+	// 			symbol: 'url(assets/dataviz2/icon_green_cross.svg)',
+	// 			width: this.size_icon,
+	// 			height: this.size_icon
+	// 		  }
+	// 		}
 	public mountains: any;
 	public speciesList = [];
 	public yearsList = [];
@@ -35,6 +137,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	public checkYearsNumber = 0;
 	public checkStagesNumber = 0;
 	public checkMountainsNumber = 0;
+	public graph;
 	public datavizForm: FormGroup;
 	public control: FormArray;
 	public isSpeciesCompared: Boolean = false;
@@ -44,7 +147,24 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		stages: [],
 		mountains: []
 	};
+	public updateFlag = false;
 	public comparedType;
+	public dataToDisplay: any;
+
+	public months = {
+		"Jan": 1,
+		"Feb": 2,
+		"Mar": 3,
+		"Apr": 4,
+		"May": 5,
+		"Jun": 6,
+		"Jul": 7,
+		"Aug": 8,
+		"Sep": 9,
+		"Oct": 10,
+		"Nov": 11,
+		"Dec": 12,
+	}
 
 
 	constructor(
@@ -72,7 +192,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			}
 			this.loadData();
 		});
-		this.initForm();  
+		this.initForm();
 	}
 
 	initForm(): void {
@@ -111,6 +231,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			.then((stages:any) => {
 				this.stages = stages;
 				this.set_stages_list();
+				console.log(this.stagesList);
 			});
 	}
 
@@ -118,9 +239,66 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		console.log(this.onData);
 	}
 
+	getSpeciesNames(cdNom) {
+		let taxon = this.speciesList.find(
+			(item) => {return item.species.cd_nom == Number(cdNom)}
+		);
+		return {
+			nom_complet: taxon.species.nom_complet,
+			nom_vern: taxon.species.nom_vern
+		}
+	}
+
+	getObsFor2Species() {
+		this.programService
+				.getObservationsFor2Species(this.onData.species[0], this.onData.species[1], this.onData.stages[0])
+				.subscribe((data) => {
+					this.dataToDisplay = data;
+					this.chartOptions.series = []
+					let speciesName0 = this.getSpeciesNames(this.onData.species[0]);
+					let speciesName1 = this.getSpeciesNames(this.onData.species[1]);
+					const serie = this.dataToDisplay
+							.filter(e => e.specie === Number(this.onData.species[0]))
+							.map(e => {
+								console.log(e);
+								const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
+								const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
+								return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
+							})
+					const serie2 = this.dataToDisplay
+							.filter(e => e.specie === Number(this.onData.species[1]))
+							.map(e => {
+								const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
+								const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
+								return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
+							})
+					this.chartOptions.series.push({
+						type: "scatter",
+						name: speciesName0.nom_complet + " / " + speciesName0.nom_vern,
+						data: serie,
+						marker: {
+						symbol: 'url(assets/dataviz2/icon_green_circle.svg)',
+						width: this.size_icon,
+						height: this.size_icon
+						}
+					})
+					this.chartOptions.series.push({
+						type: "scatter",
+						name: speciesName1.nom_complet + " / " + speciesName1.nom_vern,
+						data: serie2,
+						marker: {
+						symbol: 'url(assets/dataviz2/icon_red_circle.svg)',
+						width: this.size_icon,
+						height: this.size_icon
+						}
+					})
+					this.updateFlag = true
+				});
+	}
+
 	check_species_number(item) {
 		this.onData.years = []
-		this.onData.stages = []
+		//this.onData.stages = []
 		this.onData.mountains = []
 		if (item.isChecked) {
 			this.checkSpeciesNumber++;
@@ -129,12 +307,15 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			this.checkSpeciesNumber--;
 			this.onData.species = this.onData.species.filter(obj =>obj !== String(item.species.cd_nom));
 		}
-		if (this.checkSpeciesNumber === 2) this.modalService.close();
+		if (this.checkSpeciesNumber === 2) {
+			this.getObsFor2Species();
+			this.modalService.close();
+		};
 	}
 
 	check_years_number(item) {
 		this.onData.species = []
-		this.onData.stages = []
+		//this.onData.stages = []
 		this.onData.mountains = []
 		if (item.isChecked) {
 			this.checkYearsNumber++;
@@ -163,7 +344,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	check_mountains_number(item) {
 		this.onData.species = []
 		this.onData.years = []
-		this.onData.stages = []
+		//this.onData.stages = []
 		if (item.isChecked) {
 			this.checkMountainsNumber++;
 			this.onData.mountains.push(item.name);
@@ -192,6 +373,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.datavizForm.controls['species'].setValue('');
 		this.datavizForm.controls['years'].setValue('');
 		this.datavizForm.controls['stages'].setValue('');
+		this.datavizForm.controls['stages'].setValue('');
 		this.datavizForm.controls['mountains'].setValue('');
 	}
 
@@ -209,11 +391,18 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.checkMountainsNumber = 0;
 	}
 
+	setDefaultStage() {
+		// default stage = name of first stage of this.stagesList
+		this.datavizForm.controls['stages'].setValue(this.stagesList[0].stage.name);
+		this.onData.stages.push(this.stagesList[0].stage.name);
+	}
+
 	onSetSpecies(event, modal) {
 		this.comparedType = 'species';
 		this.set_species_list();
 		this.resetAll();
 		this.resetFilterDefaultValue();
+		this.setDefaultStage();
 		this.disableFilter('species');
 
 		//open modal
@@ -232,6 +421,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.set_years_list();
 		this.resetAll();
 		this.resetFilterDefaultValue();
+		this.setDefaultStage();
 		this.disableFilter('years');
 
 		this.modalService.open(
@@ -267,6 +457,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.set_mountains_list();
 		this.resetAll();
 		this.resetFilterDefaultValue();
+		this.setDefaultStage();
 		this.disableFilter('mountains');
 
 		this.modalService.open(
@@ -321,6 +512,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	onStagesSelect(event) {
 		this.onData.stages = []
 		this.onData.stages.push(event.target.value);
+		if (this.comparedType === 'species') this.getObsFor2Species();
 	}
 
 	onMountainsSelect(event) {
