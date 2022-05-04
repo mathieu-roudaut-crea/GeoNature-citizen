@@ -11,6 +11,7 @@ import { AppConfig } from '../../../../../conf/app.config';
 import { FormGroup, FormBuilder, FormArray, Validators, FormControl } from "@angular/forms";
 import { ThrowStmt } from '@angular/compiler';
 import * as Highcharts from 'highcharts';
+import { datavizSelection } from './dataviz-allobs.interface';
 
 
 @Component({
@@ -18,7 +19,10 @@ import * as Highcharts from 'highcharts';
     templateUrl: './dataviz-allobs.component.html',
     styleUrls: ['./dataviz-allobs.component.css'],
 })
+
 export class DatavizAllObsComponent extends ProgramBaseComponent implements OnInit {
+
+	
 	appConfig = AppConfig;
 
 	program_id;
@@ -141,7 +145,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	public datavizForm: FormGroup;
 	public control: FormArray;
 	public isSpeciesCompared: Boolean = false;
-	public onData = {
+	public onData: datavizSelection = {
 		species: [],
 		years: [],
 		stages: [],
@@ -165,7 +169,6 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		"Nov": 11,
 		"Dec": 12,
 	}
-
 
 	constructor(
 		private route: ActivatedRoute,
