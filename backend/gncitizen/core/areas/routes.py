@@ -353,6 +353,7 @@ def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux, stage):
                                             gnc_core.t_users.username, 
                                             ref_geo.li_municipalities.nom_com,
                                             ref_geo.li_municipalities.insee_com,
+                                            ref_geo.li_municipalities.insee_dep,
                                             gnc_areas.t_species_sites.cd_nom,
                                             gnc_areas.t_species_stages.name 
                                     FROM gnc_areas.t_species_site_observations 
@@ -366,7 +367,7 @@ def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux, stage):
 
         retour = []
         for data in res:
-            retour.append({"altitude":data.altitude, "date":data.date, "user":data.username, "commune":data.nom_com, "insee":data.insee_com, "specie":data.cd_nom, "stage":data.name})
+            retour.append({"altitude":data.altitude, "date":data.date, "user":data.username, "commune":data.nom_com, "insee":data.insee_com, "dep":data.insee_dep, "specie":data.cd_nom, "stage":data.name})
 
         return retour #prepare_list(observations, with_geom=False)
     except Exception as e:

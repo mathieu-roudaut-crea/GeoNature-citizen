@@ -231,7 +231,6 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			.then((stages:any) => {
 				this.stages = stages;
 				this.set_stages_list();
-				console.log(this.stagesList);
 			});
 	}
 
@@ -254,45 +253,8 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 				.getObservationsFor2Species(this.onData.species[0], this.onData.species[1], this.onData.stages[0])
 				.subscribe((data) => {
 					this.dataToDisplay = data;
-					this.chartOptions.series = []
-					let speciesName0 = this.getSpeciesNames(this.onData.species[0]);
-					let speciesName1 = this.getSpeciesNames(this.onData.species[1]);
-					const serie = this.dataToDisplay
-							.filter(e => e.specie === Number(this.onData.species[0]))
-							.map(e => {
-								console.log(e);
-								const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
-								const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-								return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
-							})
-					const serie2 = this.dataToDisplay
-							.filter(e => e.specie === Number(this.onData.species[1]))
-							.map(e => {
-								const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
-								const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-								return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
-							})
-					this.chartOptions.series.push({
-						type: "scatter",
-						name: speciesName0.nom_complet + " / " + speciesName0.nom_vern,
-						data: serie,
-						marker: {
-						symbol: 'url(assets/dataviz2/icon_green_circle.svg)',
-						width: this.size_icon,
-						height: this.size_icon
-						}
-					})
-					this.chartOptions.series.push({
-						type: "scatter",
-						name: speciesName1.nom_complet + " / " + speciesName1.nom_vern,
-						data: serie2,
-						marker: {
-						symbol: 'url(assets/dataviz2/icon_red_circle.svg)',
-						width: this.size_icon,
-						height: this.size_icon
-						}
-					})
-					this.updateFlag = true
+					this.displaySpeciesBiplot(this.dataToDisplay);
+					this.applyFilters();
 				});
 	}
 
@@ -506,18 +468,92 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 
 	onYearsSelect(event) {
 		this.onData.years = []
-		this.onData.years.push(event.target.value);
+		if (event.target.value !== '') this.onData.years.push(event.target.value);
+		if (this.comparedType === 'species') this.applyFilters();
 	}
 
 	onStagesSelect(event) {
 		this.onData.stages = []
 		this.onData.stages.push(event.target.value);
-		if (this.comparedType === 'species') this.getObsFor2Species();
+		if (this.comparedType === 'species') {
+			this.getObsFor2Species();
+		}
 	}
 
 	onMountainsSelect(event) {
 		this.onData.mountains = []
-		this.onData.mountains.push(event.target.value);
+		if (event.target.value !== '') this.onData.mountains.push(event.target.value);
+		//this.onData.mountains.push(event.target.value);
+		if (this.comparedType === 'species') {
+			this.applyFilters();
+		}
+	}
+
+	applyFilters() {
+		// apply year and mountain filter to data to display
+		let filteredDataToDisplay = this.dataToDisplay
+		
+		if (this.onData.mountains.length !== 0) {
+			// trouver les dep 'postCodes' du massif selectionne
+			let selectedMountain = this.AppConfig.mountains.find(
+				(item) => {return item.name == this.onData.mountains[0]}
+			);
+			// filtrer si dans liste
+			filteredDataToDisplay = filteredDataToDisplay.filter(
+				(item) => {return selectedMountain.postalCodes.includes(item.dep)}
+			)
+			console.log(filteredDataToDisplay);
+		}
+	
+		// filtrer dataToDisplay sur les annees
+		if (this.onData.years.length !== 0) {
+			filteredDataToDisplay = filteredDataToDisplay.filter(
+				(item) => {return new Date(item.date).getUTCFullYear() == this.onData.years[0]}
+			)
+		}
+
+		this.displaySpeciesBiplot(filteredDataToDisplay);
+	}
+
+	displaySpeciesBiplot(data) {
+		this.chartOptions.series = []
+		let speciesName0 = this.getSpeciesNames(this.onData.species[0]);
+		let speciesName1 = this.getSpeciesNames(this.onData.species[1]);
+		const serie = data
+				.filter(e => e.specie === Number(this.onData.species[0]))
+				.map(e => {
+					const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
+					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
+					return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
+				})
+		const serie2 = data
+				.filter(e => e.specie === Number(this.onData.species[1]))
+				.map(e => {
+					const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
+					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
+					return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
+				})
+		this.chartOptions.series.push({
+			type: "scatter",
+			name: speciesName0.nom_complet + " / " + speciesName0.nom_vern,
+			data: serie,
+			marker: {
+			symbol: 'url(assets/dataviz2/icon_green_circle.svg)',
+			width: this.size_icon,
+			height: this.size_icon
+			}
+		})
+		this.chartOptions.series.push({
+			type: "scatter",
+			name: speciesName1.nom_complet + " / " + speciesName1.nom_vern,
+			data: serie2,
+			marker: {
+			symbol: 'url(assets/dataviz2/icon_red_circle.svg)',
+			width: this.size_icon,
+			height: this.size_icon
+			}
+		})
+		this.updateFlag = true
 	}
 
 }
