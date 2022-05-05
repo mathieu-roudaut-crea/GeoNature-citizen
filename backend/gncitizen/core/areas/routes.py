@@ -348,7 +348,7 @@ def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux, stage):
         description: List of all observations
     """
     try:
-        res = db.engine.execute(f"""select gnc_areas.t_species_sites.json_data::json -> 'altitude' as altitude, 
+        res = db.engine.execute(f"""select (gnc_areas.t_species_sites.json_data::json ->> 'altitude')::float as altitude, 
                                             gnc_areas.t_species_site_observations.date ,
                                             gnc_core.t_users.username, 
                                             ref_geo.li_municipalities.nom_com,
@@ -367,7 +367,15 @@ def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux, stage):
 
         retour = []
         for data in res:
-            retour.append({"altitude":data.altitude, "date":data.date, "user":data.username, "commune":data.nom_com, "insee":data.insee_com, "dep":data.insee_dep, "specie":data.cd_nom, "stage":data.name})
+            retour.append({"altitude":data.altitude, 
+                            "date":data.date, 
+                            "user":data.username, 
+                            "commune":data.nom_com, 
+                            "insee":data.insee_com, 
+                            "dep":data.insee_dep, 
+                            "specie":data.cd_nom, 
+                            "stage":data.name
+                            })
 
         return retour #prepare_list(observations, with_geom=False)
     except Exception as e:

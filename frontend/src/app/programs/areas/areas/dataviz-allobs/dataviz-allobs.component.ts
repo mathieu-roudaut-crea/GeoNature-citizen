@@ -9,7 +9,7 @@ import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service
 import { Program } from '../../../../programs/programs.models';
 import { AppConfig } from '../../../../../conf/app.config';
 import { FormGroup, FormBuilder, FormArray, Validators, FormControl } from "@angular/forms";
-import { ThrowStmt } from '@angular/compiler';
+//import { ThrowStmt } from '@angular/compiler';
 import * as Highcharts from 'highcharts';
 import { datavizSelection } from './dataviz-allobs.interface';
 
@@ -22,7 +22,6 @@ import { datavizSelection } from './dataviz-allobs.interface';
 
 export class DatavizAllObsComponent extends ProgramBaseComponent implements OnInit {
 
-	
 	appConfig = AppConfig;
 
 	program_id;
@@ -234,6 +233,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 			.then((stages:any) => {
 				this.stages = stages;
 				this.set_stages_list();
+				console.log(localStorage);
 			});
 	}
 
@@ -525,14 +525,14 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		const serie = data
 				.filter(e => e.specie === Number(this.onData.species[0]))
 				.map(e => {
-					const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
+					const alt = e.altitude === null ? 0 :e.altitude
 					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
 					return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
 				})
 		const serie2 = data
 				.filter(e => e.specie === Number(this.onData.species[1]))
 				.map(e => {
-					const alt = e.altitude === null ? 0 : typeof e.altitude === "string" ? Number(e.altitude) :e.altitude
+					const alt = e.altitude === null ? 0 :e.altitude
 					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
 					return [Date.UTC(2022, this.months[date[2]], Number(date[1])), alt]
 				})
