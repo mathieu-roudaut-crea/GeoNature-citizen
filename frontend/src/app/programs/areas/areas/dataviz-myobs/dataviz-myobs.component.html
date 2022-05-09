@@ -1,5 +1,6 @@
-<div class="areas-container vertical" style="flex-wrap: wrap;  justify-content: space-around;">
-    <div class="dataviz-filter">
+<div class="areas-container vertical">
+    <!--style="flex-wrap: wrap;  justify-content: space-around;"-->
+    <div class="dataviz-filter" style="min-width:350px">
         <h1>Sélectionner <span>...</span></h1>
 
         <h2><span>...</span> Une zone d'observation</h2>
@@ -20,7 +21,7 @@
                     <input type="radio" [value]="species.properties.cd_nom" [id]="species.properties.cd_nom"
                         [name]="species.properties.nom_complet" (change)="onChangeSpeciesFilter($event)"
                         [(ngModel)]="selectedSpecies" class="selecteur">
-                    <label [for]="species.properties.cd_nom">{{ species.properties.nom_complet }}</label>
+                    <label [for]="species.properties.cd_nom">{{ species.properties.nom_vern }}</label>
                 </div>
             </form>
         </div>
@@ -39,6 +40,7 @@
 
     <div class="dataTable">
         <h1>Visualiser mes observations</h1>
+        <h3 *ngIf="individues.length === 0">Vous n'avez pas encore de donnée à visualiser</h3>
         <ul *ngIf="individues.length !== 0" class="individues">
             <li *ngFor="let individu of individues" [ngStyle]="{'color': '#000', 'fontWeight': 'bold' }">
                 <span [ngStyle]="{'background': individu.color }">&nbsp;
@@ -55,7 +57,7 @@
                             (click)="displayPopup($event, d)" [ngStyle]="{'position':i==months.data.length-1 ? 'relative' :'absolute',
                                         'paddingLeft':i===months.data.length-1 ? '0px' : (i+1)*12+'px',
                                         'zIndex': months.data.length===2 ? 0 : i%2!==0 ? 0 : i+1 }">
-                            <img [src]="d.src" [ngStyle]="{'filter': d.transfo, 'width': '40px' }"
+                            <img [src]="d.src" [ngStyle]="{'filter': d.transfo, 'width': '22px' }"
                                 (mouseenter)="over($event)" (mouseout)="out($event)">
                             <span class="popuptext" *ngIf="d.displayPopup"
                                 [ngStyle]="{'backgroundColor': d.color, 'zIndex':5 }">

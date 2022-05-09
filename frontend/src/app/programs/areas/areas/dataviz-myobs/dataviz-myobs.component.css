@@ -19,9 +19,8 @@ h2 {
   font-weight: bold;
 }
 
-table,
-tr {
-  box-shadow: inset 0px 0px 0px 13px #fff;
+tbody tr {
+  box-shadow: inset 0px 0px 0px 11px #fff;
   background: #e6e6e6;
 }
 
@@ -34,7 +33,7 @@ tr {
 }
 
 .cell {
-  min-width: 10px;
+  min-width: 18px;
   max-width: 83px;
   text-align: center;
 }
@@ -127,7 +126,7 @@ tfoot tr .cell:before {
   z-index: 1;
   bottom: 125%;
   left: 0%;
-  margin-left: -100px;
+  margin-left: -130px;
 }
 
 .popup .popuptext::after {

@@ -184,7 +184,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
                 .filter(e => e.properties.species_site.id_area === this.selectedAreas )
                 .map(e => e.properties.date.split("-")[0])
         temp = temp.filter((c, index) => temp.indexOf(c) === index);
-        return temp;
+        return temp.reverse();
     }
 
     extractStage(listObs) {
@@ -215,7 +215,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
     }
 
     over(e) {
-        e.target.style.transform="scale(1.2)"
+        e.target.style.transform="scale(1.3)"
     }
 
     out(e) {
