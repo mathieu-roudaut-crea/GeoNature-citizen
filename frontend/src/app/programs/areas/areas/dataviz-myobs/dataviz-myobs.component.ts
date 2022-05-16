@@ -87,6 +87,14 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
         "Floraison":"stage_floraison.svg"
     }
 
+    stages_authorized = [
+        "Changement couleur début",
+        "Changement couleur moitié",
+        "Débourrement",
+        "Feuillaison",
+        "Floraison"
+    ]
+
     good_obs = {
         "Débourrement":["environ 10% des bourgeons sont ouverts"],
         "Feuillaison":["environ 10% des feuilles sont étalées"],
@@ -285,6 +293,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
                             .getCurrentUserAreaSpeciesStages(this.selectedAreas, this.selectedSpecies)
                             .toPromise()
                             .then((stages:any) => {
+                                stages.features = stages.features.filter(e => this.stages_authorized.includes(e.properties.name))
                                 this.stages = stages
                                 this.selectedStages = this.stages.features[0].properties.id_species_stage
                                 this.programService
@@ -312,6 +321,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
                         .getCurrentUserAreaSpeciesStages(this.selectedAreas, this.selectedSpecies)
                         .toPromise()
                         .then((stages:any) => {
+                            stages.features = stages.features.filter(e => this.stages_authorized.includes(e.properties.name))
                             this.stages = stages
                             this.selectedStages = this.stages.features[0].properties.id_species_stage
                             this.programService
@@ -334,6 +344,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
             .getCurrentUserAreaSpeciesStages(this.selectedAreas, this.selectedSpecies)
             .toPromise()
             .then((stages:any) => {
+                stages.features = stages.features.filter(e => this.stages_authorized.includes(e.properties.name))
                 this.stages = stages
                 this.selectedStages = this.stages.features[0].properties.id_species_stage
                 this.programService

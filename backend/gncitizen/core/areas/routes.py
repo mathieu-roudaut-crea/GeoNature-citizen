@@ -252,7 +252,7 @@ def get_user_area_species(area_id):
         species = (Taxref.query
                  .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == Taxref.cd_nom)
                  .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                 .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id)
+                 .filter(SpeciesSiteModel.id_area == area_id) #, AreaModel.id_role == user_id
                  .order_by(func.lower(Taxref.nom_complet))
                  .all())
 
@@ -299,7 +299,7 @@ def get_user_area_species_stages(area_id, cd_nom):
         stages = (SpeciesStageModel.query
                  .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
                  .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                 .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesSiteModel.cd_nom == cd_nom)
+                 .filter(SpeciesSiteModel.id_area == area_id, SpeciesSiteModel.cd_nom == cd_nom) # AreaModel.id_role == user_id,
                  .order_by(func.lower(SpeciesStageModel.name))
                  .all())
 
@@ -336,7 +336,7 @@ def get_user_area_stage_observations(area_id, stage_id):
                         .join(StagesStepModel, SpeciesSiteObservationModel.id_stages_step == StagesStepModel.id_stages_step)
                         .join(SpeciesStageModel, SpeciesStageModel.id_species_stage == StagesStepModel.id_species_stage)
                         .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-                        .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesStageModel.id_species_stage == stage_id)
+                        .filter(SpeciesSiteModel.id_area == area_id, SpeciesStageModel.id_species_stage == stage_id) # AreaModel.id_role == user_id,
                         .order_by(SpeciesSiteObservationModel.date.asc())
                         .all())
 

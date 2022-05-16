@@ -54,9 +54,10 @@
                     <td class="first">{{years.year}}</td>
                     <td *ngFor="let months of years.months" class="cell">
                         <div *ngFor="let d of months.data; let i = index" class="popup"
-                            (click)="displayPopup($event, d)" [ngStyle]="{'position':i==months.data.length-1 ? 'relative' :'absolute',
+                            (click)="displayPopup($event, d)"
+                            [ngStyle]="{'position':i==months.data.length-1 ? 'relative' :'absolute',
                                         'paddingLeft':i===months.data.length-1 ? '0px' : (i+1)*12+'px',
-                                        'zIndex': months.data.length===2 ? 0 : i%2!==0 ? 0 : i+1 }">
+                                        'zIndex': months.data.length ===1 ? 0 : months.data.length===2 ? 0 : i%2!==0 ? 0 : i+1 }">
                             <img [src]="d.src" [ngStyle]="{'filter': d.transfo, 'width': '22px' }"
                                 (mouseenter)="over($event)" (mouseout)="out($event)">
                             <span class="popuptext" *ngIf="d.displayPopup"

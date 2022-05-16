@@ -33,9 +33,10 @@ export class SpeciesSiteObsStepComponent implements IFlowComponent {
                         this.areaService.speciesSiteObsEdited.emit();
                     }
                     this.closeModal();
-                    this.router.navigate([
-                        `/programs/${result.features[0].program_id}/areas-observations`,
-                    ]);
+                    window.top.location.replace("https://phenoclim.org/accueil/les-observations/");
+                    // this.router.navigate([
+                    //     `/programs/${result.features[0].program_id}/areas-observations`,
+                    // ]);
                 }
             }.bind(this)
         );
