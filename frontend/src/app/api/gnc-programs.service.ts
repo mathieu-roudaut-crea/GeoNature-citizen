@@ -224,6 +224,24 @@ export class GncProgramsService implements OnInit {
         );
     }
 
+    getObservationsFor2Years(year_one, year_two, stage) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/years_one/${year_one}/years_two/${year_two}/stage/${stage}`
+        );
+    }
+
+    getObservationsFor2Stages(stage_one, stage_two) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/stages_one/${stage_one}/stages_two/${stage_two}`
+        );
+    }
+
+    getObservationsFor2Department(department_one, department_two, stage) {
+        return this.http.get<Object>(
+            `${AppConfig.API_ENDPOINT}/areas/departments_one/${department_one}/departments_two/${department_two}/stage/${stage}`
+        );
+    }
+
     getAreaObservers(id: number): Observable<Object> {
         return this.http.get<Object>(`${this.URL}/areas/${id}/observers`);
     }
