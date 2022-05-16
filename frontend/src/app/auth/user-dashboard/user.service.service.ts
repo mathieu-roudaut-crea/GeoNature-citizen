@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { saveAs } from 'file-saver';
 import { Relay } from '../models';
+import { AuthService } from '../auth.service';
 
 @Injectable({
     providedIn: 'root',
@@ -18,7 +19,13 @@ export class UserService {
         'Content-Type': 'application/json',
     });
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private auth: AuthService) {
+        if (
+            !auth.getAccessToken() ||
+            auth.tokenExpiration(auth.getAccessToken()) < 1
+        ) {
+            return;
+        }
         this.getPersonalInfo()
             .toPromise()
             .then((user) => {

@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
     ): Observable<boolean> | Promise<boolean> | boolean {
         this.authService.redirectUrl = state.url;
         const token = localStorage.getItem('access_token');
-        if (token) {
+        if (token && this.authService.tokenExpiration(token) > 0) {
             return this.authService.ensureAuthorized().pipe(
                 map((user: LoginUser) => !!user),
                 catchError((error) => {
