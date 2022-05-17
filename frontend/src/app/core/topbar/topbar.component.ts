@@ -133,7 +133,7 @@ export class TopbarComponent implements OnInit {
 
     ngOnInit(): void {
         const access_token = localStorage.getItem('access_token');
-        if (access_token) {
+        if (access_token && this.auth.tokenExpiration(access_token) > 0) {
             this.auth.ensureAuthorized().subscribe(
                 (user) => {
                     if (user && user['features'] && user['features'].id_role) {

@@ -1,12 +1,7 @@
 <!-- Ajouter une observation -->
 <div class="modal-header">
     <h4 class="modal-title">AJOUTER UNE OBSERVATION</h4>
-    <button
-        type="button"
-        class="close"
-        aria-label="Close"
-        (click)="closeModal()"
-    >
+    <button type="button" class="close" aria-label="Close" (click)="closeModal()">
         <span aria-hidden="true">&times;</span>
     </button>
 </div>
@@ -16,20 +11,12 @@
 </div>
 
 <div class="modal-footer" *ngIf="form.readyToDisplay && !loading">
-    <button
-        type="submit"
-        [disabled]="!form.observationForm.valid"
-        class="btn btn-default btn-outline-primary rounded-0 m-1"
-        (click)="committedAndShowObs()"
-    >
-        Valider et voir mes obs
+    <button type="submit" [disabled]="!form.observationForm.valid"
+        class="btn btn-default btn-outline-primary rounded-0 m-1" (click)="committedAndShowObs()">
+        Valider et voir mes observations
     </button>
-    <button
-        type="submit"
-        [disabled]="!form.observationForm.valid"
-        class="btn btn-default btn-outline-primary rounded-0 m-1"
-        (click)="committed()"
-    >
+    <button type="submit" [disabled]="!form.observationForm.valid"
+        class="btn btn-default btn-outline-primary rounded-0 m-1" (click)="committed()">
         Valider l'observation
     </button>
 </div>

@@ -1,13 +1,13 @@
 import { Component, Inject, Input, OnInit, PLATFORM_ID, QueryList } from '@angular/core';
 import { GncProgramsService } from '../../../../api/gnc-programs.service';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from 'src/app/auth/auth.service';
-import { ProgramBaseComponent } from 'src/app/programs/base/program-base.component';
+import { AuthService } from '../../../../auth/auth.service';
+import { ProgramBaseComponent } from '../../../../programs/base/program-base.component';
 import { AreaModalFlowService } from '../../modalflow/modalflow.service';
 import { AreaService } from '../../areas.service';
-import { ModalsTopbarService } from 'src/app/core/topbar/modalTopbar.service';
+import { ModalsTopbarService } from '../../../../core/topbar/modalTopbar.service';
 import { AreaModalFlowComponent } from '../../modalflow/modalflow.component';
-import { Program } from 'src/app/programs/programs.models';
+import { Program } from '../../../../programs/programs.models';
 import { FeatureCollection } from 'geojson';
 import { AppConfig } from '../../../../../conf/app.config';
 
@@ -87,6 +87,14 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
         "Floraison":"stage_floraison.svg"
     }
 
+    stages_authorized = [
+        "Changement couleur début",
+        "Changement couleur moitié",
+        "Débourrement",
+        "Feuillaison",
+        "Floraison"
+    ]
+
     good_obs = {
         "Débourrement":["environ 10% des bourgeons sont ouverts"],
         "Feuillaison":["environ 10% des feuilles sont étalées"],
@@ -104,24 +112,31 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
         authService: AuthService
     ) {
         super(authService);
-        // this.isBrowser = isPlatformBrowser(platformId);
-        this.route.params.subscribe(
-            (params) => (this.program_id = params['id'])
-        );
         this.route.fragment.subscribe((fragment) => {
             this.fragment = fragment;
         });
+        this.route.params.subscribe(
+            (params) => (this.program_id = params['id'])
+        );
     }
     ngOnInit(): void {
         this.route.data.subscribe((data: { programs: Program[] }) => {
             if (this.userDashboard) {
                 return;
             }
+            this.programs = data.programs;
+            this.program = this.programs.find(
+                (p) => p.id_program == this.program_id
+            );
+
+            this.programService
+                .getProgram(this.program_id)
+                .subscribe((program) => (this.programFeature = program));
             this.loadData();
         });        
     }
 
-    ngAfterViewInit(): void {
+    ngAfterViewInit() {
         this.verifyProgramPrivacyAndUser();
     }
 
@@ -177,7 +192,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
                 .filter(e => e.properties.species_site.id_area === this.selectedAreas )
                 .map(e => e.properties.date.split("-")[0])
         temp = temp.filter((c, index) => temp.indexOf(c) === index);
-        return temp;
+        return temp.reverse();
     }
 
     extractStage(listObs) {
@@ -208,7 +223,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
     }
 
     over(e) {
-        e.target.style.transform="scale(1.2)"
+        e.target.style.transform="scale(1.3)"
     }
 
     out(e) {
@@ -278,6 +293,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
                             .getCurrentUserAreaSpeciesStages(this.selectedAreas, this.selectedSpecies)
                             .toPromise()
                             .then((stages:any) => {
+                                stages.features = stages.features.filter(e => this.stages_authorized.includes(e.properties.name))
                                 this.stages = stages
                                 this.selectedStages = this.stages.features[0].properties.id_species_stage
                                 this.programService
@@ -305,6 +321,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
                         .getCurrentUserAreaSpeciesStages(this.selectedAreas, this.selectedSpecies)
                         .toPromise()
                         .then((stages:any) => {
+                            stages.features = stages.features.filter(e => this.stages_authorized.includes(e.properties.name))
                             this.stages = stages
                             this.selectedStages = this.stages.features[0].properties.id_species_stage
                             this.programService
@@ -327,6 +344,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
             .getCurrentUserAreaSpeciesStages(this.selectedAreas, this.selectedSpecies)
             .toPromise()
             .then((stages:any) => {
+                stages.features = stages.features.filter(e => this.stages_authorized.includes(e.properties.name))
                 this.stages = stages
                 this.selectedStages = this.stages.features[0].properties.id_species_stage
                 this.programService

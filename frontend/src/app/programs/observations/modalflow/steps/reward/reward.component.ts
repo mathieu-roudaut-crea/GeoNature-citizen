@@ -65,7 +65,11 @@ export class BadgeFacade {
         };
         const access_token = localStorage.getItem('access_token');
 
-        if (access_token && AppConfig['REWARDS']) {
+        if (
+            access_token &&
+            this.authService.tokenExpiration(access_token) > 0 &&
+            AppConfig['REWARDS']
+        ) {
             this.authService.ensureAuthorized().subscribe(
                 (user) => {
                     if (user['features']['id_role']) {
