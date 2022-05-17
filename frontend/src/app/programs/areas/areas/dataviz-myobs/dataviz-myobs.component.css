@@ -1,0 +1,202 @@
+@font-face {
+  font-family: "Klavika";
+  src: url("/fr/assets/police_dataviz/Klavika-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Klavika-Bold";
+  src: url("/fr/assets/police_dataviz/Klavika-Bold.otf") format("opentype")
+}
+
+.dataviz-filter {
+  font-family: "Klavika" !important;
+}
+
+h1,
+h2 {
+  color: #000;
+  font-family: "Klavika-Bold" !important;
+  font-weight: bold;
+}
+
+tbody tr {
+  box-shadow: inset 0px 0px 0px 11px #fff;
+  background: #e6e6e6;
+}
+
+.cell:last-child {
+  border-right: 0px !important;
+}
+
+.cell:last-child::before {
+  display: none;
+}
+
+.cell {
+  min-width: 18px;
+  max-width: 83px;
+  text-align: center;
+}
+
+.cell:nth-child(30n+1) {
+  border-right: dotted 2px #000;
+}
+
+.first {
+  min-width: 60px;
+  text-align: right;
+  color: black;
+  font-weight: bold;
+}
+
+tfoot tr .cell {
+  color: #000;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
+  border-right: dotted 2px #000;
+}
+
+tfoot tr .cell:last-child {
+  border-right: 0px !important;
+}
+
+tfoot tr .cell:before {
+  position: absolute;
+  content: ' ';
+  height: 10px;
+  width: 10px;
+  border-radius: 5px;
+  background: #000;
+  right: -6px;
+  bottom: 0px;
+}
+
+.filter {
+  display: flex;
+  max-width: 400px;
+  flex-wrap: wrap;
+}
+
+.individues {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.vertical {
+  display: flex;
+  flex-direction: row;
+}
+
+.dataTable {
+  font-family: "Klavika" !important;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 14px 2px rgba(0, 0, 0, 0.44);
+  -webkit-box-shadow: 0px 0px 14px 2px rgba(0, 0, 0, 0.44);
+  -moz-box-shadow: 0px 0px 14px 2px rgba(0, 0, 0, 0.44);
+}
+
+#listIndiv {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.popup .popuptext {
+  width: 280px;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 0%;
+  margin-left: -130px;
+}
+
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+input[type="radio"].selecteur {
+  display: none;
+}
+
+input[type="radio"].selecteur+label {
+  padding: 2px 20px;
+  border-radius: 25px;
+  border: solid 2px #218a7c;
+  color: #000;
+}
+
+input[type="radio"].selecteur:checked+label {
+  background: #218a7c;
+  color: #fff;
+  font-weight: bold;
+}
+
+h1 span,
+h2 span {
+  color: #218a7c;
+}
+
+ul.individues li {
+  position: relative;
+  padding: 0px 10px 0px 25px;
+}
+
+ul.individues li span {
+  width: 20px;
+  height: 20px;
+  padding: 0px 5px;
+  margin-right: 10px;
+  padding: 0px 6px;
+}
