@@ -263,7 +263,6 @@ def get_user_area_species(area_id):
 
 @areas_api.route("/<int:area_id>/stages", methods=["GET"])
 @json_resp
-@jwt_required()
 def get_user_area_stages(area_id):
     """Get all stages in user's area
     ---
@@ -274,10 +273,8 @@ def get_user_area_stages(area_id):
         description: List of all species
     """
     try:
-        user_id = get_id_role_if_exists()
         stages = (SpeciesStageModel.query
                  .all())
-
         return prepare_list(stages, with_geom=False)
     except Exception as e:
         return {"error_message": str(e)}, 400
@@ -322,14 +319,6 @@ def get_user_area_stage_observations(area_id, stage_id):
     """
     try:
         user_id = get_id_role_if_exists()
-        # observations = (SpeciesSiteObservationModel.query
-        #          .join(StagesStepModel, SpeciesSiteObservationModel.id_stages_step == StagesStepModel.id_stages_step)
-        #          .join(SpeciesStageModel, SpeciesStageModel.id_species_stage == StagesStepModel.id_species_stage)
-        #          .join(SpeciesSiteModel, SpeciesSiteModel.cd_nom == SpeciesStageModel.cd_nom)
-        #          .join(AreaModel, AreaModel.id_area == SpeciesSiteModel.id_area)
-        #          .filter(SpeciesSiteModel.id_area == area_id, AreaModel.id_role == user_id, SpeciesStageModel.id_species_stage == stage_id)
-        #          .order_by(SpeciesSiteObservationModel.timestamp_create.desc())
-        #          .all())
 
         observations = (SpeciesSiteObservationModel.query
                         .join(SpeciesSiteModel, SpeciesSiteModel.id_species_site == SpeciesSiteObservationModel.id_species_site)
@@ -344,6 +333,185 @@ def get_user_area_stage_observations(area_id, stage_id):
     except Exception as e:
         return {"error_message": str(e)}, 400
 
+@areas_api.route("/species_one/<int:cd_nom_un>/species_two/<int:cd_nom_deux>/stage/<string:stage>/", methods=["GET"])
+@json_resp
+def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux, stage):
+    """Get all stage's observations for 2 specifics species
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        res = db.engine.execute(f"""select (gnc_areas.t_species_sites.json_data::json ->> 'altitude')::float as altitude, 
+                                            gnc_areas.t_species_site_observations.date ,
+                                            gnc_core.t_users.username, 
+                                            ref_geo.li_municipalities.nom_com,
+                                            ref_geo.li_municipalities.insee_dep,
+                                            gnc_areas.t_species_sites.cd_nom,
+                                            gnc_areas.t_species_stages.name 
+                                    FROM gnc_areas.t_species_site_observations 
+                                    JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
+                                    JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
+                                    join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
+                                    WHERE (gnc_areas.t_species_sites.cd_nom = {cd_nom_un} OR gnc_areas.t_species_sites.cd_nom = {cd_nom_deux})
+                                    AND gnc_areas.t_species_stages.name = '{stage}'
+                                    and gnc_areas.t_stages_steps.order = 2""")
+
+        retour = []
+        for data in res:
+          retour.append({"altitude":data.altitude, 
+                            "date":data.date, 
+                            "user":data.username, 
+                            "commune":data.nom_com, 
+                            "dep":data.insee_dep, 
+                            "specie":data.cd_nom, 
+                            "stage":data.name,
+                            })
+
+        return retour
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+@areas_api.route("/years_one/<string:year_un>/years_two/<string:year_deux>/stage/<string:stage>/", methods=["GET"])
+@json_resp
+def get_area_stage_observations_2_years(year_un, year_deux, stage):
+    """Get all stage's observations for 2 specifics years
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        res = db.engine.execute(f"""select (gnc_areas.t_species_sites.json_data::json ->> 'altitude')::float as altitude, 
+                                            gnc_areas.t_species_site_observations.date ,
+                                            gnc_core.t_users.username, 
+                                            ref_geo.li_municipalities.nom_com,
+                                            ref_geo.li_municipalities.insee_dep,
+                                            gnc_areas.t_species_sites.cd_nom,
+                                            gnc_areas.t_species_stages.name 
+                                    FROM gnc_areas.t_species_site_observations 
+                                    JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
+                                    JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
+                                    join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
+                                    WHERE (cast(gnc_areas.t_species_site_observations.date AS TEXT) like '{year_un}%%' OR cast(gnc_areas.t_species_site_observations.date AS TEXT) like '{year_deux}%%')
+                                    AND gnc_areas.t_species_stages.name = '{stage}'
+                                    and gnc_areas.t_stages_steps.order = 2""")
+
+        retour = []
+        for data in res:
+          retour.append({"altitude":data.altitude, 
+                            "date":data.date, 
+                            "user":data.username, 
+                            "commune":data.nom_com, 
+                            "dep":data.insee_dep, 
+                            "specie":data.cd_nom, 
+                            "stage":data.name,
+                            })
+
+        return retour
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+@areas_api.route("/departments_one/<string:dep_un>/departments_two/<string:dep_deux>/stage/<string:stage>/", methods=["GET"])
+@json_resp
+def get_area_stage_observations_2_departments(dep_un, dep_deux, stage):
+    """Get all stage's observations for 2 specifics departments
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all observations
+    """
+    list_dep_un = dep_un.split(",")
+    dep_un = ','.join(["'"+str(item)+"'" for item in list_dep_un])
+    list_dep_deux = dep_deux.split(",")
+    dep_deux = ','.join(["'"+str(item)+"'" for item in list_dep_deux])
+
+    try:
+        res = db.engine.execute(f"""select (gnc_areas.t_species_sites.json_data::json ->> 'altitude')::float as altitude, 
+                                            gnc_areas.t_species_site_observations.date ,
+                                            gnc_core.t_users.username, 
+                                            ref_geo.li_municipalities.nom_com,
+                                            ref_geo.li_municipalities.insee_dep,
+                                            gnc_areas.t_species_sites.cd_nom,
+                                            gnc_areas.t_species_stages.name 
+                                    FROM gnc_areas.t_species_site_observations 
+                                    JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
+                                    JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
+                                    join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
+                                    WHERE (ref_geo.li_municipalities.insee_dep in ({dep_un}) OR ref_geo.li_municipalities.insee_dep in ({dep_deux}))
+                                    AND gnc_areas.t_species_stages.name = '{stage}'
+                                    and gnc_areas.t_stages_steps.order = 2""")
+
+        retour = []
+        for data in res:
+          retour.append({"altitude":data.altitude, 
+                            "date":data.date, 
+                            "user":data.username, 
+                            "commune":data.nom_com, 
+                            "dep":data.insee_dep, 
+                            "specie":data.cd_nom, 
+                            "stage":data.name,
+                            })
+
+        return retour
+    except Exception as e:
+        return {"error_message": str(e)}, 400
+
+@areas_api.route("/stages_one/<string:stage_un>/stages_two/<string:stage_deux>/", methods=["GET"])
+@json_resp
+def get_area_stage_observations_2_stages(stage_un, stage_deux):
+    """Get all stage's observations for 2 specifics stages
+    ---
+    tags:
+      - Areas (External module)
+    responses:
+      200:
+        description: List of all observations
+    """
+    try:
+        res = db.engine.execute(f"""select (gnc_areas.t_species_sites.json_data::json ->> 'altitude')::float as altitude, 
+                                            gnc_areas.t_species_site_observations.date ,
+                                            gnc_core.t_users.username, 
+                                            ref_geo.li_municipalities.nom_com,
+                                            ref_geo.li_municipalities.insee_dep,
+                                            gnc_areas.t_species_sites.cd_nom,
+                                            gnc_areas.t_species_stages.name 
+                                    FROM gnc_areas.t_species_site_observations 
+                                    JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
+                                    JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
+                                    join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
+                                    WHERE (gnc_areas.t_species_stages.name like '{stage_un}' OR gnc_areas.t_species_stages.name like '{stage_deux}')
+                                    and gnc_areas.t_stages_steps.order = 2""")
+
+        retour = []
+        for data in res:
+          retour.append({"altitude":data.altitude, 
+                            "date":data.date, 
+                            "user":data.username, 
+                            "commune":data.nom_com, 
+                            "dep":data.insee_dep, 
+                            "specie":data.cd_nom, 
+                            "stage":data.name,
+                            })
+
+        return retour
+    except Exception as e:
+        return {"error_message": str(e)}, 400
 
 @areas_api.route("/current_user", methods=["GET"])
 @json_resp

@@ -1,0 +1,217 @@
+@font-face {
+  font-family: "Klavika";
+  src: url("/fr/assets/police_dataviz/Klavika-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Klavika-Bold";
+  src: url("/fr/assets/police_dataviz/Klavika-Bold.otf") format("opentype")
+}
+
+.dataviz-filter {
+  font-family: "Klavika" !important;
+}
+
+h1,
+h2 {
+  color: #000;
+  font-family: "Klavika-Bold" !important;
+  font-weight: bold;
+}
+
+tbody tr {
+  box-shadow: inset 0px 0px 0px 11px #fff;
+  background: #e6e6e6;
+}
+
+.cell:last-child {
+  border-right: 0px !important;
+}
+
+.cell:last-child::before {
+  display: none;
+}
+
+.cell {
+  min-width: 18px;
+  max-width: 83px;
+}
+
+.dataviz-filter {
+  font-family: Klavika !important;
+  text-align: center;
+}
+
+.highcharts-chart {
+  margin-left: 20px;
+  border: solid 1px #ccc;
+  border-radius: 5px;
+  box-shadow: 5px 5px 3px 0px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: 5px 5px 3px 0px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 5px 5px 3px 0px rgba(0, 0, 0, 0.4);
+}
+
+button[type=radio].selecteur {
+  padding: 2px 20px;
+  border-radius: 10px;
+  border: 1px solid #218A70;
+  color: #000;
+  background-color: transparent;
+  font-family: Klavika !important;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+button[type=radio].selecteur:disabled {
+  opacity: 0.5;
+}
+
+button[type=radio].selecteur.actif {
+  background-color: #218A70 !important;
+  color: #fff !important;
+}
+
+.showSelection div {
+  border-radius: 10px;
+  color: #fff;
+  padding: 2px 20px;
+  margin: 5px 0px;
+}
+
+select {
+  padding: 2px 20px;
+  border: 1px solid #218A70;
+  color: #000;
+  border-radius: 2px;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: #fff;
+  opacity: 0.5;
+}
+
+.vertical {
+  display: flex;
+  flex-direction: row;
+}
+
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.popup .popuptext {
+  width: 280px;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 0%;
+  margin-left: -130px;
+}
+
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+button[type="radio"].selecteur {
+  padding: 2px 20px;
+  border-radius: 25px;
+  border: solid 2px #218a7c;
+  color: #000;
+  background-color: transparent;
+}
+
+select {
+  padding: 2px 20px;
+  border: solid 2px #218a7c;
+  color: #000;
+}
+
+.selectSpecies {
+  padding: 2px 20px;
+  border-radius: 25px;
+  border: solid 2px #218a7c;
+  color: #000;
+}
+
+input {
+  display: none;
+}
+
+.selectLabel {
+  background: #fff;
+  color: #218a7c;
+  font-weight: 700;
+  padding: 2px 20px;
+  border-radius: 25px;
+  border: 2px solid #218a7c;
+}
+
+.selectedLabel {
+  background: #7d9e18;
+  color: #fff;
+  font-weight: 700;
+  padding: 2px 20px;
+  border-radius: 25px;
+  border: 2px solid #7d9e18;
+}
+
+.comparedButton {
+  width: fit-content !important;
+  margin: 5px auto !important;
+}
+
+.divSelection {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+h1 span,
+h2 span {
+  color: #218a7c;
+}

@@ -30,27 +30,21 @@
     /* --router-outlet-margin-top: 106px; */
     --router-outlet-offset: calc(var(--router-outlet-margin-top) + 0.5em);
     /* --router-outlet-offset: 113px; */
-    --modal-header-bg-moz: moz-linear-gradient(
-        179.4deg,
-        var(--secondary) 0%,
-        var(--secondary) 50%,
-        var(--secondary-gradient) 51%,
-        var(--secondary-gradient) 100%
-    );
-    --modal-header-bg-webkit: moz-linear-gradient(
-        179.4deg,
-        var(--secondary) 0%,
-        var(--secondary) 50%,
-        var(--secondary-gradient) 51%,
-        var(--secondary-gradient) 100%
-    );
-    --modal-header-bg-linear: linear-gradient(
-        179.4deg,
-        var(--secondary) 0%,
-        var(--secondary) 50%,
-        var(--secondary-gradient) 51%,
-        var(--secondary-gradient) 100%
-    );
+    --modal-header-bg-moz: moz-linear-gradient(179.4deg,
+            var(--secondary) 0%,
+            var(--secondary) 50%,
+            var(--secondary-gradient) 51%,
+            var(--secondary-gradient) 100%);
+    --modal-header-bg-webkit: moz-linear-gradient(179.4deg,
+            var(--secondary) 0%,
+            var(--secondary) 50%,
+            var(--secondary-gradient) 51%,
+            var(--secondary-gradient) 100%);
+    --modal-header-bg-linear: linear-gradient(179.4deg,
+            var(--secondary) 0%,
+            var(--secondary) 50%,
+            var(--secondary-gradient) 51%,
+            var(--secondary-gradient) 100%);
 }
 
 button:focus {
@@ -467,10 +461,12 @@ select:focus {
 .leaflet-popup-content .espece-link {
     color: black;
 }
+
 .leaflet-popup-content .espece-link:hover {
     text-decoration: none !important;
     color: #555;
 }
+
 .modal-header {
     background: var(--secondary);
     background: var(--modal-header-bg-moz);
@@ -855,12 +851,12 @@ input#slide-sidebar[type='checkbox'] {
     display: none;
 }
 
-input:checked ~ .map {
+input:checked~.map {
     left: 0;
     width: 100%;
 }
 
-input:not(:checked) ~ .map {
+input:not(:checked)~.map {
     width: 67%;
 }
 
@@ -880,7 +876,7 @@ input:not(:checked) ~ .map {
     justify-content: center;
 }
 
-input:checked ~ .toggle {
+input:checked~.toggle {
     left: 0;
 }
 
@@ -888,7 +884,7 @@ input:checked ~ .toggle {
     transition: all 0.5s ease;
 }
 
-input:checked ~ .toggle i {
+input:checked~.toggle i {
     transform: rotate(180deg);
 }
 
@@ -996,7 +992,8 @@ input:checked ~ .toggle i {
     transition: all 0.3s ease;
 }
 
-.avatar-wrapper .profile-pic::after, .avatar-main-wrapper .profile-pic::after {
+.avatar-wrapper .profile-pic::after,
+.avatar-main-wrapper .profile-pic::after {
     font-family: FontAwesome;
     content: '\f007';
     top: 0;
@@ -1124,6 +1121,14 @@ input:checked ~ .toggle i {
     text-align: center;
 }
 
+.dataviz2 .modal-content {
+    padding: 20px;
+    border: solid 1px #dadad9 !important;
+    border-radius: 10px !important;
+    box-shadow: 5px 5px 3px 0 rgb(0 0 0 / 40%) !important;
+    -webkit-box-shadow: 5px 5px 3px 0 rgb(0 0 0 / 40%) !important;
+}
+
 app-about .container {
     margin-top: 106px !important;
     padding-top: 50px;
@@ -1131,15 +1136,18 @@ app-about .container {
 }
 
 @media screen and (max-width: 576px) {
+
     .programs-modal .modal-dialog,
     .obs-modal .modal-dialog {
         margin: 0px !important;
     }
+
     .programs-modal .modal-content,
     .obs-modal .modal-content {
         max-height: inherit;
         height: 100vh;
     }
+
     .obs-modal .modal-header h4 {
         font-size: 18px;
     }

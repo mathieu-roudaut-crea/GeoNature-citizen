@@ -1,0 +1,159 @@
+<div class="areas-container vertical" style="flex-wrap: wrap;">
+    <div class="dataviz-filter">
+
+        <div class="comparer">
+
+            <h1>Comparer </h1>
+            <div class="form-group">
+                <button type="radio" class="selecteur" [ngClass]="comparedType=='years' ? 'actif' : ''"
+                    (click)="onSetYears($event, yearsModal)"> deux années </button>
+                <div class="showSelection" *ngIf="comparedType=='years'">
+                    <div *ngFor="let year of onData.years; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
+                        <span> {{year}} </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="radio" class="selecteur" [ngClass]="comparedType=='species' ? 'actif' : ''"
+                    (click)="onSetSpecies($event, speciesModal)"> deux espèces
+                </button>
+                <div class="showSelection" *ngIf="comparedType=='species'">
+                    <div *ngFor="let species of onData.species; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
+                        <span>
+                            {{this.getSpeciesNames(species).nom_vern}} </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="radio" class="selecteur" (click)="onSetStages($event, stagesModal)"> deux stades </button>
+                <div class="showSelection" *ngIf="comparedType=='stages'">
+                    <div *ngFor="let stage of onData.stages; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
+                        <span> {{stage}} </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="radio" class="selecteur" (click)="onSetMountains($event, mountainsModal)"> deux massifs
+                </button>
+                <div class="showSelection" *ngIf="comparedType=='mountains'">
+                    <div *ngFor="let mountain of onData.mountains; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
+                        <span> {{mountain}} </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <ng-template #speciesModal>
+            <div *ngIf="species" class="divSelection">
+                <div *ngFor="let species of speciesList">
+                    <input type="checkbox" [value]="species.species.cd_nom" [id]="species.species.cd_nom"
+                        [name]="species.species.nom_complet" (change)="check_species_number(species)"
+                        [(ngModel)]="species.isChecked" class="selectSpecies" [checked]="species.isChecked"
+                        [disabled]="!species.isChecked && checkSpeciesNumber>1">
+                    <label [for]="species.species.cd_nom" class="selectLabel"
+                        [ngClass]="species.isChecked ? 'selectedLabel' : ''">{{ species.species.nom_vern }}</label>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template #yearsModal>
+            <div *ngIf="years" class="divSelection">
+                <div *ngFor="let year of yearsList">
+                    <input type="checkbox" [value]="year.year" [id]="year.year" [name]="year.year"
+                        (change)="check_years_number(year)" [(ngModel)]="year.isChecked" class="selectYears"
+                        [checked]="year.isChecked" [disabled]="!year.isChecked && checkYearsNumber>1">
+                    <label [for]="year.year" class="selectLabel" [ngClass]="year.isChecked ? 'selectedLabel' : ''">{{
+                        year.year }}</label>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template #stagesModal>
+            <div *ngIf="stages" class="divSelection">
+                <div *ngFor="let stage of stagesList">
+                    <input type="checkbox" [value]="stage.stage.name" [id]="stage.stage.id_species_stage"
+                        [name]="stage.stage.name" (change)="check_stages_number(stage)" [(ngModel)]="stage.isChecked"
+                        class="selectStages" [checked]="stage.isChecked"
+                        [disabled]="!stage.isChecked && checkStagesNumber>1">
+                    <label [for]="stage.stage.id_species_stage" class="selectLabel"
+                        [ngClass]="stage.isChecked ? 'selectedLabel' : ''">{{ stage.stage.name }}</label>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template #mountainsModal>
+            <div *ngIf="mountains" class="divSelection">
+                <div *ngFor="let mountain of mountainsList">
+                    <input type="checkbox" [value]="mountain.name" [id]="mountain.name" [name]="mountain.name"
+                        (change)="check_mountains_number(mountain)" [(ngModel)]="mountain.isChecked"
+                        class="selectMountains" [checked]="mountain.isChecked"
+                        [disabled]="!mountain.isChecked && checkMountainsNumber>1">
+                    <label [for]="mountain.name" class="selectLabel"
+                        [ngClass]="mountain.isChecked ? 'selectedLabel' : ''">{{ mountain.name }}</label>
+                </div>
+            </div>
+        </ng-template>
+
+        <div class=" filtrer">
+            <h1>Filtrer </h1>
+            <div class="form-group">
+                <div *ngIf="years">
+                    <select class="form-control" [formControl]="datavizForm.controls.years"
+                        (click)="onYearsSelect($event)">
+                        <option value="" enabled [selected]=true>Toutes les années</option>
+                        <option *ngFor="let year of years" [value]="year">
+                            {{year}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div *ngIf="species">
+                    <select class="form-control" [formControl]="datavizForm.controls.species"
+                        (click)="onSpeciesSelect($event)">
+                        <option value="" enabled [selected]=true>Toutes les espèces</option>
+                        <option *ngFor="let species of species" [value]="species.properties.cd_nom">
+                            {{species.properties.nom_complet}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div *ngIf="stages">
+                    <select class="form-control" [formControl]="datavizForm.controls.stages"
+                        (click)="onStagesSelect($event)">
+                        <option value="" disabled [selected]=true>Choisir un stade</option>
+                        <option *ngFor="let stage of stagesList" [value]="stage.stage.name">
+                            {{stage.stage.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div *ngIf="mountains">
+                    <select class="form-control" [formControl]="datavizForm.controls.mountains"
+                        (click)="onMountainsSelect($event)">
+                        <option value="" enabled [selected]=true>Tous les massifs</option>
+                        <option *ngFor="let mountain of mountains" [value]="mountain.name">
+                            {{mountain.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="highcharts-chart">
+        <highcharts-chart id="container" [Highcharts]="Highcharts" [constructorType]="chartConstructor"
+            [options]="chartOptions" [callbackFunction]="chartCallback" [(update)]="updateFlag" [oneToOne]="true"
+            style="width: 1000px; height: 600px; display: block;">
+        </highcharts-chart>
+    </div>
+
+</div>
