@@ -187,6 +187,11 @@ input {
   border: 2px solid #7d9e18;
 }
 
+.comparedButton {
+  width: fit-content !important;
+  margin: 5px auto !important;
+}
+
 .divSelection {
   display: flex;
   flex-direction: row;

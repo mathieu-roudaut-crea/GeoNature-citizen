@@ -360,9 +360,8 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	}
 
 	setDefaultStage() {
-		// default stage = name of first stage of this.stagesList
-		this.datavizForm.controls['stages'].setValue(this.stagesList[0].stage.name);
-		this.onData.stages.push(this.stagesList[0].stage.name);
+		this.datavizForm.controls['stages'].setValue(this.stagesList[4].stage.name);
+		this.onData.stages.push(this.stagesList[4].stage.name);
 	}
 
 	onSetSpecies(event, modal) {
@@ -452,7 +451,7 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		this.stagesList = this.stages
 												.map(e => ({'stage': e.properties, 'isChecked': false}))
 												.filter((e, i, self) => i === self.findIndex((t) => t.stage.name === e.stage.name))
-												console.log(this.stagesList)
+												.filter((e) => !["Chute des feuilles moitié", "Chute des feuilles fin"].includes(e.stage.name))
 	}
 
 	set_mountains_list() {

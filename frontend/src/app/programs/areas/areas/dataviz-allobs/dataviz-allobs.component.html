@@ -8,7 +8,8 @@
                 <button type="radio" class="selecteur" [ngClass]="comparedType=='years' ? 'actif' : ''"
                     (click)="onSetYears($event, yearsModal)"> deux années </button>
                 <div class="showSelection" *ngIf="comparedType=='years'">
-                    <div *ngFor="let year of onData.years; let index = index" [ngStyle]="getStyles(index)">
+                    <div *ngFor="let year of onData.years; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
                         <span> {{year}} </span>
                     </div>
                 </div>
@@ -18,7 +19,8 @@
                     (click)="onSetSpecies($event, speciesModal)"> deux espèces
                 </button>
                 <div class="showSelection" *ngIf="comparedType=='species'">
-                    <div *ngFor="let species of onData.species; let index = index" [ngStyle]="getStyles(index)">
+                    <div *ngFor="let species of onData.species; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
                         <span>
                             {{this.getSpeciesNames(species).nom_vern}} </span>
                     </div>
@@ -27,7 +29,8 @@
             <div class="form-group">
                 <button type="radio" class="selecteur" (click)="onSetStages($event, stagesModal)"> deux stades </button>
                 <div class="showSelection" *ngIf="comparedType=='stages'">
-                    <div *ngFor="let stage of onData.stages; let index = index" [ngStyle]="getStyles(index)">
+                    <div *ngFor="let stage of onData.stages; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
                         <span> {{stage}} </span>
                     </div>
                 </div>
@@ -36,7 +39,8 @@
                 <button type="radio" class="selecteur" (click)="onSetMountains($event, mountainsModal)"> deux massifs
                 </button>
                 <div class="showSelection" *ngIf="comparedType=='mountains'">
-                    <div *ngFor="let mountain of onData.mountains; let index = index" [ngStyle]="getStyles(index)">
+                    <div *ngFor="let mountain of onData.mountains; let index = index" class="comparedButton"
+                        [ngStyle]="getStyles(index)">
                         <span> {{mountain}} </span>
                     </div>
                 </div>
