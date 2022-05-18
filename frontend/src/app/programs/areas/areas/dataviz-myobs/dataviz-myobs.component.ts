@@ -136,7 +136,7 @@ export class DatavizMyObsComponent extends ProgramBaseComponent implements OnIni
         });        
     }
 
-    ngAfterViewInit() {
+    ngAfterViewInit(): void {
         this.verifyProgramPrivacyAndUser();
     }
 

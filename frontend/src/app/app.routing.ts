@@ -78,6 +78,7 @@ const appRoutes: Routes = [
     {
         path: 'programs/:id/areas/dataviz-myobs',
         component: DatavizMyObsComponent,
+        resolve: { programs: ProgramsResolve },
     },
     {
         path: 'programs/:id/areas/dataviz-allobs',

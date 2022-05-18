@@ -31,9 +31,11 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 	@Input('userDashboard') userDashboard = false;
 	public size_icon = 20;
 	public colors = ['#7d9e18', '#892132'];
+	public regexTime_old = /\w{3}, (\d{2}) (\w{3}) (\d{4})/
+	public regexTime = /(\d{4})-(\d{2})-(\d{2})/
 	public Highcharts = Highcharts;
 	public chartConstructor = "chart";
-  	public chartCallback;
+  public chartCallback;
 	public chartOptions = {
     chart: {
 			  plotBackgroundImage: 'assets/dataviz2/mountain_background.png'
@@ -526,46 +528,32 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		return {'backgroundColor': this.colors[index]}
 	}
 
+	mapData = (e) => {
+		const alt = e.altitude === null ? 0 :e.altitude
+		const date = e.date.match(this.regexTime)
+		return {x:Date.UTC(2022, Number(date[2]-1), Number(date[3])), y:alt, day:Number(date[3]), month:Number(date[2]), year:Number(date[1]), nb_individues:e.nb, observers:e.user, commune:e.commune}
+	}
+
 	displaySpeciesBiplot(data) {
 		this.chartOptions.series = []
 		let speciesName0 = this.getSpeciesNames(this.onData.species[0]);
 		let speciesName1 = this.getSpeciesNames(this.onData.species[1]);
 		const serie_user = data
 				.filter(e => e.specie === Number(this.onData.species[0]))
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie = data
 				.filter(e => e.specie === Number(this.onData.species[0]))
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2 = data
 				.filter(e => e.specie === Number(this.onData.species[1]))
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2_user = data
 				.filter(e => e.specie === Number(this.onData.species[1]))
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		this.chartOptions.series.push({
 			type: "scatter",
 			name: `Les observations ${speciesName0.nom_vern}`,
@@ -615,40 +603,20 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		let yearsName1 = this.onData.years[1];
 		const serie_user = data
 				.filter(e => e.date.includes(yearsName0))
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie = data
 				.filter(e => e.date.includes(yearsName0))
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2 = data
 				.filter(e => e.date.includes(yearsName1))
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2_user = data
 				.filter(e => e.date.includes(yearsName1))
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		this.chartOptions.series.push({
 			type: "scatter",
 			name: `Les observations ${yearsName0}`,
@@ -700,40 +668,20 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		let stagesName1 = this.onData.stages[1];
 		const serie_user = data
 				.filter(e => e.stage === stagesName0)
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie = data
 				.filter(e => e.stage === stagesName0)
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2 = data
 				.filter(e => e.stage === stagesName1)
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2_user = data
 				.filter(e => e.stage === stagesName1)
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		this.chartOptions.series.push({
 			type: "scatter",
 			name: `Les observations ${stagesName0}`,
@@ -789,40 +737,20 @@ export class DatavizAllObsComponent extends ProgramBaseComponent implements OnIn
 		console.log(selectedMountain1)
 		const serie_user = data
 				.filter(e => selectedMountain0.postalCodes.includes(e.dep))
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie = data
 				.filter(e => selectedMountain0.postalCodes.includes(e.dep))
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2 = data
 				.filter(e => selectedMountain1.postalCodes.includes(e.dep))
-				.filter(e => !e.user.includes('ColinVR'))
-				//.filter(e => e.user !== localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user !== localStorage.getItem('username'))
+				.map(this.mapData)
 		const serie2_user = data
 				.filter(e => selectedMountain1.postalCodes.includes(e.dep))
-				.filter(e => e.user.includes('ColinVR'))
-				//.filter(e => e.user === localStorage.getItem('username'))
-				.map(e => {
-					const alt = e.altitude === null ? 0 :e.altitude
-					const date = e.date.match(/\w{3}, (\d{2}) (\w{3}) (\d{4})/)
-					return {x:Date.UTC(2022, this.months[date[2]]-1, Number(date[1])), y:alt, day:Number(date[1]), month:this.months[date[2]], year:Number(date[3]), nb_individues:e.nb, observers:e.user, commune:e.commune}
-				})
+				.filter(e => e.user === localStorage.getItem('username'))
+				.map(this.mapData)
 		this.chartOptions.series.push({
 			type: "scatter",
 			name: `Les observations ${mountainsName0}`,
