@@ -356,7 +356,8 @@ def get_area_stage_observations_2_species(cd_nom_un, cd_nom_deux, stage):
                                     JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
                                     JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
                                     join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
-                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_areas.t_areas on gnc_areas.t_areas.id_area = gnc_areas.t_species_sites.id_area 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_areas.municipality 
                                     join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
                                     WHERE (gnc_areas.t_species_sites.cd_nom = {cd_nom_un} OR gnc_areas.t_species_sites.cd_nom = {cd_nom_deux})
                                     AND gnc_areas.t_species_stages.name = '{stage}'
@@ -400,7 +401,8 @@ def get_area_stage_observations_2_years(year_un, year_deux, stage):
                                     JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
                                     JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
                                     join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
-                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_areas.t_areas on gnc_areas.t_areas.id_area = gnc_areas.t_species_sites.id_area 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_areas.municipality  
                                     join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
                                     WHERE (cast(gnc_areas.t_species_site_observations.date AS TEXT) like '{year_un}%%' OR cast(gnc_areas.t_species_site_observations.date AS TEXT) like '{year_deux}%%')
                                     AND gnc_areas.t_species_stages.name = '{stage}'
@@ -449,7 +451,8 @@ def get_area_stage_observations_2_departments(dep_un, dep_deux, stage):
                                     JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
                                     JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
                                     join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
-                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_areas.t_areas on gnc_areas.t_areas.id_area = gnc_areas.t_species_sites.id_area 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_areas.municipality 
                                     join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
                                     WHERE (ref_geo.li_municipalities.insee_dep in ({dep_un}) OR ref_geo.li_municipalities.insee_dep in ({dep_deux}))
                                     AND gnc_areas.t_species_stages.name = '{stage}'
@@ -493,7 +496,8 @@ def get_area_stage_observations_2_stages(stage_un, stage_deux):
                                     JOIN gnc_areas.t_species_sites ON gnc_areas.t_species_sites.id_species_site = gnc_areas.t_species_site_observations.id_species_site 
                                     JOIN gnc_areas.t_stages_steps ON gnc_areas.t_species_site_observations.id_stages_step = gnc_areas.t_stages_steps.id_stages_step 
                                     join gnc_areas.t_species_stages on gnc_areas.t_species_stages.id_species_stage = gnc_areas.t_stages_steps.id_species_stage 
-                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_species_sites.id_area 
+                                    join gnc_areas.t_areas on gnc_areas.t_areas.id_area = gnc_areas.t_species_sites.id_area 
+                                    join ref_geo.li_municipalities on ref_geo.li_municipalities.id_area = gnc_areas.t_areas.municipality  
                                     join gnc_core.t_users on gnc_areas.t_species_site_observations.id_role = gnc_core.t_users.id_user  
                                     WHERE (gnc_areas.t_species_stages.name like '{stage_un}' OR gnc_areas.t_species_stages.name like '{stage_deux}')
                                     and gnc_areas.t_stages_steps.order = 2""")
